@@ -15,10 +15,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
-var mvcBuilder = builder.Services.AddRazorPages(options =>
-{
-    options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "");
-});
+var mvcBuilder = builder.Services.AddRazorPages();
 if (builder.Environment.IsDevelopment())
 {
     mvcBuilder.AddRazorRuntimeCompilation();

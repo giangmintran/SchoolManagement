@@ -103,7 +103,14 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                // Ví dụ: Về Home/Index 
+                returnUrl = Url.Content("~/Home/Index");
+
+                // Hoặc nếu bạn dùng Razor Pages khác thì: 
+                // returnUrl = Url.Content("~/Dashboard");
+            }
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
