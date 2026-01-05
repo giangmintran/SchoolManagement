@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SchoolManagement</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SchoolManagement.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div id="wrapper">
+        <div id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <i class="bi bi-mortarboard-fill me-2"></i>SchoolMgt
+            </div>
+            <div class="list-group list-group-flush mt-3">
+                <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+                <a asp-controller="Home" asp-action="Privacy" class="list-group-item list-group-item-action">
+                    <i class="bi bi-shield-lock me-2"></i> Privacy
+                </a>
+
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people me-2"></i> Students
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-person-video3 me-2"></i> Teachers
+                </a>
+            </div>
+
+            <div class="mt-auto p-3 text-center text-muted small">
+                &copy; 2026 SchoolMgt
+            </div>
+        </div>
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom px-3">
+                <button class="btn btn-outline-secondary" id="menu-toggle">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div class="ms-auto">
+                    <partial name="_LoginPartial" />
+                </div>
+            </nav>
+
+            <div class="container-fluid p-4">
+                <main role="main">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#menu-toggle").click(function (e) {
+                e.preventDefault();
+                $("#wrapper").toggleClass("toggled");
+            });
+
+            // Tự động đóng menu khi click ra ngoài (chỉ trên mobile)
+            $(document).click(function (e) {
+                if ($(window).width() <= 768) {
+                     if (!$(e.target).closest('#sidebar-wrapper, #menu-toggle').length && $("#wrapper").hasClass("toggled")) {
+                        $("#wrapper").removeClass("toggled");
+                    }
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,210 @@
+﻿@page
+@model LoginModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập hệ thống";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 3rem 2.5rem;
+            animation: fadeInUp 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* Trang trí nhỏ ở góc card */
+            .login-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 5px;
+                background: var(--primary-gradient);
+            }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: rgba(78, 115, 223, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .login-card:hover .icon-box {
+            transform: scale(1.05);
+            background: rgba(78, 115, 223, 0.2);
+        }
+
+        .login-header h3 {
+            color: #333;
+            font-weight: 700;
+            font-size: 1.75rem;
+        }
+
+        .form-floating > .form-control {
+            border-radius: 10px;
+            border: 1px solid #e1e5ea;
+            padding-left: 15px;
+        }
+
+            .form-floating > .form-control:focus {
+                border-color: #8a7cfb;
+                box-shadow: 0 0 0 0.25rem rgba(138, 124, 251, 0.25);
+            }
+
+        .btn-login {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            color: white;
+            margin-top: 10px;
+        }
+
+            .btn-login:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+        .forgot-pass {
+            color: #6c757d;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+            .forgot-pass:hover {
+                color: var(--primary-color);
+            }
+
+        /* Animation */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Mobile */
+        @@media (max-width: 576px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .login-header h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-header">
+            <div class="icon-box">
+                <i class="bi bi-mortarboard-fill" style="font-size: 2.5rem;"></i>
+            </div>
+            <h3>Trường THCS Cao Dương</h3>
+            <p class="text-muted small">Chào mừng trở lại! Vui lòng đăng nhập.</p>
+        </div>
+
+        <section>
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3 small" role="alert"></div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label asp-for="Input.Email" class="text-muted"><i class="bi bi-envelope me-1 mb-2"></i> Email</label>
+                    <span asp-validation-for="Input.Email" class="text-danger small ms-1"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label asp-for="Input.Password" class="text-muted"><i class="bi bi-lock me-1 mb-2"></i> Mật khẩu</label>
+                    <span asp-validation-for="Input.Password" class="text-danger small ms-1"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="Input.RememberMe" style="cursor: pointer;" />
+                        <label class="form-check-label text-muted small" asp-for="Input.RememberMe" style="cursor: pointer;">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+                    <div>
+                        <a id="forgot-password" asp-page="./ForgotPassword" class="text-decoration-none fw-bold small" style="color: #667eea;">Quên mật khẩu?</a>
+                    </div>
+                </div>
+
+                <div>
+                    <button id="login-submit" type="submit" class="btn btn-login w-100 fw-bold">
+                        Đăng nhập <i class="bi bi-arrow-right-short ms-1"></i>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <div class="text-center mt-4">
+            <p class="text-muted small mb-0">&copy; @DateTime.Now.Year School Management System</p>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

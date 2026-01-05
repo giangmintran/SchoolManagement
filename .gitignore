@@ -1,0 +1,53 @@
+## Build results
+bin/
+obj/
+
+## Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Logs
+*.log
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## NuGet
+*.nupkg
+packages/
+.nuget/
+
+## Publish output
+publish/
+wwwroot/lib/
+
+## Environment files
+appsettings.Development.json
+appsettings.Local.json
+
+## Secrets
+secrets.json
+
+## Temporary files
+*.tmp
+*.temp
+
+## Test results
+TestResults/
+
+## Docker
+docker-compose.override.yml
+
+## Node (nếu có dùng frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
