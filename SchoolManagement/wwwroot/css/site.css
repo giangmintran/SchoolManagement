@@ -1,94 +1,252 @@
-﻿/* Custom CSS cho Sidebar Layout */
-body {
-    overflow-x: hidden;
-    background-color: #f8f9fa; /* Màu nền sáng nhẹ cho content */
+﻿html {
+    font-size: 14px;
 }
 
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    overflow-x: hidden;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f0f2f5;
+}
+
+/* --- LAYOUT CHÍNH --- */
 #wrapper {
     display: flex;
     width: 100%;
-    height: 100vh; /* Full màn hình */
+    overflow-x: hidden; /* Ngăn scroll ngang toàn trang */
 }
 
-/* Sidebar Styling */
+/* --- LEFT SIDEBAR --- */
 #sidebar-wrapper {
     min-height: 100vh;
-    width: 250px;
+    width: 280px;
     margin-left: 0;
-    transition: margin 0.25s ease-out;
-    background-color: #212529; /* Màu tối sang trọng */
-    color: white;
+    transition: all 0.3s ease; /* Transition mượt cho cả width và margin */
+    background: #1e293b;
+    color: #94a3b8;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1040;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
+    /* QUAN TRỌNG: Ẩn nội dung tràn ra khi thu nhỏ */
+    overflow-x: hidden;
+    white-space: nowrap; /* Giữ chữ trên 1 dòng để không bị vỡ layout khi thu nhỏ */
 }
 
-    #sidebar-wrapper .sidebar-heading {
-        padding: 1.2rem 1rem;
-        font-size: 1.5rem;
-        font-weight: bold;
-        text-align: center;
-        border-bottom: 1px solid #495057;
-    }
-
-    #sidebar-wrapper .list-group-item {
-        border: none;
-        padding: 1rem 1.5rem;
-        background-color: transparent;
-        color: #cfd2d6;
-        transition: all 0.3s;
-    }
-
-        #sidebar-wrapper .list-group-item:hover {
-            background-color: #343a40;
-            color: #fff;
-            padding-left: 2rem; /* Hiệu ứng đẩy text sang phải khi hover */
-        }
-
-        #sidebar-wrapper .list-group-item.active {
-            background-color: #0d6efd; /* Màu xanh active */
-            color: white;
-            font-weight: 600;
-        }
-
-/* Page Content Styling */
 #page-content-wrapper {
     width: 100%;
+    margin-left: 280px;
+    transition: all 0.3s ease;
+    min-height: 100vh;
+}
+
+/* Header Sidebar */
+.sidebar-heading {
+    padding: 1.25rem 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    background: rgba(0,0,0,0.1);
     display: flex;
-    flex-direction: column;
-    overflow-y: auto; /* Scroll nội dung riêng, sidebar đứng yên */
+    align-items: center;
+    justify-content: space-between;
+    min-height: 70px; /* Cố định chiều cao header */
 }
 
-.navbar-light {
-    background-color: #fff !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+/* Menu Items */
+.list-group-item {
+    background-color: transparent;
+    color: #cbd5e1;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    margin: 4px 12px;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease; /* Hiệu ứng mượt khi hover/active */
 }
 
-/* Responsive Behavior */
-#wrapper.toggled #sidebar-wrapper {
-    margin-left: -250px; /* Ẩn sidebar */
+    .list-group-item:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #fff;
+    }
+
+    .list-group-item.active {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .list-group-item i {
+        font-size: 1.25rem;
+        min-width: 30px; /* Cố định độ rộng vùng icon */
+        text-align: center; /* Căn giữa icon trong vùng của nó */
+        margin-right: 10px;
+    }
+
+/* --- LOGIC RESPONSIVE & TOGGLE --- */
+
+/* 1. DESKTOP (Màn hình > 768px) */
+@media (min-width: 769px) {
+    /* Khi đóng menu (Thêm class .toggled vào wrapper) -> Thu nhỏ Sidebar */
+    #wrapper.toggled #sidebar-wrapper {
+        width: 80px; /* Thu về kích thước nhỏ chỉ hiện icon */
+    }
+
+    #wrapper.toggled #page-content-wrapper {
+        margin-left: 80px; /* Content dịch về khớp với sidebar nhỏ */
+    }
+
+    /* Ẩn chữ trong menu, chỉ hiện icon */
+    #wrapper.toggled #sidebar-wrapper .list-group-item span,
+    #wrapper.toggled #sidebar-wrapper .sidebar-heading span {
+        display: none; /* Ẩn text */
+    }
+
+    /* Ẩn dòng copyright footer khi thu nhỏ */
+    #wrapper.toggled #sidebar-wrapper .sidebar-footer-content {
+        display: none;
+    }
+
+    /* Căn giữa icon khi thu nhỏ */
+    #wrapper.toggled #sidebar-wrapper .list-group-item {
+        justify-content: center;
+        padding: 0.85rem 0; /* Bỏ padding ngang để icon nằm giữa */
+        margin: 4px 8px; /* Margin nhỏ lại */
+    }
+
+        #wrapper.toggled #sidebar-wrapper .list-group-item i {
+            margin-right: 0; /* Bỏ margin phải của icon */
+            font-size: 1.4rem; /* Icon to lên một chút cho đẹp */
+        }
+
+    /* Logo header khi thu nhỏ */
+    #wrapper.toggled #sidebar-wrapper .sidebar-heading {
+        justify-content: center;
+        padding: 1.25rem 0;
+    }
+
+        #wrapper.toggled #sidebar-wrapper .sidebar-heading i {
+            margin: 0 !important;
+            font-size: 1.5rem;
+        }
 }
 
-/* Trên Mobile: Mặc định ẩn sidebar */
+/* 2. MOBILE (Màn hình <= 768px) */
 @media (max-width: 768px) {
     #sidebar-wrapper {
-        margin-left: -250px;
-        position: fixed; /* Nổi lên trên content */
-        z-index: 1000;
-        height: 100%;
+        margin-left: 0;
+        transform: translateX(-100%); /* Mặc định ẩn sang trái */
+        width: 280px; /* Mobile luôn full width sidebar */
     }
 
+    #page-content-wrapper {
+        margin-left: 0;
+    }
+
+    /* Khi mở menu (có class .toggled) */
     #wrapper.toggled #sidebar-wrapper {
-        margin-left: 0; /* Hiện lại khi toggle */
+        transform: translateX(0); /* Trượt vào */
     }
-    /* Thêm overlay khi mở menu trên mobile */
-    #wrapper.toggled::before {
-        content: "";
+
+    /* Overlay che mờ */
+    #sidebar-overlay {
+        display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+        z-index: 1030;
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
+
+    #wrapper.toggled #sidebar-overlay {
+        display: block;
+        opacity: 1;
+    }
+}
+
+/* Offcanvas User Profile (Mobile) */
+.user-profile-header {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.user-avatar-large {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 2.5rem;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.mobile-user-link {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s;
+    border-radius: 8px;
+    margin: 0 10px;
+}
+
+    .mobile-user-link:hover {
+        background-color: #f1f5f9;
+    }
+
+    .mobile-user-link i {
+        font-size: 1.4rem;
+        margin-right: 15px;
+        color: #64748b;
+    }
+
+/* Navbar */
+.navbar {
+    background-color: #fff !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    padding: 0.8rem 1.5rem;
+}
+
+.user-dropdown-toggle {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 50px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.02);
+    transition: all 0.2s;
 }

@@ -8,8 +8,8 @@ namespace SchoolManagement.Data
         {
             using var scope = service.CreateScope();
 
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<string>>>();
 
             // 1. Seed Roles
             string[] roles = { "Admin", "User" };
@@ -18,7 +18,7 @@ namespace SchoolManagement.Data
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    await roleManager.CreateAsync(new IdentityRole<string>(role));
                 }
             }
 
@@ -30,8 +30,8 @@ namespace SchoolManagement.Data
 
             if (adminUser == null)
             {
-                adminUser = new IdentityUser
-                {
+                adminUser = new ApplicationUser
+				{
                     UserName = adminEmail,
                     Email = adminEmail,
                     EmailConfirmed = true

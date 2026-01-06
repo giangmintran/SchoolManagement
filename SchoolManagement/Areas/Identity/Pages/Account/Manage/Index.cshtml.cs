@@ -1,75 +1,72 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SchoolManagement.Data;
+using SchoolManagement.Models; // Nhớ using namespace chứa ApplicationUser
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace SchoolManagement.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        // 1. Đổi IdentityUser thành ApplicationUser
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IWebHostEnvironment _environment;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IWebHostEnvironment environment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _environment = environment;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string Username { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Phone]
-            [Display(Name = "Phone number")]
+            [Display(Name = "Số điện thoại")]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "Địa chỉ")]
+            public string Address { get; set; } // Thêm Address vào Input
+
+            [Display(Name = "Ảnh đại diện")]
+            public IFormFile ProfilePicture { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        public string CurrentProfilePicture { get; set; }
+
+        private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
 
+            // Load ảnh từ DB, nếu null thì lấy ảnh mặc định
+            CurrentProfilePicture = !string.IsNullOrEmpty(user.Avatar)
+                                    ? user.Avatar
+                                    : "/images/default-avatar.png";
+
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Address = user.Address // Load địa chỉ từ DB lên form
             };
         }
 
@@ -99,19 +96,59 @@ namespace SchoolManagement.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
+            // 1. XỬ LÝ UPLOAD ẢNH
+            if (Input.ProfilePicture != null)
+            {
+                // Xóa ảnh cũ nếu không phải ảnh mặc định (Optional - tùy nhu cầu)
+                // if (!string.IsNullOrEmpty(user.ProfilePicture) && System.IO.File.Exists(Path.Combine(_environment.WebRootPath, user.ProfilePicture.TrimStart('/')))) ...
+
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(Input.ProfilePicture.FileName);
+                string uploadFolder = Path.Combine(_environment.WebRootPath, "uploads", "avatars");
+
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                string filePath = Path.Combine(uploadFolder, fileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await Input.ProfilePicture.CopyToAsync(fileStream);
+                }
+
+                // Cập nhật đường dẫn vào object User
+                user.Avatar = "/uploads/avatars/" + fileName;
+            }
+
+            // 2. XỬ LÝ ĐỊA CHỈ
+            if (Input.Address != user.Address)
+            {
+                user.Address = Input.Address;
+            }
+
+            // 3. LƯU THAY ĐỔI VÀO DATABASE (Address + ProfilePicture)
+            // Chỉ cần gọi UpdateAsync một lần là lưu hết các property của user
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                StatusMessage = "Lỗi không mong muốn khi cập nhật hồ sơ.";
+                return RedirectToPage();
+            }
+
+            // 4. XỬ LÝ SỐ ĐIỆN THOẠI (Logic riêng của Identity)
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
+                    StatusMessage = "Lỗi không mong muốn khi cập nhật số điện thoại.";
                     return RedirectToPage();
                 }
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            StatusMessage = "Hồ sơ của bạn đã được cập nhật";
             return RedirectToPage();
         }
     }

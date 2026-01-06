@@ -9,9 +9,26 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true) // Set false để test cho nhanh
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true) // Set false để test cho nhanh
     .AddRoles<IdentityRole>() // <--- Thêm dòng này để bật tính năng Roles
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // 1. Cookie settings
+    options.Cookie.HttpOnly = true; // Chặn JS truy cập cookie (chống XSS)
+
+    // 2. Thời gian hết hạn
+    // Với HRM, đề xuất: 30 phút hoặc 60 phút không thao tác sẽ tự out
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+
+    // 3. Cơ chế trượt (Reset thời gian nếu có thao tác)
+    options.SlidingExpiration = true;
+
+    // 4. Đường dẫn
+    options.LoginPath = "/Identity/Account/Login";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
