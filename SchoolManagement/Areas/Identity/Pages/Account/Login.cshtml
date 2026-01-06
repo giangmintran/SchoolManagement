@@ -36,7 +36,7 @@
 
         .login-card {
             width: 100%;
-            max-width: 420px;
+            max-width: 600px;
             background: white;
             border-radius: 20px;
             box-shadow: var(--card-shadow);
@@ -54,7 +54,6 @@
                 left: 0;
                 width: 100%;
                 height: 5px;
-                background: var(--primary-gradient);
             }
 
         .login-header {
@@ -127,18 +126,6 @@
             }
 
         /* Animation */
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         /* Responsive Mobile */
         @@media (max-width: 576px) {
             .login-card {
@@ -146,7 +133,7 @@
             }
 
             .login-header h3 {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
             }
         }
     </style>
@@ -158,7 +145,7 @@
             <div class="icon-box">
                 <i class="bi bi-mortarboard-fill" style="font-size: 2.5rem;"></i>
             </div>
-            <h3>Trường THCS Cao Dương</h3>
+            <h3 class="intro-text">Trường THCS Cao Dương</h3>
             <p class="text-muted small">Chào mừng trở lại! Vui lòng đăng nhập.</p>
         </div>
 
@@ -202,9 +189,37 @@
             <p class="text-muted small mb-0">&copy; @DateTime.Now.Year School Management System</p>
         </div>
     </div>
-
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span id="toastMessage">Thông báo lỗi</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Dùng Html.Raw để giữ nguyên tiếng Việt có dấu
+            var errorMessage = '@Html.Raw(ViewData["LoginError"])';
+
+            if (errorMessage && errorMessage.length > 0) {
+                var toastElement = document.getElementById('errorToast');
+                var toastBody = document.getElementById('toastMessage');
+
+                toastBody.innerText = errorMessage;
+
+                var toast = new bootstrap.Toast(toastElement, {
+                    delay: 5000
+                });
+                toast.show();
+            }
+        });
+    </script>
 </body>
 </html>

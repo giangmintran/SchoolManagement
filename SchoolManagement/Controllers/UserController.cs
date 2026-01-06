@@ -24,12 +24,19 @@ namespace SchoolManagement.Controllers
         }
 
         // 1. Danh sách người dùng
-        public async Task<IActionResult> Index(int pageNumber = 1)
+        public async Task<IActionResult> Index(string keyword, int pageNumber = 1)
         {
+            ViewData["Keyword"] = keyword;
             int pageSize = 10; // Số dòng trên 1 trang
-            var users = _userManager.Users;
-            var count = users.Count();
-            List<ApplicationUser> items = [.. users.Skip((pageNumber - 1) * pageSize).Take(pageSize)];
+            var query = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                // Lọc theo Email hoặc Username
+                query = query.Where(u => u.Email.Contains(keyword) || u.UserName.Contains(keyword));
+            }
+            var totalRecords = await query.CountAsync();
+            List<ApplicationUser> items = [.. query.Skip((pageNumber - 1) * pageSize).Take(pageSize)];
             var resultItems = new List<UserRolesViewModel>();
             foreach (var user in items)
             {
@@ -45,7 +52,7 @@ namespace SchoolManagement.Controllers
             {
                 Items = resultItems,
                 PageIndex = pageNumber,
-                TotalPages = (int)Math.Ceiling(count / (double)pageSize)
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
             };
 
             return View(viewModel);

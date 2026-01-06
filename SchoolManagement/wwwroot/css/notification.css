@@ -1,0 +1,162 @@
+﻿/* CSS riêng cho Notification giống Facebook */
+.notification-dropdown-menu {
+    width: 360px; /* Rộng hơn giống FB */
+    max-height: 90vh; /* Tránh tràn màn hình dọc */
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    border: none;
+}
+
+/* Header */
+.notif-header {
+    padding: 16px;
+}
+
+.notif-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #050505;
+}
+
+/* Filter pills (Tất cả / Chưa đọc) */
+.notif-filter .btn-pill {
+    border-radius: 18px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 6px 12px;
+    background-color: #e4e6eb; /* Màu xám nhạt FB */
+    color: #050505;
+    border: none;
+    margin-right: 5px;
+}
+
+    .notif-filter .btn-pill.active {
+        background-color: #e7f3ff;
+        color: #1877f2; /* Màu xanh FB */
+    }
+
+/* Item */
+.notif-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px; /* Padding rộng rãi */
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+    .notif-item:hover {
+        background-color: #f0f2f5; /* Hover màu xám đặc trưng FB */
+        color: inherit;
+    }
+
+/* Avatar */
+.notif-avatar {
+    width: 56px;
+    height: 56px;
+    position: relative;
+    margin-right: 12px;
+}
+
+    .notif-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+
+.notif-icon-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    border: 2px solid white;
+}
+
+/* Content */
+.notif-content {
+    flex: 1;
+    line-height: 1.3;
+}
+
+.notif-text {
+    font-size: 15px;
+    color: #050505;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notif-time {
+    font-size: 13px;
+    color: #65676b; /* Màu xám chữ phụ FB */
+    font-weight: 500;
+}
+
+/* Chấm xanh chưa đọc */
+.notif-unread-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #1877f2;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+/* Nút chuông */
+.btn-notif-trigger {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e4e6eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #050505;
+    transition: 0.2s;
+    border: none;
+}
+
+    .btn-notif-trigger:hover, .btn-notif-trigger[aria-expanded="true"] {
+        background-color: #d8dadf; /* Darker grey on hover */
+        color: #1877f2; /* Blue on active */
+    }
+
+/* Badge số lượng trên chuông */
+.notif-badge-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e41e3f;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+}
+
+/* Mobile Responsive: Full width hoặc căn chỉnh lại */
+@media (max-width: 576px) {
+    .notification-dropdown-menu {
+        position: fixed !important;
+        top: 60px !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important; /* Tự co giãn theo màn hình */
+        transform: none !important;
+        max-height: 80vh;
+    }
+}

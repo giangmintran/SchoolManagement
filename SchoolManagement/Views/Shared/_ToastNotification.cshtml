@@ -1,0 +1,87 @@
+﻿@* Views/Shared/_ToastNotification.cshtml *@
+
+@if (TempData["ToastMessage"] != null)
+{
+    var toastType = TempData["ToastType"] as string ?? "primary";
+
+    // Cấu hình Icon và Màu sắc dựa trên loại thông báo
+    string iconClass = "", borderClass = "", textClass = "", title = "";
+
+    switch (toastType)
+    {
+        case "success":
+            iconClass = "fa-solid fa-circle-check"; // Yêu cầu FontAwesome, hoặc thay bằng SVG
+            borderClass = "border-success";
+            textClass = "text-success";
+            title = "Thành công";
+            break;
+        case "danger":
+            iconClass = "fa-solid fa-circle-xmark";
+            borderClass = "border-danger";
+            textClass = "text-danger";
+            title = "Lỗi";
+            break;
+        case "warning":
+            iconClass = "fa-solid fa-triangle-exclamation";
+            borderClass = "border-warning";
+            textClass = "text-warning";
+            title = "Cảnh báo";
+            break;
+        default: // primary/info
+            iconClass = "fa-solid fa-circle-info";
+            borderClass = "border-primary";
+            textClass = "text-primary";
+            title = "Thông báo";
+            break;
+    }
+
+    <style>
+        .custom-toast {
+            background-color: #fff;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            border-left: 5px solid; /* Viền màu bên trái */
+            animation: slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 60px;">
+        @* Thêm class borderClass và textClass để tô màu viền và icon *@
+        <div id="liveToast" class="toast custom-toast @borderClass align-items-center border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                @* Phần Icon *@
+                <div class="toast-body d-flex align-items-center">
+                    <i class="@iconClass @textClass fs-4 me-3"></i>
+                    <div>
+                        <strong class="@textClass d-block mb-1">@title</strong>
+                        <span class="text-secondary">@TempData["ToastMessage"]</span>
+                    </div>
+                </div>
+                @* Nút đóng *@
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toastEl = document.getElementById('liveToast');
+            if (toastEl) {
+                // Tùy chỉnh delay: 5000ms = 5 giây
+                var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+            }
+        });
+    </script>
+}

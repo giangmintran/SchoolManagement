@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SchoolManagement.Common;
 using SchoolManagement.Data;
 using System.ComponentModel.DataAnnotations;
 
@@ -129,7 +130,7 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ViewData["LoginError"] = "Sai tên đăng nhập hoặc mật khẩu.";
                     return Page();
                 }
             }

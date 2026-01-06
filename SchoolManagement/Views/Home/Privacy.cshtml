@@ -1,6 +1,134 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Chính sách bảo mật";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<style>
+    /* CSS Tùy chỉnh cho trang Privacy */
+    body {
+        background-color: #f8f9fa; /* Màu nền nhẹ */
+    }
+
+    .privacy-wrapper {
+        max-width: 900px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        padding: 50px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .privacy-header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 20px;
+    }
+
+        .privacy-header h1 {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .privacy-header .last-updated {
+            font-style: italic;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+    .privacy-content h2 {
+        color: #0d6efd; /* Màu xanh chủ đạo (Bootstrap Primary) */
+        font-size: 1.5rem;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .privacy-content p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #495057;
+        margin-bottom: 15px;
+        text-align: justify;
+    }
+
+    .privacy-content ul {
+        margin-bottom: 20px;
+        padding-left: 20px;
+    }
+
+    .privacy-content li {
+        margin-bottom: 10px;
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    .privacy-contact {
+        margin-top: 40px;
+        background-color: #f1f8ff;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #0d6efd;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .privacy-wrapper {
+            padding: 20px;
+            margin: 20px 10px;
+        }
+
+        .privacy-header h1 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="privacy-wrapper">
+        <div class="privacy-header">
+            <h1>@ViewData["Title"]</h1>
+            <p class="last-updated">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy")</p>
+        </div>
+
+        <div class="privacy-content">
+            <p>Chào mừng bạn đến với trang Chính sách bảo mật của chúng tôi. Chúng tôi cam kết bảo vệ thông tin cá nhân và quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn khi bạn sử dụng hệ thống.</p>
+
+            <h2>1. Thông tin chúng tôi thu thập</h2>
+            <p>Chúng tôi có thể thu thập các loại thông tin sau để cung cấp và cải thiện dịch vụ:</p>
+            <ul>
+                <li><strong>Thông tin cá nhân:</strong> Họ tên, địa chỉ email, số điện thoại, địa chỉ liên hệ (khi bạn đăng ký tài khoản hoặc liên hệ với chúng tôi).</li>
+                <li><strong>Dữ liệu sử dụng:</strong> Thông tin về cách bạn truy cập và sử dụng dịch vụ (ví dụ: địa chỉ IP, loại trình duyệt, thời gian truy cập).</li>
+                <li><strong>Cookies:</strong> Chúng tôi sử dụng cookies để lưu trữ tùy chọn của người dùng và duy trì phiên đăng nhập.</li>
+            </ul>
+
+            <h2>2. Cách chúng tôi sử dụng thông tin</h2>
+            <p>Thông tin thu thập được sử dụng cho các mục đích sau:</p>
+            <ul>
+                <li>Cung cấp và duy trì dịch vụ của hệ thống.</li>
+                <li>Thông báo cho bạn về các thay đổi trong dịch vụ.</li>
+                <li>Hỗ trợ khách hàng và giải quyết các vấn đề kỹ thuật.</li>
+                <li>Phát hiện, ngăn chặn và giải quyết các vấn đề về bảo mật.</li>
+            </ul>
+
+            <h2>3. Chia sẻ thông tin</h2>
+            <p>Chúng tôi cam kết không bán, trao đổi hoặc chuyển giao thông tin cá nhân của bạn cho bên thứ ba, trừ khi có sự đồng ý của bạn hoặc theo yêu cầu của pháp luật.</p>
+
+            <h2>4. Bảo mật dữ liệu</h2>
+            <p>Chúng tôi áp dụng các biện pháp bảo mật kỹ thuật và tổ chức phù hợp để bảo vệ dữ liệu cá nhân của bạn khỏi bị truy cập trái phép, mất mát hoặc phá hủy. Tuy nhiên, xin lưu ý rằng không có phương thức truyền tải nào qua Internet là an toàn 100%.</p>
+
+            <h2>5. Quyền của bạn</h2>
+            <p>Bạn có quyền yêu cầu truy cập, chỉnh sửa hoặc xóa thông tin cá nhân của mình bất cứ lúc nào. Nếu bạn muốn thực hiện các quyền này, vui lòng liên hệ với chúng tôi qua thông tin bên dưới.</p>
+
+            <div class="privacy-contact">
+                <h3>6. Liên hệ với chúng tôi</h3>
+                <p>Nếu bạn có bất kỳ câu hỏi nào về Chính sách bảo mật này, vui lòng liên hệ:</p>
+                <ul>
+                    <li><strong>Email:</strong> c2caoduong-to@hanoiedu.vn</li>
+                    <li><strong>Hotline:</strong> +842433978499</li>
+                    <li><strong>Địa chỉ:</strong> 108 ĐT429, Cao Xuân Dương, Thanh Oai, Hà Nội</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

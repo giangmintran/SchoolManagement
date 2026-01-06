@@ -1,0 +1,76 @@
+﻿@* Views/Shared/_NotificationPartial.cshtml *@
+
+<div class="dropdown me-2 me-lg-3">
+    <button class="btn-notif-trigger position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell-fill fs-5"></i>
+        <span class="notif-badge-count">5</span>
+    </button>
+
+    <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="notificationDropdown">
+
+        <div class="notif-header d-flex justify-content-between align-items-center">
+            <h3 class="notif-title m-0">Thông báo</h3>
+            <button class="btn btn-sm btn-light rounded-circle"><i class="bi bi-three-dots"></i></button>
+        </div>
+
+        <div class="px-3 pb-2 notif-filter">
+            <button class="btn-pill active">Tất cả</button>
+            <button class="btn-pill">Chưa đọc</button>
+        </div>
+
+        <div class="list-group list-group-flush py-2">
+
+            <a href="#" class="notif-item">
+                <div class="notif-avatar">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="User">
+                    <div class="notif-icon-badge bg-primary">
+                        <i class="bi bi-shield-lock-fill" style="font-size: 14px;"></i>
+                    </div>
+                </div>
+                <div class="notif-content">
+                    <div class="notif-text">
+                        <strong>Hệ thống SchoolMgt</strong> đã cập nhật chính sách bảo mật mới.
+                    </div>
+                    <div class="notif-time">5 phút trước</div>
+                </div>
+                <div class="notif-unread-dot"></div>
+            </a>
+
+            <a href="#" class="notif-item">
+                <div class="notif-avatar">
+                    <img src="https://ui-avatars.com/api/?name=Nguyen+Van+A&background=0D8ABC&color=fff" alt="User">
+                    <div class="notif-icon-badge bg-success">
+                        <i class="bi bi-chat-fill" style="font-size: 12px;"></i>
+                    </div>
+                </div>
+                <div class="notif-content">
+                    <div class="notif-text">
+                        <strong>Nguyễn Văn A</strong> đã gửi một phản hồi về khóa học Lập trình C#.
+                    </div>
+                    <div class="notif-time">1 giờ trước</div>
+                </div>
+                <div class="notif-unread-dot"></div>
+            </a>
+
+            <a href="#" class="notif-item">
+                <div class="notif-avatar">
+                    <img src="https://ui-avatars.com/api/?name=Tran+Thi+B&background=random" alt="User">
+                    <div class="notif-icon-badge bg-warning text-dark">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 12px;"></i>
+                    </div>
+                </div>
+                <div class="notif-content">
+                    <div class="notif-text">
+                        <strong>Cảnh báo:</strong> Học phí kỳ 2 của bạn sắp đến hạn thanh toán.
+                    </div>
+                    <div class="notif-time">Hôm qua lúc 10:30</div>
+                </div>
+            </a>
+
+        </div>
+
+        <div class="p-2 text-center border-top">
+            <a href="#" class="text-decoration-none fw-bold text-primary small">Xem thông báo trước đó</a>
+        </div>
+    </div>
+</div>

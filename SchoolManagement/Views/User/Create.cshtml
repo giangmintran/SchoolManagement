@@ -4,36 +4,138 @@
     ViewData["Title"] = "Thêm người dùng";
 }
 
-<h2>Thêm người dùng mới</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<style>
+    .card {
+        border-radius: 16px;
+    }
 
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+        border-color: #0d6efd;
+    }
+
+    .input-group-text {
+        min-width: 45px;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        border: none;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #198754, #157347);
+        border: none;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-5 col-lg-6 col-md-8">
+
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top">
+                    <i class="fas fa-user-plus fa-2x mb-2"></i>
+                    <h4 class="mb-0 fw-bold">Thêm Người Dùng Mới</h4>
+                    <small class="opacity-75">Quản lý tài khoản hệ thống</small>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger small"></div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">
+                                Email đăng nhập
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-envelope text-primary"></i>
+                                </span>
+                                <input asp-for="Email"
+                                       class="form-control"
+                                       placeholder="vidu@school.edu.vn" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold">
+                                Mật khẩu
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-lock text-primary"></i>
+                                </span>
+                                <input asp-for="Password"
+                                       type="password"
+                                       class="form-control"
+                                       id="txtPassword"
+                                       placeholder="••••••••" />
+                                <button class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="togglePassword()">
+                                    <i class="fas fa-eye" id="eyeIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="mb-4">
+                            <label asp-for="SelectedRole" class="form-label fw-semibold">
+                                Vai trò
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-user-shield text-primary"></i>
+                                </span>
+                                <select asp-for="SelectedRole"
+                                        class="form-select"
+                                        asp-items="ViewBag.Roles">
+                                    <option value="" disabled selected>-- Chọn vai trò --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="SelectedRole" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fas fa-save me-1"></i> Lưu
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Password" class="control-label">Mật khẩu</label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="SelectedRole" class="control-label">Vai trò (Role)</label>
-                <select asp-for="SelectedRole" class="form-control" asp-items="ViewBag.Roles">
-                    <option value="">-- Chọn vai trò --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-success">Tạo mới</button>
-                <a asp-action="Index" class="btn btn-secondary">Hủy</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById("txtPassword");
+        const icon = document.getElementById("eyeIcon");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+</script>

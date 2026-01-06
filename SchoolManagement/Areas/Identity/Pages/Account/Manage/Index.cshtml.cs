@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SchoolManagement.Common;
 using SchoolManagement.Data;
 using SchoolManagement.Models; // Nhớ using namespace chứa ApplicationUser
 using System;
@@ -40,13 +41,13 @@ namespace SchoolManagement.Areas.Identity.Pages.Account.Manage
         {
             [Phone]
             [Display(Name = "Số điện thoại")]
-            public string PhoneNumber { get; set; }
+            public string? PhoneNumber { get; set; }
 
             [Display(Name = "Địa chỉ")]
-            public string Address { get; set; } // Thêm Address vào Input
+            public string? Address { get; set; } // Thêm Address vào Input
 
             [Display(Name = "Ảnh đại diện")]
-            public IFormFile ProfilePicture { get; set; }
+            public IFormFile? ProfilePicture { get; set; }
         }
 
         public string CurrentProfilePicture { get; set; }
@@ -131,7 +132,7 @@ namespace SchoolManagement.Areas.Identity.Pages.Account.Manage
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
-                StatusMessage = "Lỗi không mong muốn khi cập nhật hồ sơ.";
+                TempData.ToastSuccess("Có lỗi xảy ra khi cập nhật hồ sơ");
                 return RedirectToPage();
             }
 
@@ -142,13 +143,13 @@ namespace SchoolManagement.Areas.Identity.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Lỗi không mong muốn khi cập nhật số điện thoại.";
+                    TempData.ToastSuccess("Có lỗi xảy ra khi cập nhật số điện thoại");
                     return RedirectToPage();
                 }
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Hồ sơ của bạn đã được cập nhật";
+            TempData.ToastSuccess("Hồ sơ của bạn đã được cập nhật");
             return RedirectToPage();
         }
     }

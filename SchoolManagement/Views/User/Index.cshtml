@@ -1,26 +1,58 @@
-﻿@* Lưu ý: Model lúc này không phải List nữa mà là PagedResult *@
+﻿@using SchoolManagement.Models
 @model SchoolManagement.Common.PagedResult<SchoolManagement.Models.UserRolesViewModel>
 
 @{
     ViewData["Title"] = "Quản lý người dùng";
+    // Lấy từ khóa tìm kiếm từ Controller truyền sang (nếu có) để hiển thị lại vào ô input
+    var currentKeyword = ViewData["Keyword"] as string;
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="./css/user.css" />
 
 <div class="container-fluid py-4">
     <div class="card shadow border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-users me-2"></i>Danh sách người dùng
-            </h5>
-            <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-4">
-                <i class="fas fa-plus me-1"></i> Thêm mới
-            </a>
+
+        @* --- 1. PHẦN HEADER CÓ Ô TÌM KIẾM --- *@
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center gy-2">
+                @* gy-2 để tạo khoảng cách dọc khi xuống dòng *@
+                <div class="col-md-4 col-12">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-users me-2"></i>Danh sách
+                    </h5>
+                </div>
+
+                @* Form tìm kiếm *@
+                <div class="col-md-6 col-12">
+                    <form asp-action="Index" method="get" class="d-flex">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control form-control-sm"
+                                   placeholder="Tìm email, ID..." value="@currentKeyword" />
+                            <button class="btn btn-primary btn-sm" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            @if (!string.IsNullOrEmpty(currentKeyword))
+                            {
+                                <a asp-action="Index" class="btn btn-outline-secondary btn-sm" title="Xóa tìm kiếm">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            }
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-2 col-12 text-md-end text-start">
+                    <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-4 w-100 w-md-auto">
+                        <i class="bi bi-person-plus"></i> Thêm mới
+                    </a>
+                </div>
+            </div>
         </div>
 
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 mobile-responsive-table">
                     <thead class="bg-light text-secondary">
                         <tr>
                             <th class="ps-4">Email / Tài khoản</th>
@@ -34,19 +66,20 @@
                             foreach (var user in Model.Items)
                             {
                                 <tr>
-                                    <td class="ps-4">
-                                        <div class="d-flex align-items-center">
+                                    <td class="ps-4 user-info-cell" data-label="Tài khoản">
+                                        <div class="d-flex align-items-center user-info-wrapper">
                                             <div class="avatar-circle me-3 bg-primary bg-opacity-10 text-primary fw-bold d-flex justify-content-center align-items-center"
                                                  style="width: 40px; height: 40px; border-radius: 50%;">
                                                 @user.Email?.Substring(0, 1).ToUpper()
                                             </div>
                                             <div>
-                                                <div class="fw-bold text-dark">@user.Email</div>
+                                                @* Highlight từ khóa tìm kiếm nếu có (Optional - nâng cao) *@
+                                                <div class="fw-bold text-dark text-break">@user.Email</div>
                                                 <small class="text-muted">ID: @user.UserId</small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Phân quyền">
                                         @if (user.Roles != null && user.Roles.Any())
                                         {
                                             foreach (var role in user.Roles)
@@ -60,15 +93,17 @@
                                             <span class="text-muted fst-italic">N/A</span>
                                         }
                                     </td>
-                                    <td class="text-center">
-                                        <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-outline-warning btn-sm me-1" title="Sửa">
-                                            <i class="fas fa-pen"></i>
-                                        </a>
-                                        <form asp-action="Delete" asp-route-id="@user.UserId" method="post" class="d-inline" onsubmit="return confirm('Xóa user này?');">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                    <td class="text-center" data-label="Hành động">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-pen"></i> Sửa
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@user.UserId" method="post" class="d-inline" onsubmit="return confirm('Xóa user này?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -77,8 +112,9 @@
                         {
                             <tr>
                                 <td colspan="3" class="text-center py-5 text-muted">
-                                    <i class="fas fa-inbox fa-3x mb-3"></i>
-                                    <p>Không tìm thấy dữ liệu</p>
+                                    <i class="fas fa-search fa-3x mb-3 text-secondary"></i>
+                                    <p>Không tìm thấy kết quả nào cho "<strong>@currentKeyword</strong>"</p>
+                                    <a asp-action="Index" class="btn btn-sm btn-outline-primary">Quay lại danh sách</a>
                                 </td>
                             </tr>
                         }
@@ -87,26 +123,32 @@
             </div>
         </div>
 
-        <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
-            <div class="text-muted small">
+        @* --- 2. CẬP NHẬT PHÂN TRANG (Thêm asp-route-keyword) --- *@
+        <div class="card-footer bg-white py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="text-muted small mb-2 mb-md-0">
                 Trang <strong>@Model.PageIndex</strong> / <strong>@Model.TotalPages</strong>
             </div>
 
             <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm m-0">
+                <ul class="pagination pagination-sm m-0 flex-wrap justify-content-center">
+                    @* Nút Previous *@
                     <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)" aria-label="Previous">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pageNumber="@(Model.PageIndex - 1)"
+                           asp-route-keyword="@currentKeyword"
+                           aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
 
                     @for (int i = 1; i <= Model.TotalPages; i++)
                     {
-                        // Chỉ hiển thị trang đầu, trang cuối, và các trang xung quanh trang hiện tại
                         if (i == 1 || i == Model.TotalPages || (i >= Model.PageIndex - 2 && i <= Model.PageIndex + 2))
                         {
                             <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                                <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pageNumber="@i"
+                                   asp-route-keyword="@currentKeyword">@i</a>
                             </li>
                         }
                         else if (i == Model.PageIndex - 3 || i == Model.PageIndex + 3)
@@ -115,8 +157,12 @@
                         }
                     }
 
+                    @* Nút Next *@
                     <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)" aria-label="Next">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pageNumber="@(Model.PageIndex + 1)"
+                           asp-route-keyword="@currentKeyword"
+                           aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
