@@ -6,11 +6,12 @@ namespace SchoolManagement.Models.Users
     {
         public string Id { get; set; }
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Vui lòng nhập Email")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Display(Name = "Role")]
-        public string SelectedRole { get; set; } // Role hiện tại hoặc Role mới muốn gán
+        [Display(Name = "Vai trò")]
+        public string SelectedRole { get; set; }
     }
 }

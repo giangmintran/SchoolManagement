@@ -1,0 +1,284 @@
+﻿@using System.Globalization
+@model SchoolManagement.Models.ReadModels.LectureCalendarReadVM
+
+@{
+    ViewData["Title"] = "Chi tiết & Cập nhật Lịch báo giảng";
+    var cultureVi = new CultureInfo("vi-VN");
+
+    // Biến đếm toàn cục để đánh index cho list Details khi binding form
+    int globalIndex = 0;
+}
+
+<form asp-action="UpdateQuick" asp-controller="LectureCalendar" method="post" id="form-update">
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Week" />
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fs-6 fs-md-5"><i class="fa fa-calendar-alt me-2"></i>Chi tiết Lịch Báo Giảng</h5>
+            <div>
+                <span class="badge bg-light text-primary me-2">Tuần @Model.Week</span>
+                
+                <button type="submit" class="btn btn-warning btn-sm fw-bold text-dark shadow-sm d-none d-md-inline-block">
+                    <i class="fa fa-save me-1"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-6 col-md-3">
+                    <label class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Giáo viên</label>
+                    <p class="fw-bold text-dark mb-0">@Model.TeacherName</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Thời gian</label>
+                    <p class="mb-0 small">
+                        @Model.StartDate.ToString("dd/MM") - @Model.EndDate.ToString("dd/MM/yyyy")
+                    </p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Ngày tạo</label>
+                    <p class="mb-0 small">@Model.CreatedDate.ToString("dd/MM HH:mm")</p>
+                </div>
+                <div class="col-6 col-md-3 d-flex align-items-end justify-content-end d-none d-md-inline-block">
+                    <a asp-action="ExportExcel" asp-controller="LectureCalendar" asp-route-id="@Model.Id" class="btn btn-outline-success btn-sm">
+                        <i class="fa fa-file-excel me-1"></i> <span class="d-none d-md-inline">Xuất Excel</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 d-none d-md-block">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 align-middle">
+                    <thead class="bg-light text-secondary text-center text-uppercase small fw-bold">
+                        <tr>
+                            <th style="width: 120px;">Ngày / Thứ</th>
+                            <th style="width: 60px;">Tiết</th>
+                            <th style="width: 80px;">Lớp</th>
+                            <th style="width: 150px;">Môn</th>
+                            <th style="width: 80px;">PPCT</th>
+                            <th>Tên bài dạy</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Details != null && Model.Details.Any())
+                        {
+                            // Sắp xếp lại để đảm bảo thứ tự
+                            var groupedDetails = Model.Details.OrderBy(x => x.Date).ThenBy(x => x.Period).GroupBy(d => d.Date);
+
+                            foreach (var group in groupedDetails)
+                            {
+                                var isFirstRow = true;
+                                var rowCount = group.Count();
+                                var dateDisplay = group.Key.ToString("dd/MM/yyyy");
+                                var dayOfWeek = group.Key.ToString("dddd", cultureVi);
+                                var rowClass = (group.Key.DayOfWeek == DayOfWeek.Sunday) ? "table-warning" : "";
+
+                                foreach (var detail in group)
+                                {
+                                    <tr class="@rowClass">
+                                        @if (isFirstRow)
+                                        {
+                                            <td rowspan="@rowCount" class="text-center align-middle bg-white">
+                                                <div class="fw-bold text-primary">@dayOfWeek</div>
+                                                <div class="small text-muted">@dateDisplay</div>
+                                            </td>
+                                            isFirstRow = false;
+                                        }
+
+                                        <input type="hidden" name="Details[@globalIndex].Id" value="@detail.Id" />
+                                        <input type="hidden" name="Details[@globalIndex].LectureCalendarId" value="@Model.Id" />
+                                        <input type="hidden" name="Details[@globalIndex].Date" value="@detail.Date" />
+
+                                        <td class="text-center fw-bold text-secondary">
+                                            @detail.Period
+                                            <input type="hidden" name="Details[@globalIndex].Period" value="@detail.Period" />
+                                        </td>
+
+                                        <td class="p-1">
+                                            <input type="text"
+                                                   class="form-control form-control-sm text-center border-0 bg-transparent fw-bold text-info"
+                                                   name="Details[@globalIndex].Class"
+                                                   value="@detail.Class"
+                                                   placeholder=""
+                                                   style="min-width: 60px;" />
+                                        </td>
+
+                                        <td class="p-1">
+                                            <input type="text"
+                                                   class="form-control form-control-sm border-0 bg-transparent fw-semibold"
+                                                   name="Details[@globalIndex].Subject"
+                                                   value="@detail.Subject"
+                                                   placeholder="" />
+                                        </td>
+
+                                        <td class="p-1">
+                                            <input type="number"
+                                                   class="form-control form-control-sm text-center border-0 bg-transparent"
+                                                   name="Details[@globalIndex].Lesson"
+                                                   value="@detail.Lesson"
+                                                   placeholder="" />
+                                        </td>
+
+                                        <td class="p-1">
+                                            <input type="text"
+                                                   class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary"
+                                                   name="Details[@globalIndex].LessonTitle"
+                                                   value="@detail.LessonTitle"
+                                                   placeholder="" />
+                                        </td>
+
+                                        <td class="p-1">
+                                            <input type="text"
+                                                   class="form-control form-control-sm border-0 bg-transparent text-muted fst-italic"
+                                                   name="Details[@globalIndex].Note"
+                                                   value="@detail.Note"
+                                                   placeholder="" />
+                                        </td>
+                                    </tr>
+
+                                    // Tăng index
+                                    globalIndex++;
+                                }
+                                <tr class="border-top border-2 border-light"></tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fa fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
+                                    <p>Chưa có dữ liệu.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-block d-md-none">
+        @if (Model.Details != null && Model.Details.Any())
+        {
+            var groupedDetails = Model.Details.OrderBy(x => x.Date).ThenBy(x => x.Period).GroupBy(d => d.Date);
+            foreach (var group in groupedDetails)
+            {
+                var dayOfWeek = group.Key.ToString("dddd", cultureVi);
+                var dateDisplay = group.Key.ToString("dd/MM");
+                var isSunday = group.Key.DayOfWeek == DayOfWeek.Sunday;
+
+                <div class="d-flex align-items-center mb-2 mt-3 sticky-top" style="top: 10px; z-index: 10;">
+                    <div class="bg-primary text-white rounded-start px-3 py-1 fw-bold shadow-sm">@dayOfWeek</div>
+                    <div class="bg-white text-primary border border-start-0 rounded-end px-3 py-1 fw-bold flex-grow-1 shadow-sm">@dateDisplay</div>
+                </div>
+
+                <div class="list-group shadow-sm mb-3">
+                    @foreach (var detail in group)
+                    {
+                        var itemClass = isSunday ? "bg-warning-subtle border-warning" : "bg-white border-light";
+                        <div class="list-group-item p-3 border-start border-4 @itemClass"
+                             style="border-left-color: @(isSunday ? "#ffc107" : "#0d6efd") !important;">
+
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="badge rounded-pill bg-primary me-2" style="min-width: 60px;">Tiết @detail.Period</span>
+                                    <span class="fw-bold text-dark fs-6">@detail.Subject</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(detail.Class))
+                                {
+                                    <span class="badge bg-info text-dark">@detail.Class</span>
+                                }
+                            </div>
+
+                            <div class="mb-2 mr-2 ps-1">
+                                @if (string.IsNullOrEmpty(detail.LessonTitle) && !string.IsNullOrEmpty(detail.Class))
+                                {
+                                    <span class="text-danger fst-italic small">
+                                        <i class="fa fa-exclamation-circle me-1"></i>Chưa nhập tên bài
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary fw-bold mr-1">@detail.LessonTitle</span>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center ps-1 border-top pt-2 mt-2">
+                                <small class="text-muted">PPCT: <strong>@detail.Lesson</strong></small>
+                                @if (!string.IsNullOrEmpty(detail.Note))
+                                {
+                                    <small class="text-muted fst-italic text-end" style="max-width: 60%;">
+                                        <i class="fa fa-sticky-note me-1"></i>@detail.Note
+                                    </small>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            <div class="alert alert-info small mt-3">
+                <i class="fa fa-info-circle me-1"></i> Để sửa nội dung, vui lòng sử dụng giao diện Máy tính (Desktop).
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted bg-white rounded shadow-sm">
+                <i class="fa fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
+                <p>Chưa có dữ liệu.</p>
+            </div>
+        }
+    </div>
+</form>
+
+<div class="row g-2 mt-4 pb-5 justify-content-md-end">
+    <div class="col-12 col-md-auto">
+        <a asp-action="Index" class="btn btn-secondary w-100 px-md-4 py-2">
+            <i class="fa fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Làm đẹp cho Input trong bảng */
+    .table input.form-control {
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+        .table input.form-control:focus {
+            background-color: #fff !important;
+            border-bottom: 2px solid #0d6efd !important;
+        }
+
+    @@media (max-width: 768px) {
+        .bg-warning-subtle {
+            background-color: #fff8e1 !important;
+        }
+    }
+
+    @@media print {
+        .d-md-none, .btn, header, footer {
+            display: none !important;
+        }
+
+        .d-md-block {
+            display: block !important;
+        }
+
+        .card {
+            border: none !important;
+            shadow: none !important;
+        }
+        /* Khi in thì ẩn border của input đi để nhìn như văn bản */
+        input {
+            border: none !important;
+            background: transparent !important;
+        }
+    }
+</style>

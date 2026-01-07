@@ -106,10 +106,19 @@
                 <a asp-controller="StarterBook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("StarterBook", "Index")">
                     <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
                 </a>
-
-                <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index")">
-                    <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="AdminLectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index") d-none d-md-block">
+                        <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "UserIndex")">
+                        <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
+                    </a>
+                }
+               
 
                 <a asp-controller="Home" asp-action="Privacy" class="list-group-item list-group-item-action @GetActiveClass("Home", "Privacy")">
                     <i class="bi bi-shield-lock"></i><span>Chính sách bảo mật</span>
@@ -213,9 +222,6 @@
 
     @if (SignInManager.IsSignedIn(User))
     {
-        <button class="btn btn-light rounded-circle shadow-sm d-lg-none border ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileUserMenu">
-            <i class="bi bi-person-circle fs-5 text-primary"></i>
-        </button>
         <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileUserMenu">
             <div class="offcanvas-header pb-0">
                 <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="offcanvas" style="z-index: 10; position: absolute; right: 20px; top: 20px;"></button>
@@ -241,7 +247,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     <script>
         $(document).ready(function () {
             // Logic Nút Toggle (Hamburger Menu)

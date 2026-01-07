@@ -1,0 +1,152 @@
+﻿@model SchoolManagement.Models.Users.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật người dùng";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .card {
+        border-radius: 16px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+        border-color: #0d6efd;
+    }
+
+    .input-group-text {
+        min-width: 45px;
+        justify-content: center;
+    }
+    /* Style riêng cho nút trên mobile/desktop */
+    .action-buttons .btn {
+        width: 100%; /* Mobile: full width trong cột của nó */
+    }
+
+    @@media (min-width: 768px) {
+        .action-buttons .btn {
+            width: auto; /* Desktop: tự động co giãn */
+        }
+
+        .action-buttons {
+            justify-content: flex-end; /* Desktop: căn phải */
+        }
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-5 col-lg-6 col-md-8">
+
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark text-center py-4 rounded-top">
+                    <i class="fas fa-user-edit fa-2x mb-2"></i>
+                    <h4 class="mb-0 fw-bold">Cập nhật tài khoản</h4>
+                    <small class="opacity-75">Chỉnh sửa thông tin thành viên</small>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">Email đăng nhập</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-envelope text-warning"></i>
+                                </span>
+                                <input asp-for="Email" class="form-control" placeholder="vidu@school.edu.vn" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="SelectedRole" class="form-label fw-semibold">Vai trò</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">
+                                    <i class="fas fa-user-shield text-warning"></i>
+                                </span>
+                                <select asp-for="SelectedRole" class="form-select" asp-items="ViewBag.Roles">
+                                    <option value="" disabled>-- Chọn vai trò --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="SelectedRole" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-2 action-buttons">
+                            <div class="col-12 mb-2">
+                                <button type="button" class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                                    <i class="fas fa-key me-2"></i>Đặt lại mật khẩu
+                                </button>
+                            </div>
+
+                            <hr class="my-3 text-muted">
+
+                            <div class="col-6 col-md-auto">
+                                <a asp-action="Index" class="btn btn-secondary py-2">
+                                    <i class="fa fa-arrow-left me-2"></i>Quay lại
+                                </a>
+                            </div>
+
+                            <div class="col-6 col-md-auto">
+                                <button type="submit" class="btn btn-warning py-2 fw-bold text-dark">
+                                    <i class="fa fa-save me-2"></i>Lưu
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="resetPasswordLabel"><i class="fas fa-lock me-2"></i>Đặt lại mật khẩu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ResetPassword" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="userId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu mới</label>
+                        <div class="input-group">
+                            <input type="password" name="newPassword" class="form-control" id="txtNewPassword" required minlength="6">
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleNewPassword()">
+                                <i class="fas fa-eye" id="eyeIconNew"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleNewPassword() {
+        const input = document.getElementById("txtNewPassword");
+        const icon = document.getElementById("eyeIconNew");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+</script>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolManagement.Data;
 
@@ -11,9 +12,11 @@ using SchoolManagement.Data;
 namespace SchoolManagement.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260107032851_UpdateLectureCalendar")]
+    partial class UpdateLectureCalendar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,6 +284,7 @@ namespace SchoolManagement.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Class")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .IsUnicode(false)
                         .HasColumnType("varchar(10)");
@@ -291,7 +295,7 @@ namespace SchoolManagement.Data.Migrations
                     b.Property<int>("LectureCalendarId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Lesson")
+                    b.Property<int>("Lesson")
                         .HasColumnType("int");
 
                     b.Property<string>("LessonTitle")
@@ -305,6 +309,7 @@ namespace SchoolManagement.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Subject")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

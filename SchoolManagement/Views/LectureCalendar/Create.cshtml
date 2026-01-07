@@ -1,0 +1,175 @@
+﻿@model SchoolManagement.Models.LectureCalendarCreateViewModel
+
+@{
+    ViewData["Title"] = "Tạo Lịch Báo Giảng";
+}
+
+<div class="container mt-4">
+    <h2>Tạo Lịch Báo Giảng Mới (Tự động 5 tiết/ngày)</h2>
+    <hr />
+
+    <form asp-action="Create" id="createForm">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                Thông tin chung
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="TeacherName" class="control-label fw-bold"></label>
+                            <input asp-for="TeacherName" class="form-control" />
+                            <span asp-validation-for="TeacherName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mb-3">
+                            <label asp-for="Week" class="control-label fw-bold"></label>
+                            <input asp-for="Week" class="form-control" type="number" min="1" max="52" />
+                            <span asp-validation-for="Week" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-3">
+                            <label asp-for="StartDate" class="control-label fw-bold"></label>
+                            <input asp-for="StartDate" class="form-control" id="StartDate" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-3">
+                            <label asp-for="EndDate" class="control-label fw-bold"></label>
+                            <input asp-for="EndDate" class="form-control" id="EndDate" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-end">
+                        <button type="button" class="btn btn-warning" onclick="generateScheduleTable()">
+                            <i class="fa fa-table"></i> Tạo lưới 5 tiết/ngày
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="detailsSection" style="display:none;">
+            <h4 class="mb-3">Chi tiết giảng dạy</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm" id="detailsTable">
+                    <thead class="table-light text-center align-middle">
+                        <tr>
+                            <th style="width: 120px;">Ngày</th>
+                            <th style="width: 60px;">Tiết</th>
+                            <th style="width: 100px;">Lớp</th>
+                            <th>Môn học</th>
+                            <th style="width: 80px;">Tiết PPCT</th>
+                            <th>Tên bài dạy</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 mb-5">
+                <button type="submit" class="btn btn-success btn-lg">Lưu Lịch Báo Giảng</button>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Quay lại</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // 1. Hàm sinh lưới 5 tiết mỗi ngày
+        function generateScheduleTable() {
+            var startDateVal = $("#StartDate").val();
+            var endDateVal = $("#EndDate").val();
+
+            if (!startDateVal || !endDateVal) {
+                alert("Vui lòng chọn Từ ngày và Đến ngày trước.");
+                return;
+            }
+
+            var start = new Date(startDateVal);
+            var end = new Date(endDateVal);
+
+            if (end < start) {
+                 alert("Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+                 return;
+            }
+
+            var tbody = $("#detailsTable tbody");
+            tbody.empty();
+
+            var globalIndex = 0; // Index chạy liên tục cho toàn bộ mảng Details[...]
+
+            // Vòng lặp từng ngày
+            for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+
+                // Bỏ qua Chủ nhật (nếu muốn)
+                // if (d.getDay() === 0) continue;
+
+                var displayDate = d.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' });
+                var dateInputVal = d.toISOString().split('T')[0];
+
+                // Vòng lặp 5 tiết cho mỗi ngày
+                for (var period = 1; period <= 5; period++) {
+
+                    var isFirstRowOfDay = (period === 1);
+
+                    var tr = $("<tr>");
+
+                    // Cột NGÀY: Chỉ hiện ở dòng đầu tiên của ngày (dùng rowspan=5)
+                    if (isFirstRowOfDay) {
+                        tr.append(`
+                            <td class="align-middle text-center bg-light" rowspan="5">
+                                <strong>${displayDate}</strong>
+                            </td>
+                        `);
+                    }
+
+                    // Các cột input dữ liệu
+                    // Lưu ý: Cột Date ẩn vẫn phải có ở mọi dòng để Model Binding nhận đủ dữ liệu
+                    tr.append(`
+                        <td class="text-center align-middle">
+                            <input type="hidden" name="Details[${globalIndex}].Date" value="${dateInputVal}" />
+
+                            <input type="number" name="Details[${globalIndex}].Period" class="form-control text-center border-0 bg-transparent" value="${period}" readonly />
+                        </td>
+                        <td>
+                            <input type="text" name="Details[${globalIndex}].Class" class="form-control form-control-sm" />
+                        </td>
+                        <td>
+                            <input type="text" name="Details[${globalIndex}].Subject" class="form-control form-control-sm" />
+                        </td>
+                        <td>
+                            <input type="number" name="Details[${globalIndex}].Lesson" class="form-control form-control-sm text-center" />
+                        </td>
+                        <td>
+                            <input type="text" name="Details[${globalIndex}].LessonTitle" class="form-control form-control-sm" />
+                        </td>
+                        <td>
+                            <input type="text" name="Details[${globalIndex}].Note" class="form-control form-control-sm" />
+                        </td>
+                    `);
+
+                    tbody.append(tr);
+                    globalIndex++; // Tăng index sau mỗi dòng tiết
+                }
+
+                // Thêm một dòng ngăn cách mờ giữa các ngày (tùy chọn)
+                tbody.append('<tr class="table-group-divider border-top border-3"></tr>');
+            }
+
+            $("#detailsSection").show();
+        }
+    </script>
+}

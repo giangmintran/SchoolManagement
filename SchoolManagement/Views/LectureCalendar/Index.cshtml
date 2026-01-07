@@ -1,53 +1,226 @@
-﻿@{
-    ViewBag.Title = "Lịch báo giảng";
-    // Nếu muốn trang trắng hoàn toàn không có menu, dùng Layout = null;
+﻿@model IEnumerable<SchoolManagement.Data.Entities.LectureCalendar>
+
+@{
+    ViewData["Title"] = "Lịch báo giảng của tôi";
 }
-<style>
-    .construction-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 60vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
 
-    .gear-icon {
-        width: 100px;
-        height: 100px;
-        margin-bottom: 20px;
-        animation: spin 4s linear infinite;
-        color: #555;
-    }
+<div class="container-fluid py-3 py-md-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
 
-    .status-badge {
-        background-color: #fff3cd;
-        color: #856404;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-weight: bold;
-        font-size: 0.9rem;
-        border: 1px solid #ffeeba;
-        margin-bottom: 15px;
-    }
-</style>
+        <div class="mb-3 mb-md-0">
+            <h1 class="h3 text-primary fw-bold border-start border-4 border-primary ps-3 mb-0">
+                Lịch báo giảng
+            </h1>
+            <p class="text-muted small ms-3 mb-0 mt-1">Quản lý lịch dạy hàng tuần</p>
+        </div>
 
-<div class="construction-container">
-    <svg class="gear-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-    </svg>
-
-    <span class="status-badge">Tính năng đang phát triển</span>
-    <h1>Sắp ra mắt!</h1>
-    <p style="color: #666; max-width: 500px; text-align: center;">
-        Chức năng này đang được đội ngũ kỹ thuật xây dựng.
-        <br>Cảm ơn bạn đã kiên nhẫn.
-    </p>
-
-    <div style="margin-top: 30px;">
-        <a href="@Url.Action("Index", "Home")" style="text-decoration: none; color: white; background-color: #0d6efd; padding: 10px 25px; border-radius: 5px;">
-            Quay lại trang chủ
+        <a asp-action="Create" class="btn btn-primary shadow-sm w-md-auto d-none d-md-block">
+            <i class="fa fa-plus me-2"></i>Tạo lịch mới
         </a>
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <div class="mb-3 text-muted opacity-50">
+                    <i class="fa fa-calendar-times fa-4x"></i>
+                </div>
+                <h5 class="fw-bold text-secondary">Chưa có dữ liệu</h5>
+                <p class="text-muted mb-4">Bạn chưa tạo lịch báo giảng nào.</p>
+                <a asp-action="Create" class="btn btn-outline-primary d-none d-md-block">
+                    <i class="fa fa-plus me-1"></i> Thêm mới
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0 responsive-table">
+                    <thead class="bg-light text-secondary text-uppercase small fw-bold">
+                        <tr>
+                            <th class="text-center" style="width: 80px;">Tuần</th>
+                            <th style="width: 250px;">Thời gian</th>
+                            <th>Ngày tạo</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr onclick="window.location.href = '@Url.Action("Details", new { id = item.Id })'"
+                                style="cursor: pointer;" class="align-middle">
+
+                                <td data-label="Tuần" class="text-center-desktop">
+                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fs-6 px-3">
+                                        @item.Week
+                                    </span>
+                                </td>
+
+                                <td data-label="Thời gian">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark">
+                                            @item.StartDate.ToString("dd/MM") - @item.EndDate.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td data-label="Ngày tạo" class="text-secondary small">
+                                    @item.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td data-label="Trạng thái" class="text-center-desktop">
+                                    <span class="badge bg-success bg-opacity-75 rounded-pill fw-normal px-2">
+                                        <i class="fa fa-check-circle me-1"></i> Đã duyệt
+                                    </span>
+                                </td>
+
+                                <td data-label="Thao tác" class="text-end-desktop action-cell" onclick="event.stopPropagation()">
+                                    <div class="btn-group shadow-sm action-btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-light btn-sm text-primary"
+                                           title="Xem">
+                                            <i class="fa fa-eye me-2 d-md-none"></i> <span class="d-md-none">Xem chi tiết</span>
+                                            <i class="fa fa-eye d-none d-md-inline"></i>
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-light btn-sm text-danger"
+                                                title="Xóa"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-delete-url="@Url.Action("Delete", "LectureCalendar", new { id = item.Id })"
+                                                onclick="event.stopPropagation()">
+                                            <i class="fa fa-trash-alt me-2 d-md-none"></i>
+                                            <span class="d-md-none">Xóa</span>
+                                            <i class="fa fa-trash-alt d-none d-md-inline"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 </div>
+
+<style>
+    /* CSS cho Responsive Table trên Mobile */
+    @@media (max-width: 768px) {
+        .responsive-table thead {
+            display: none;
+        }
+
+        .responsive-table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Thêm bóng đổ nhẹ cho từng thẻ */
+            border-radius: 8px; /* Bo góc thẻ */
+        }
+
+            .responsive-table tr:last-child {
+                margin-bottom: 0;
+            }
+
+        .responsive-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px dashed #eee;
+            text-align: right;
+        }
+
+            .responsive-table td:last-child {
+                border-bottom: none;
+            }
+
+            .responsive-table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                color: #6c757d;
+                margin-right: 1rem;
+            }
+            /* --- PHẦN CHỈNH SỬA NÚT FULL WIDTH --- */
+            .responsive-table td.action-cell {
+                display: block; /* Đổi sang block để chứa nút full width */
+                padding: 1rem;
+                background-color: #f8f9fa;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+            }
+
+                .responsive-table td.action-cell::before {
+                    display: none;
+                }
+                /* Tùy chỉnh btn-group trên mobile */
+                .responsive-table td.action-cell .action-btn-group {
+                    display: flex;
+                    flex-direction: column; /* Xếp dọc */
+                    width: 100%;
+                    box-shadow: none !important;
+                }
+
+                .responsive-table td.action-cell .btn {
+                    width: 100%; /* Full width */
+                    margin-bottom: 8px; /* Khoảng cách giữa các nút */
+                    border-radius: 4px !important; /* Bo lại góc vì btn-group làm vuông góc */
+                    text-align: center;
+                    padding: 10px; /* Nút to hơn dễ bấm */
+                    border: 1px solid #dee2e6; /* Thêm viền nhẹ */
+                    background-color: white;
+                }
+
+                    .responsive-table td.action-cell .btn:last-child {
+                        margin-bottom: 0;
+                    }
+        /* --- HẾT PHẦN CHỈNH SỬA --- */
+    }
+
+    @@media (min-width: 769px) {
+        .text-center-desktop {
+            text-align: center !important;
+        }
+
+        .text-end-desktop {
+            text-align: right !important;
+        }
+        /* Giữ nguyên giao diện btn-group trên desktop */
+        .action-btn-group {
+            display: inline-flex;
+        }
+    }
+</style>
+<partial name="_DeleteModal" />
+
+@section Scripts {
+    <script>
+        // Lắng nghe sự kiện khi Modal chuẩn bị hiển thị (Bootstrap 5)
+        var deleteModal = document.getElementById('deleteModal');
+
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                // Button kích hoạt modal (nút thùng rác trong bảng)
+                var button = event.relatedTarget;
+
+                // Lấy đường dẫn xóa từ attribute 'data-delete-url'
+                var deleteUrl = button.getAttribute('data-delete-url');
+
+                // Tìm form trong modal và gán action
+                var form = deleteModal.querySelector('#deleteForm');
+                form.setAttribute('action', deleteUrl);
+            });
+        }
+    </script>
+}

@@ -52,7 +52,7 @@
                         <!-- Email -->
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-semibold">
-                                Email đăng nhập
+                                Tên đăng nhập
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
@@ -72,17 +72,19 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
-                                    <i class="fas fa-lock text-primary"></i>
+                                    <i class="fas fa-key text-primary"></i>
                                 </span>
                                 <input asp-for="Password"
-                                       type="password"
+                                       type="text"
                                        class="form-control"
                                        id="txtPassword"
-                                       placeholder="••••••••" />
-                                <button class="btn btn-outline-secondary"
+                                       placeholder="Mật khẩu sẽ hiện tại đây..." />
+
+                                <button class="btn btn-outline-primary"
                                         type="button"
-                                        onclick="togglePassword()">
-                                    <i class="fas fa-eye" id="eyeIcon"></i>
+                                        onclick="generatePassword()"
+                                        title="Tạo mật khẩu ngẫu nhiên">
+                                    <i class="fas fa-sync-alt me-1"></i> Tạo mới
                                 </button>
                             </div>
                             <span asp-validation-for="Password" class="text-danger small"></span>
@@ -126,16 +128,37 @@
 </div>
 
 <script>
-    function togglePassword() {
-        const input = document.getElementById("txtPassword");
-        const icon = document.getElementById("eyeIcon");
+    function generatePassword() {
+        const length = 10;
+        
+        // Các nhóm ký tự nguồn
+        const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lower = "abcdefghijklmnopqrstuvwxyz";
+        const digits = "0123456789";
+        const specials = "!@@#$%^&*";
+        const allChars = upper + lower + digits + specials;
 
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-            input.type = "password";
-            icon.classList.replace("fa-eye-slash", "fa-eye");
+        let passwordArray = [];
+
+        // BƯỚC 1: Lấy chắc chắn mỗi loại ít nhất 1 ký tự (để vượt qua mọi validation)
+        passwordArray.push(digits.charAt(Math.floor(Math.random() * digits.length)));     // Bắt buộc có số
+        passwordArray.push(specials.charAt(Math.floor(Math.random() * specials.length))); // Bắt buộc có ký tự đặc biệt
+        passwordArray.push(upper.charAt(Math.floor(Math.random() * upper.length)));       // Bắt buộc có chữ hoa
+        passwordArray.push(lower.charAt(Math.floor(Math.random() * lower.length)));       // Bắt buộc có chữ thường
+
+        // BƯỚC 2: Điền ngẫu nhiên cho đủ độ dài (10 ký tự)
+        while (passwordArray.length < length) {
+            passwordArray.push(allChars.charAt(Math.floor(Math.random() * allChars.length)));
         }
+
+        // BƯỚC 3: Trộn lộn xộn (Shuffle) để các ký tự bắt buộc không nằm theo thứ tự dễ đoán
+        const password = passwordArray.sort(() => 0.5 - Math.random()).join('');
+
+        // Gán vào ô input
+        document.getElementById("txtPassword").value = password;
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        generatePassword();
+    });
 </script>

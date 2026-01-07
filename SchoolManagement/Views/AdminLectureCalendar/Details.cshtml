@@ -1,0 +1,208 @@
+﻿@model SchoolManagement.Data.Entities.LectureCalendar
+
+@{
+    ViewData["Title"] = $"Chi tiết - Tuần {Model.Week} - {Model.TeacherName}";
+    // Xử lý logic hiển thị ngày tháng
+    var days = new List<DateTime>();
+    for (var dt = Model.StartDate; dt <= Model.EndDate; dt = dt.AddDays(1))
+    {
+        days.Add(dt);
+    }
+    var periods = Enumerable.Range(1, 5).ToList();
+}
+
+<style>
+    .calendar-container {
+        background-color: #f4f6f9;
+        min-height: 100vh;
+    }
+
+    .calendar-header-col {
+        background-color: #fff;
+        border-bottom: 2px solid #3b7ddd;
+    }
+
+        .calendar-header-col.is-sunday {
+            border-bottom-color: #dc3545;
+        }
+
+            .calendar-header-col.is-sunday .day-name {
+                color: #dc3545;
+            }
+
+    /* Cột Tiết: Tăng chữ to, đậm */
+    .period-cell {
+        width: 60px; /* Tăng độ rộng cột tiết một chút */
+        background-color: #f8f9fa;
+        vertical-align: middle;
+        text-align: center;
+        font-weight: 800; /* Đậm hơn */
+        font-size: 1.2rem; /* Chữ to hơn hẳn */
+        color: #495057;
+        border-right: 2px solid #dee2e6;
+    }
+
+    /* Style cho ô tiết học */
+    .lesson-card {
+        border-left: 5px solid #3b7ddd;
+        background: #fff;
+        padding: 10px; /* Tăng khoảng cách đệm */
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+        height: 100%;
+        font-size: 1rem; /* Kích thước chuẩn (16px), thay vì 0.85rem cũ */
+    }
+
+        .lesson-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+            position: relative;
+        }
+
+    .lesson-class {
+        font-weight: 700;
+        color: #3b7ddd;
+        font-size: 1.2em; /* Tên lớp to hẳn lên (1.2 lần chữ thường) */
+    }
+
+    .lesson-subject {
+        font-weight: 600;
+        color: #212529;
+        font-size: 1.05em; /* Tên môn học to hơn một chút */
+        margin-bottom: 4px;
+    }
+
+    .lesson-ppct {
+        font-size: 0.9em; /* PPCT nhỏ hơn một chút nhưng vẫn rõ */
+        color: #6c757d;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .lesson-title {
+        margin-top: 6px;
+        border-top: 1px dashed #e9ecef;
+        padding-top: 6px;
+        color: #495057;
+        font-style: italic;
+        font-size: 0.95em; /* Nội dung bài học */
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Cho phép hiện 3 dòng thay vì 2 */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .lesson-note {
+        font-size: 0.9em;
+        color: #dc3545;
+        margin-top: 6px;
+        font-weight: 500;
+    }
+
+    /* Dòng ngăn cách buổi chiều */
+    .separator-row td {
+        background: #eef2f7;
+        color: #495057;
+        text-transform: uppercase;
+        font-size: 1rem; /* Tăng size chữ dòng phân cách */
+        font-weight: bold;
+        letter-spacing: 1.5px;
+        padding: 12px !important;
+    }
+</style>
+
+<div class="calendar-container container-fluid py-4">
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h4 class="mb-1 text-uppercase fw-bold text-primary">
+                    <i class="fas fa-calendar-alt me-2"></i>Lịch Báo Giảng
+                </h4>
+                <div class="d-flex align-items-center gap-3 mt-2 text-secondary">
+                    <span><i class="fas fa-user-tie me-1"></i> @Model.TeacherName</span>
+                    <span class="border-start border-2 h-50 mx-1"></span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3">Tuần @Model.Week</span>
+                    <span class="small">(@Model.StartDate.ToString("dd/MM") - @Model.EndDate.ToString("dd/MM/yyyy"))</span>
+                </div>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm px-3 shadow-sm">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive bg-white shadow-sm rounded-3">
+        <table class="table table-bordered mb-0" style="table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th class="text-center bg-light align-middle" style="width: 50px;">Tiết</th>
+                    @foreach (var day in days)
+                    {
+                        var isSunday = day.DayOfWeek == DayOfWeek.Sunday;
+                        var dayName = isSunday ? "Chủ nhật" : "Thứ " + ((int)day.DayOfWeek + 1);
+
+                        <th class="calendar-header-col @(isSunday ? "is-sunday" : "") p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="day-name fw-bold text-uppercase fs-6">@dayName</span>
+
+                                <span class="badge @(isSunday ? "bg-danger" : "bg-light text-dark") rounded-pill border fs-6">
+                                    @day.ToString("dd/MM")
+                                </span>
+                            </div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var period in periods)
+                {
+                    // Ngăn cách buổi Chiều
+                    if (period == 6)
+                    {
+                        <tr class="separator-row text-center">
+                            <td colspan="@(days.Count + 1)" class="fw-bold border-0 shadow-inset">
+                                <i class="fas fa-cloud-sun text-warning me-2"></i>BUỔI CHIỀU
+                            </td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td class="period-cell">@period</td>
+                        @foreach (var day in days)
+                        {
+                            var detail = Model.Details.FirstOrDefault(d => d.Date.Date == day.Date && d.Period == period);
+                            <td class="p-1 align-top bg-light bg-opacity-10" style="height: 100px;">
+                                @if (detail != null)
+                                {
+                                    <div class="lesson-card h-100 d-flex flex-column">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="lesson-class">@detail.Class</span>
+                                            <span class="lesson-ppct" title="Phân phối chương trình">PPCT: @detail.Lesson</span>
+                                        </div>
+                                        <div class="lesson-subject text-truncate">@detail.Subject</div>
+
+                                        @if (!string.IsNullOrEmpty(detail.LessonTitle))
+                                        {
+                                            <div class="lesson-title flex-grow-1" title="@detail.LessonTitle">
+                                                @detail.LessonTitle
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(detail.Note))
+                                        {
+                                            <div class="lesson-note text-truncate">
+                                                <i class="fas fa-exclamation-circle me-1"></i>@detail.Note
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
