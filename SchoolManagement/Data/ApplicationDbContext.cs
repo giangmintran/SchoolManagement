@@ -14,12 +14,16 @@ namespace SchoolManagement.Data
         }
 
         public DbSet<LectureCalendar> LectureCalendars { get; set; }
+        public DbSet<ClassLogbook> ClassLogbooks { get; set; }
+        public DbSet<ClassLogbookDetail> ClassLogbookDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new LectureCalendarConfiguration());
             builder.ApplyConfiguration(new LectureCalendarDetailConfiguration());
+            builder.ApplyConfiguration(new ClassLogbookConfiguration());
+            builder.ApplyConfiguration(new ClassLogbookDetailConfiguration());
         }
 
         public override int SaveChanges()

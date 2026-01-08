@@ -1,0 +1,175 @@
+﻿@model SchoolManagement.Models.LogbookUpsertViewModel
+
+@{
+    ViewData["Title"] = "Sổ Đầu Bài";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Quản lý Sổ đầu bài</h2>
+
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-filter"></i> Chọn Lớp và Thời gian
+        </div>
+        <div class="card-body bg-light">
+            <form asp-action="Create" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Chọn Lớp</label>
+                    @* Dropdown chọn lớp *@
+                    <select asp-for="ClassName" asp-items="Model.AvailableClasses" class="form-select">
+                        <option value="">-- Chọn lớp --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Tuần</label>
+                    <input asp-for="WeekNumber" class="form-control" type="number" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Năm học</label>
+                    <input asp-for="SchoolYear" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Xem Sổ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ClassName) && Model.Details != null && Model.Details.Any())
+    {
+        <form asp-action="Create" method="post" id="formLogbook">
+            <input type="hidden" asp-for="ClassName" />
+            <input type="hidden" asp-for="WeekNumber" />
+            <input type="hidden" asp-for="SchoolYear" />
+            <input type="hidden" asp-for="FromDate" />
+            <input type="hidden" asp-for="ToDate" />
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="row">
+                        <div class="col-md-6 d-flex align-items-center">
+                            <h5 class="m-0 text-primary">
+                                Chi tiết Sổ đầu bài - Lớp: <span class="fw-bold text-dark">@Model.AvailableClasses?.FirstOrDefault(c => c.Value == Model.ClassName.ToString())?.Text</span>
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end text-muted">
+                            <small>Từ ngày: @Model.FromDate.ToString("dd/MM/yyyy") - Đến ngày: @Model.ToDate.ToString("dd/MM/yyyy")</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light text-center align-middle">
+                                <tr>
+                                    <th style="width: 50px;">Thứ</th>
+                                    <th style="width: 50px;">Tiết</th>
+                                    <th style="width: 150px;">Môn học</th>
+                                    <th style="width: 80px;">Tiết CT</th>
+                                    <th>Nội dung / Đầu bài</th>
+                                    <th>HS Nghỉ</th>
+                                    <th style="width: 75px;">HT<br>(4đ)</th>
+                                    <th style="width: 75px;">KL<br>(3đ)</th>
+                                    <th style="width: 75px;">VS<br>(2đ)</th>
+                                    <th style="width: 75px;">CC<br>(1đ)</th>
+                                    <th style="width: 150px;">Nhận xét GV</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Details.Count; i++)
+                                {
+                                    <tr class="logbook-row">
+                                        @* Kỹ thuật Index để post list không liên tục *@
+                                        <input type="hidden" name="Details.Index" value="@i" />
+                                        <input type="hidden" asp-for="Details[i].DayOfWeek" />
+                                        <input type="hidden" asp-for="Details[i].PeriodIndex" />
+                                        <input type="hidden" asp-for="Details[i].Date" />
+
+                                        <td class="text-center fw-bold bg-light">
+                                            @if (Model.Details[i].PeriodIndex == 1)
+                                            {
+                                                <span>T @Model.Details[i].DayOfWeek</span>
+                                            }
+                                        </td>
+
+                                        <td class="text-center bg-light">@Model.Details[i].PeriodIndex</td>
+
+                                        <td>
+                                            <input asp-for="Details[i].SubjectName" class="form-control form-control-sm subject-input border-0 bg-transparent" placeholder="Nhập môn..." />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].CurriculumCode" class="form-control form-control-sm text-center border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].LessonContent" class="form-control form-control-sm border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].AbsentStudents" class="form-control form-control-sm border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].ScoreLearning" type="number" min="0" max="4" class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].ScoreDiscipline" type="number" min="0" max="3" class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].ScoreSanitation" type="number" min="0" max="2" class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].ScoreDiligent" type="number" min="0" max="1" class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                        </td>
+                                        <td>
+                                            <input asp-for="Details[i].TeacherComment" class="form-control form-control-sm border-0 bg-transparent" />
+                                        </td>
+                                    </tr>
+
+                                    @if (Model.Details[i].PeriodIndex == 5)
+                                    {
+                                        <tr class="table-secondary"><td colspan="11"></td></tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <label class="form-label fw-bold">Nhận xét chung của GVCN tuần này:</label>
+                    <textarea asp-for="HomeroomTeacherComment" class="form-control bg-white" rows="3"></textarea>
+
+                    <div class="mt-3 text-end">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save"></i> Lưu Sổ Đầu Bài
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+    else if (Context.Request.Query.ContainsKey("ClassId"))
+    {
+        // Hiển thị thông báo nếu đã chọn lớp nhưng chưa có dữ liệu hoặc không tìm thấy
+        <div class="alert alert-info mt-3 text-center">
+            Chưa có dữ liệu cho tuần này hoặc lớp học chưa được cấu hình.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('formLogbook')?.addEventListener('submit', function (e) {
+            const rows = document.querySelectorAll('tr.logbook-row');
+            rows.forEach(row => {
+                const subjectInput = row.querySelector('.subject-input');
+                // Nếu không có tên môn học -> disable row
+                if (subjectInput && subjectInput.value.trim() === "") {
+                    const allInputs = row.querySelectorAll('input, select, textarea');
+                    allInputs.forEach(input => input.disabled = true);
+                }
+            });
+        });
+    </script>
+}

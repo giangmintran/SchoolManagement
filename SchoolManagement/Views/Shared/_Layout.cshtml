@@ -102,10 +102,19 @@
                 <a asp-controller="Teachers" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("Teachers")">
                     <i class="bi bi-person-video3"></i><span>Teachers</span>
                 </a> *@
-
-                <a asp-controller="StarterBook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("StarterBook", "Index")">
-                    <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="AdminClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("AdminClassLogbook", "Index") d-none d-md-block">
+                        <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="ClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("ClassLogbook", "Index")">
+                        <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
+                    </a>
+                }
+                
                 @if (User.IsInRole("Admin"))
                 {
                     <a asp-controller="AdminLectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index") d-none d-md-block">
@@ -114,7 +123,7 @@
                 }
                 else
                 {
-                    <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "UserIndex")">
+                    <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index")">
                         <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
                     </a>
                 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolManagement.Data;
 
@@ -11,9 +12,11 @@ using SchoolManagement.Data;
 namespace SchoolManagement.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108041721_AddClassLogbook1")]
+    partial class AddClassLogbook1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,6 +250,7 @@ namespace SchoolManagement.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("HomeroomTeacherComment")
+                        .IsRequired()
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SchoolYear")
@@ -276,6 +280,7 @@ namespace SchoolManagement.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AbsentStudents")
+                        .IsRequired()
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("ClassLogbookId")
@@ -286,6 +291,7 @@ namespace SchoolManagement.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CurriculumCode")
+                        .IsRequired()
                         .HasColumnType("varchar(10)");
 
                     b.Property<DateTime>("Date")
@@ -321,6 +327,7 @@ namespace SchoolManagement.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("TeacherComment")
+                        .IsRequired()
                         .HasColumnType("nvarchar(1024)");
 
                     b.HasKey("Id");

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolManagement.Data;
 
@@ -11,9 +12,11 @@ using SchoolManagement.Data;
 namespace SchoolManagement.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108041229_AddClassLogbook")]
+    partial class AddClassLogbook
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,107 +233,6 @@ namespace SchoolManagement.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("SchoolManagement.Data.Entities.ClassLogbook", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Class")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("HomeroomTeacherComment")
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("SchoolYear")
-                        .IsRequired()
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<DateTime>("ToDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("WeekNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Class", "WeekNumber", "SchoolYear")
-                        .IsUnique();
-
-                    b.ToTable("ClassLogbooks");
-                });
-
-            modelBuilder.Entity("SchoolManagement.Data.Entities.ClassLogbookDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AbsentStudents")
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("ClassLogbookId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConfirmedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CurriculumCode")
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LessonContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<int>("PeriodIndex")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ScoreDiligent")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ScoreDiscipline")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ScoreLearning")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ScoreSanitation")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SubjectName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("TeacherComment")
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassLogbookId", "DayOfWeek", "PeriodIndex")
-                        .IsUnique();
-
-                    b.ToTable("ClassLogbookDetails");
-                });
-
             modelBuilder.Entity("SchoolManagement.Data.Entities.LectureCalendar", b =>
                 {
                     b.Property<int>("Id")
@@ -467,17 +369,6 @@ namespace SchoolManagement.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SchoolManagement.Data.Entities.ClassLogbookDetail", b =>
-                {
-                    b.HasOne("SchoolManagement.Data.Entities.ClassLogbook", "ClassLogbook")
-                        .WithMany("LogbookDetails")
-                        .HasForeignKey("ClassLogbookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassLogbook");
-                });
-
             modelBuilder.Entity("SchoolManagement.Data.Entities.LectureCalendar", b =>
                 {
                     b.HasOne("SchoolManagement.Data.ApplicationUser", "User")
@@ -498,11 +389,6 @@ namespace SchoolManagement.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("LectureCalendar");
-                });
-
-            modelBuilder.Entity("SchoolManagement.Data.Entities.ClassLogbook", b =>
-                {
-                    b.Navigation("LogbookDetails");
                 });
 
             modelBuilder.Entity("SchoolManagement.Data.Entities.LectureCalendar", b =>

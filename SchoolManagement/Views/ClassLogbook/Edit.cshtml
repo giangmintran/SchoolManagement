@@ -1,0 +1,264 @@
+﻿@model SchoolManagement.Models.LogbookUpsertViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật Sổ Đầu Bài";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-edit text-warning"></i> Cập nhật Sổ đầu bài</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning text-dark">
+            <i class="fas fa-info-circle"></i> Thông tin Sổ
+        </div>
+        <div class="card-body bg-light">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Lớp</label>
+                    <select asp-for="ClassName" asp-items="Model.AvailableClasses" class="form-select" disabled></select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Tuần</label>
+                    <input asp-for="WeekNumber" class="form-control" disabled />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Năm học</label>
+                    <input asp-for="SchoolYear" class="form-control" disabled />
+                </div>
+                <div class="col-md-5 d-flex align-items-end">
+                    <span class="text-muted fst-italic">Đang chỉnh sửa dữ liệu của tuần này.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post" id="formLogbook">
+        <input type="hidden" asp-for="Id" /> <input type="hidden" asp-for="ClassName" />
+        <input type="hidden" asp-for="WeekNumber" />
+        <input type="hidden" asp-for="SchoolYear" />
+        <input type="hidden" asp-for="FromDate" />
+        <input type="hidden" asp-for="ToDate" />
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="m-0 text-primary">
+                            Lớp: <span class="fw-bold text-dark fs-5">@Model.ClassName</span>
+                        </h5>
+                    </div>
+                    <div class="col-md-6 text-end text-muted">
+                        <i class="far fa-calendar-alt"></i>
+                        @Model.FromDate.ToString("dd/MM/yyyy") - @Model.ToDate.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle mb-0">
+                        @* --- PHẦN HEADER: Giống hệt Create --- *@
+                        <thead class="table-light text-center align-middle sticky-top">
+                            <tr>
+                                <th style="width: 50px;">Thứ</th>
+                                <th style="width: 50px;">Tiết</th>
+                                <th style="width: 100px;">Môn học</th>
+                                <th style="width: 80px;">Tiết CT</th>
+
+                                @* --- SỬA Ở ĐÂY: Đặt width bằng nhau (ví dụ 15% hoặc 200px) --- *@
+                                <th>Nội dung / Đầu bài</th>
+                                <th style="width: 200px;">HS Nghỉ</th>
+                                @* ----------------------------------------------------------- *@
+
+                                @* Các cột điểm số *@
+                                <th style="width: 60px;">HT<br><small>(4đ)</small></th>
+                                <th style="width: 60px;">KL<br><small>(3đ)</small></th>
+                                <th style="width: 60px;">VS<br><small>(2đ)</small></th>
+                                <th style="width: 60px;">CC<br><small>(1đ)</small></th>
+
+                                <th style="width: 150px;">Nhận xét GV</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @for (int i = 0; i < Model.Details.Count; i++)
+                            {
+                                <tr class="logbook-row">
+                                    @* --- QUAN TRỌNG: Hidden Fields để Update --- *@
+                                    <input type="hidden" asp-for="Details[i].Id" /> @* ID bản ghi (0 nếu là dòng mới) *@
+                                    <input type="hidden" name="Details.Index" value="@i" />
+                                    <input type="hidden" asp-for="Details[i].DayOfWeek" />
+                                    <input type="hidden" asp-for="Details[i].PeriodIndex" />
+
+                                    @* 1. Cột Thứ *@
+                                    <td class="text-center fw-bold bg-light">
+                                        @if (Model.Details[i].PeriodIndex == 1)
+                                        {
+                                            <span>T @Model.Details[i].DayOfWeek</span>
+                                        }
+                                    </td>
+
+                                    @* 2. Cột Tiết *@
+                                    <td class="text-center bg-light">@Model.Details[i].PeriodIndex</td>
+
+                                    @* 3. Môn học *@
+                                    <td>
+                                        <input asp-for="Details[i].SubjectName"
+                                               class="form-control form-control-sm subject-input border-0 bg-transparent fw-bold text-primary"
+                                               placeholder="..." />
+                                    </td>
+
+                                    @* 4. Tiết CT *@
+                                    <td>
+                                        <input asp-for="Details[i].CurriculumCode"
+                                               class="form-control form-control-sm text-center border-0 bg-transparent" />
+                                    </td>
+
+                                    @* 5. Nội dung bài học *@
+                                    <td>
+                                        <input asp-for="Details[i].LessonContent"
+                                               class="form-control form-control-sm border-0 bg-transparent" />
+                                    </td>
+
+                                    @* 6. Học sinh nghỉ *@
+                                    <td>
+                                        <input asp-for="Details[i].AbsentStudents"
+                                               class="form-control form-control-sm border-0 bg-transparent text-danger" />
+                                    </td>
+
+                                    @* 7. Điểm Học tập (Max 4) *@
+                                    <td>
+                                        <input asp-for="Details[i].ScoreLearning" type="number" min="0" max="4"
+                                               class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                    </td>
+
+                                    @* 8. Điểm Kỷ luật (Max 3) *@
+                                    <td>
+                                        <input asp-for="Details[i].ScoreDiscipline" type="number" min="0" max="3"
+                                               class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                    </td>
+
+                                    @* 9. Điểm Vệ sinh (Max 2) *@
+                                    <td>
+                                        <input asp-for="Details[i].ScoreSanitation" type="number" min="0" max="2"
+                                               class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                    </td>
+
+                                    @* 10. Điểm Chuyên cần (Max 1) *@
+                                    <td>
+                                        <input asp-for="Details[i].ScoreDiligent" type="number" min="0" max="1"
+                                               class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
+                                    </td>
+
+                                    @* 11. Nhận xét GV *@
+                                    <td>
+                                        <input asp-for="Details[i].TeacherComment"
+                                               class="form-control form-control-sm border-0 bg-transparent" />
+                                    </td>
+                                </tr>
+
+                                @* Dòng ngăn cách sau tiết 5 *@
+                                @if (Model.Details[i].PeriodIndex == 5)
+                                {
+                                    <tr class="table-secondary"><td colspan="12"></td></tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white sticky-bottom border-top">
+                <div class="row">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Nhận xét chung của GVCN:</label>
+                        <textarea asp-for="HomeroomTeacherComment" class="form-control bg-light" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+                        <button type="submit" class="btn btn-warning px-4">
+                            <i class="fas fa-save"></i> Lưu Thay Đổi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('formLogbook')?.addEventListener('submit', function (e) {
+            const rows = document.querySelectorAll('tr.logbook-row');
+            let isValid = true; // Biến cờ để kiểm tra lỗi
+            let errorMsg = "";
+
+            rows.forEach((row, index) => {
+                // 1. Lấy ô Môn học (dựa trên class subject-input bạn đã gán)
+                const subjectInput = row.querySelector('.subject-input');
+
+                // 2. Lấy ô Nội dung (dựa trên name attribute sinh ra bởi asp-for="LessonContent")
+                //
+                const contentInput = row.querySelector('input[name$=".LessonContent"]');
+
+                if (!subjectInput || !contentInput) return;
+
+                const hasSubject = subjectInput.value.trim() !== "";
+                const hasContent = contentInput.value.trim() !== "";
+
+                // Reset style lỗi (nếu có từ lần bấm trước)
+                subjectInput.classList.remove('border', 'border-danger', 'bg-warning', 'bg-opacity-10');
+                contentInput.classList.remove('border', 'border-danger', 'bg-warning', 'bg-opacity-10');
+
+                // --- TRƯỜNG HỢP 1: Cả 2 đều rỗng -> Disable row (Không gửi về server) ---
+                if (!hasSubject && !hasContent) {
+                    const allInputs = row.querySelectorAll('input, select, textarea');
+                    allInputs.forEach(input => input.disabled = true);
+                }
+
+                // --- TRƯỜNG HỢP 2: Dữ liệu bị thiếu 1 trong 2 -> Báo lỗi ---
+                else if ((hasSubject && !hasContent) || (!hasSubject && hasContent)) {
+                    isValid = false;
+
+                    // Highlight ô bị thiếu
+                    if (!hasSubject) subjectInput.classList.add('border', 'border-danger', 'bg-warning', 'bg-opacity-10');
+                    if (!hasContent) contentInput.classList.add('border', 'border-danger', 'bg-warning', 'bg-opacity-10');
+
+                    // Lấy thông tin tiết để báo lỗi cụ thể hơn
+                    const day = row.querySelector('input[name$=".DayOfWeek"]')?.value;
+                    const period = row.querySelector('input[name$=".PeriodIndex"]')?.value;
+                    errorMsg += `\n- Thứ ${day}, Tiết ${period}: Nhập thiếu Môn học hoặc Nội dung.`;
+
+                    // Đảm bảo row không bị disabled để người dùng sửa
+                    const allInputs = row.querySelectorAll('input, select, textarea');
+                    allInputs.forEach(input => input.disabled = false);
+                }
+
+                // --- TRƯỜNG HỢP 3: Đầy đủ -> Enable row ---
+                else {
+                    const allInputs = row.querySelectorAll('input, select, textarea');
+                    allInputs.forEach(input => input.disabled = false);
+                }
+            });
+
+            // Nếu có lỗi thì chặn submit và hiện thông báo
+            if (!isValid) {
+                e.preventDefault(); // Chặn gửi form
+
+                // Enable lại các dòng rỗng (tạm thời) để script chạy lại đúng logic ở lần bấm sau
+                // (tránh trường hợp người dùng sửa xong nhưng dòng khác vẫn bị disable)
+                rows.forEach(row => {
+                     const allInputs = row.querySelectorAll('input, select, textarea');
+                     allInputs.forEach(input => input.disabled = false);
+                });
+
+                alert("Vui lòng kiểm tra lại thông tin:" + errorMsg);
+            }
+        });
+    </script>
+}
