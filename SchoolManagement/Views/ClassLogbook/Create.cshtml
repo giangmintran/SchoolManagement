@@ -5,37 +5,45 @@
 }
 
 <div class="container-fluid">
-    <h2 class="mb-4">Quản lý Sổ đầu bài</h2>
+    <div class="container-fluid">
+        @* --- SỬA ĐOẠN NÀY: Dùng d-flex để Tiêu đề và Nút nằm 2 bên --- *@
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="m-0">Quản lý Sổ đầu bài</h2>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
 
-    <div class="card mb-4 border-primary">
-        <div class="card-header bg-primary text-white">
-            <i class="fas fa-filter"></i> Chọn Lớp và Thời gian
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-filter"></i> Chọn Lớp và Thời gian
+            </div>
+            <div class="card-body bg-light">
+                <form asp-action="Create" method="get" class="row g-3 align-items-end" id="formSearchLogbook">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Chọn Lớp</label>
+                        <select asp-for="ClassName" asp-items="Model.AvailableClasses" class="form-select" id="ClassName">
+                            <option value="">-- Chọn lớp --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Tuần</label>
+                        <input asp-for="WeekNumber" class="form-control" type="number" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Năm học</label>
+                        <input asp-for="SchoolYear" class="form-control" />
+                    </div>
+
+                    @* Nút Lập Sổ giữ nguyên *@
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Lập Sổ
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="card-body bg-light">
-            <form asp-action="Create" method="get" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Chọn Lớp</label>
-                    @* Dropdown chọn lớp *@
-                    <select asp-for="ClassName" asp-items="Model.AvailableClasses" class="form-select">
-                        <option value="">-- Chọn lớp --</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Tuần</label>
-                    <input asp-for="WeekNumber" class="form-control" type="number" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Năm học</label>
-                    <input asp-for="SchoolYear" class="form-control" />
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search"></i> Xem Sổ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     @if (!string.IsNullOrEmpty(Model.ClassName) && Model.Details != null && Model.Details.Any())
     {

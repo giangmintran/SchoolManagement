@@ -92,8 +92,20 @@ namespace SchoolManagement.Controllers
 
         // GET: Tạo sổ đầu bài mới
         [HttpGet]
-        public IActionResult Create(string className)
+        public IActionResult Create(string className, int? weekNumber)
         {
+            var classNameQuery = Request.Query["ClassName"].ToString();
+            if (Request.Query.ContainsKey("ClassName") && string.IsNullOrWhiteSpace(classNameQuery) && string.IsNullOrWhiteSpace(className))
+            {
+                TempData.ToastWarning("Vui lòng chọn lớp");
+            }
+
+            var weekQuery = Request.Query["WeekNumber"].ToString();
+            if (Request.Query.ContainsKey("WeekNumber") && string.IsNullOrWhiteSpace(weekQuery) && weekNumber is null)
+            {
+                TempData.ToastWarning("Vui lòng nhập số tuần");
+            }
+
             var now = DateTime.Now;
             var academicYear = GetAcademicYear(now);
 
@@ -108,7 +120,7 @@ namespace SchoolManagement.Controllers
             var model = new LogbookUpsertViewModel
             {
                 ClassName = className,
-                WeekNumber = 1,
+                WeekNumber = weekNumber,
                 SchoolYear = academicYear,
                 FromDate = fromDate,
                 ToDate = toDate,
