@@ -1,11 +1,23 @@
 ﻿@using System.Globalization
+@using System.Security.Claims  
 @model SchoolManagement.Models.ReadModels.LectureCalendarReadVM
 
 @{
     ViewData["Title"] = "Chi tiết & Cập nhật Lịch báo giảng";
     var cultureVi = new CultureInfo("vi-VN");
 
-    // Biến đếm toàn cục để đánh index cho list Details khi binding form
+    // 2. Lấy ID người dùng hiện tại
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    
+    // 3. Kiểm tra: Nếu trùng khớp thì cho sửa (canEdit = true), ngược lại là false
+    // Lưu ý: Model cần có thuộc tính UserId
+    bool canEdit = Model.UserId == currentUserId; 
+    
+    // Biến này dùng để gán vào thuộc tính readonly
+    // Nếu canEdit là true -> giá trị là null (không readonly)
+    // Nếu canEdit là false -> giá trị là "readonly"
+    var readonlyMode = canEdit ? null : "readonly";
+
     int globalIndex = 0;
 }
 
@@ -20,16 +32,29 @@
             <div>
                 <span class="badge bg-light text-primary me-2">Tuần @Model.Week</span>
                 
-                <button type="submit" class="btn btn-warning btn-sm fw-bold text-dark shadow-sm d-none d-md-inline-block">
-                    <i class="fa fa-save me-1"></i> Lưu thay đổi
-                </button>
+                @if (canEdit)
+                {
+                    <button type="submit" class="btn btn-warning btn-sm fw-bold text-dark shadow-sm d-none d-md-inline-block">
+                        <i class="fa fa-save me-1"></i> Lưu thay đổi
+                    </button>
+                }
             </div>
         </div>
         <div class="card-body">
             <div class="row g-2">
                 <div class="col-6 col-md-3">
                     <label class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Giáo viên</label>
-                    <p class="fw-bold text-dark mb-0">@Model.TeacherName</p>
+                        @if (canEdit)
+                        {
+                            <input asp-for="TeacherName"
+                               class="form-control form-control-sm fw-bold text-dark border-secondary-subtle"
+                               placeholder="Nhập tên giáo viên" />
+                        }
+                        else
+                        {
+                            <p class="fw-bold text-dark mb-0">@Model.TeacherName</p>
+                        }
+                       
                 </div>
                 <div class="col-6 col-md-3">
                     <label class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem;">Thời gian</label>
@@ -52,7 +77,7 @@
 
     <div class="card shadow-sm border-0 d-none d-md-block">
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div>
                 <table class="table table-bordered table-hover mb-0 align-middle">
                     <thead class="bg-light text-secondary text-center text-uppercase small fw-bold">
                         <tr>
@@ -101,44 +126,74 @@
                                         </td>
 
                                         <td class="p-1">
-                                            <input type="text"
-                                                   class="form-control form-control-sm text-center border-0 bg-transparent fw-bold text-info"
-                                                   name="Details[@globalIndex].Class"
-                                                   value="@detail.Class"
-                                                   placeholder=""
-                                                   style="min-width: 60px;" />
+                                            @if (canEdit)
+                                            {
+                                                <input type="text"
+                                                       class="form-control form-control-sm text-center border-0 bg-transparent fw-bold text-info"
+                                                       name="Details[@globalIndex].Class"
+                                                       value="@detail.Class"
+                                                       style="min-width: 60px;" />
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-bold text-info">@detail.Class</span>
+                                            }
                                         </td>
 
                                         <td class="p-1">
-                                            <input type="text"
-                                                   class="form-control form-control-sm border-0 bg-transparent fw-semibold"
-                                                   name="Details[@globalIndex].Subject"
-                                                   value="@detail.Subject"
-                                                   placeholder="" />
+                                            @if (canEdit)
+                                            {
+                                                <input type="text"
+                                                       class="form-control form-control-sm border-0 bg-transparent fw-semibold"
+                                                       name="Details[@globalIndex].Subject"
+                                                       value="@detail.Subject" />
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-semibold px-2">@detail.Subject</span>
+                                            }
+                                        </td>
+
+                                        <td class="p-1 text-center">
+                                            @if (canEdit)
+                                            {
+                                                <input type="number"
+                                                       class="form-control form-control-sm text-center border-0 bg-transparent"
+                                                       name="Details[@globalIndex].Lesson"
+                                                       value="@detail.Lesson" />
+                                            }
+                                            else
+                                            {
+                                                <span>@detail.Lesson</span>
+                                            }
                                         </td>
 
                                         <td class="p-1">
-                                            <input type="number"
-                                                   class="form-control form-control-sm text-center border-0 bg-transparent"
-                                                   name="Details[@globalIndex].Lesson"
-                                                   value="@detail.Lesson"
-                                                   placeholder="" />
+                                            @if (canEdit)
+                                            {
+                                                <input type="text"
+                                                       class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary"
+                                                       name="Details[@globalIndex].LessonTitle"
+                                                       value="@detail.LessonTitle" />
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-bold text-primary px-2">@detail.LessonTitle</span>
+                                            }
                                         </td>
 
                                         <td class="p-1">
-                                            <input type="text"
-                                                   class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary"
-                                                   name="Details[@globalIndex].LessonTitle"
-                                                   value="@detail.LessonTitle"
-                                                   placeholder="" />
-                                        </td>
-
-                                        <td class="p-1">
-                                            <input type="text"
-                                                   class="form-control form-control-sm border-0 bg-transparent text-muted fst-italic"
-                                                   name="Details[@globalIndex].Note"
-                                                   value="@detail.Note"
-                                                   placeholder="" />
+                                            @if (canEdit)
+                                            {
+                                                <input type="text"
+                                                       class="form-control form-control-sm border-0 bg-transparent text-muted fst-italic"
+                                                       name="Details[@globalIndex].Note"
+                                                       value="@detail.Note" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic px-2">@detail.Note</span>
+                                            }
                                         </td>
                                     </tr>
 
@@ -222,9 +277,18 @@
                     }
                 </div>
             }
-            <div class="alert alert-info small mt-3">
-                <i class="fa fa-info-circle me-1"></i> Để sửa nội dung, vui lòng sử dụng giao diện Máy tính (Desktop).
-            </div>
+            @if (canEdit)
+            {
+                <div class="alert alert-info small mt-3">
+                    <i class="fa fa-info-circle me-1"></i> Để sửa nội dung, vui lòng sử dụng giao diện Máy tính (Desktop).
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning small mt-3">
+                    <i class="fa fa-lock me-1"></i> Bạn đang xem lịch báo giảng của giáo viên khác (Chế độ chỉ xem).
+                </div>
+            }
         }
         else
         {

@@ -18,7 +18,43 @@
             <i class="fa fa-plus me-2"></i>Tạo lịch mới
         </a>
     </div>
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-2 col-6">
+                    <label class="form-label small fw-bold text-secondary">Tuần</label>
+                    <input type="number" name="week" class="form-control"
+                           value="@ViewContext.HttpContext.Request.Query["week"]"
+                           placeholder="Số tuần...">
+                </div>
 
+                <div class="col-md-3 col-6">
+                    <label class="form-label small fw-bold text-secondary">Ngày báo giảng</label>
+                    <input type="date" name="searchDate" class="form-control"
+                           value="@ViewContext.HttpContext.Request.Query["searchDate"]">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Tên Giáo viên</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted"><i class="fa fa-search"></i></span>
+                        <input type="text" name="teacherName" class="form-control"
+                               value="@ViewContext.HttpContext.Request.Query["teacherName"]"
+                               placeholder="Nhập tên giáo viên...">
+                    </div>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="fa fa-filter me-1"></i> Lọc
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                        <i class="fa fa-sync-alt"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
     @if (!Model.Any())
     {
         <div class="card shadow-sm border-0 text-center py-5">
@@ -42,6 +78,7 @@
                     <thead class="bg-light text-secondary text-uppercase small fw-bold">
                         <tr>
                             <th class="text-center" style="width: 80px;">Tuần</th>
+                            <th class="text-center" style="width: 80px;">Tên Giáo viên</th>
                             <th style="width: 250px;">Thời gian</th>
                             <th>Ngày tạo</th>
                             <th class="text-center">Trạng thái</th>
@@ -57,6 +94,12 @@
                                 <td data-label="Tuần" class="text-center-desktop">
                                     <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fs-6 px-3">
                                         @item.Week
+                                    </span>
+                                </td>
+
+                                <td data-label="Tên Giáo viên" class="text-center-desktop">
+                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fs-6 px-3">
+                                        @item.TeacherName
                                     </span>
                                 </td>
 

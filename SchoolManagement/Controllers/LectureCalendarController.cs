@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SchoolManagement.Common;
 using SchoolManagement.Data;
 using SchoolManagement.Data.Entities;
 using SchoolManagement.Models;
@@ -10,7 +11,7 @@ using System.Security.Claims;
 
 namespace SchoolManagement.Controllers
 {
-    [Authorize(Roles = "User")]
+    [Authorize]
     public class LectureCalendarController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,20 +22,10 @@ namespace SchoolManagement.Controllers
         }
 
         // GET: LectureCalendars
-        [Authorize(Roles = "User")]
+        [Authorize]
         public async Task<IActionResult> Index(int? week, string searchTeacher)
         {
-            // Lấy UserId (NameIdentifier) của user đang đăng nhập
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
-
-            // Lọc lịch giảng của user hiện tại
             var mySchedules = await _context.LectureCalendars
-                .Where(l => l.UserId == userId)
                 .OrderByDescending(l => l.Week)
                 .ToListAsync();
 
@@ -240,6 +231,7 @@ namespace SchoolManagement.Controllers
             return _context.LectureCalendars.Any(e => e.Id == id);
         }
 
+        [Authorize(Roles = "User")]
         [HttpPost]
         public async Task<IActionResult> UpdateQuick(LectureCalendarReadVM model)
         {
@@ -248,13 +240,15 @@ namespace SchoolManagement.Controllers
                 return RedirectToAction("Details", new { id = model.Id });
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             // 1. Lấy dữ liệu gốc từ DB
             var calendar = await _context.LectureCalendars
                 .Include(c => c.Details)
-                .FirstOrDefaultAsync(c => c.Id == model.Id);
+                .FirstOrDefaultAsync(c => c.Id == model.Id && c.UserId == userId);
 
             if (calendar == null) return NotFound();
-
+            calendar.TeacherName = model.TeacherName;
             // 2. Cập nhật dữ liệu
             foreach (var item in model.Details)
             {
@@ -274,7 +268,7 @@ namespace SchoolManagement.Controllers
             await _context.SaveChangesAsync();
 
             // Thông báo thành công
-            TempData["Success"] = "Đã cập nhật lịch báo giảng thành công!";
+            TempData.ToastSuccess("Đã cập nhật lịch báo giảng thành công!");
             return RedirectToAction("Details", new { id = model.Id });
         }
 

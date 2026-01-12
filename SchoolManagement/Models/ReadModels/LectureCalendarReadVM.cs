@@ -15,6 +15,7 @@ namespace SchoolManagement.Models.ReadModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string UserId { get; set; }
 
         // Danh sách chi tiết
         public List<LectureCalendarDetailReadVM> Details { get; set; } = new List<LectureCalendarDetailReadVM>();

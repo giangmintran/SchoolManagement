@@ -104,7 +104,7 @@
                 </a> *@
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-controller="AdminClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("AdminClassLogbook", "Index") d-none d-md-block">
+                    <a asp-controller="AdminClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("AdminClassLogbook", "Index")">
                         <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
                     </a>
                 }
@@ -115,18 +115,9 @@
                     </a>
                 }
                 
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-controller="AdminLectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index") d-none d-md-block">
-                        <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
-                    </a>
-                }
-                else
-                {
-                    <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index")">
-                        <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
-                    </a>
-                }
+                <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index")">
+                    <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
+                </a>
                
 
                 <a asp-controller="Home" asp-action="Privacy" class="list-group-item list-group-item-action @GetActiveClass("Home", "Privacy")">
