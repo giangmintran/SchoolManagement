@@ -27,32 +27,46 @@ namespace SchoolManagement.Controllers
         public async Task<IActionResult> Index(string keyword, int pageNumber = 1)
         {
             ViewData["Keyword"] = keyword;
-            int pageSize = 10; // Số dòng trên 1 trang
+            int pageSize = 10;
+
+            // 1. Tạo Query
             var query = _userManager.Users.AsQueryable();
 
             if (!string.IsNullOrEmpty(keyword))
             {
-                // Lọc theo Email hoặc Username
                 query = query.Where(u => u.Email.Contains(keyword) || u.UserName.Contains(keyword));
             }
-            var totalRecords = await query.CountAsync();
-            List<ApplicationUser> items = [.. query.Skip((pageNumber - 1) * pageSize).Take(pageSize)];
+
+            // 2. Dùng Extension Method để phân trang trên Entity (ApplicationUser) trước
+            //    Lợi ích: Tự động Count và Skip/Take tối ưu tại Database
+            var pagedUsers = await query.ToPagedResultAsync(pageNumber, pageSize);
+
+            // 3. Mapping dữ liệu từ Entity sang ViewModel
+            //    Vì cần gọi hàm async GetRolesAsync nên phải loop thủ công ở đây
             var resultItems = new List<UserRolesViewModel>();
-            foreach (var user in items)
+
+            foreach (var user in pagedUsers.Items)
             {
-                if (user.UserName == "admin@gmail.com") continue; // Bỏ qua super admin nếu cần
-                var thisViewModel = new UserRolesViewModel();
-                thisViewModel.UserId = user.Id;
-                thisViewModel.UserName = user.UserName;
-                thisViewModel.Email = user.Email;
-                thisViewModel.Roles = await _userManager.GetRolesAsync(user);
+                if (user.UserName == "admin@gmail.com") continue;
+
+                var thisViewModel = new UserRolesViewModel
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Avatar = user.Avatar,
+                    Roles = await _userManager.GetRolesAsync(user)
+                };
                 resultItems.Add(thisViewModel);
             }
+
+            // 4. Tạo PagedResult cho ViewModel dựa trên thông tin trang của Entity
             var viewModel = new PagedResult<UserRolesViewModel>
             {
                 Items = resultItems,
-                PageIndex = pageNumber,
-                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+                PageIndex = pagedUsers.PageIndex,
+                TotalPages = pagedUsers.TotalPages,
+                TotalRecords = pagedUsers.TotalRecords
             };
 
             return View(viewModel);

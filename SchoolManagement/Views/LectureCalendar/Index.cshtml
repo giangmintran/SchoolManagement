@@ -1,5 +1,5 @@
-﻿@model IEnumerable<SchoolManagement.Data.Entities.LectureCalendar>
-
+﻿@using SchoolManagement.Common
+@model PagedResult<SchoolManagement.Data.Entities.LectureCalendar>
 @{
     ViewData["Title"] = "Lịch báo giảng của tôi";
 }
@@ -55,18 +55,15 @@
             </form>
         </div>
     </div>
-    @if (!Model.Any())
+    @if (!Model.Items.Any())
     {
         <div class="card shadow-sm border-0 text-center py-5">
             <div class="card-body">
                 <div class="mb-3 text-muted opacity-50">
                     <i class="fa fa-calendar-times fa-4x"></i>
                 </div>
-                <h5 class="fw-bold text-secondary">Chưa có dữ liệu</h5>
-                <p class="text-muted mb-4">Bạn chưa tạo lịch báo giảng nào.</p>
-                <a asp-action="Create" class="btn btn-outline-primary d-none d-md-block">
-                    <i class="fa fa-plus me-1"></i> Thêm mới
-                </a>
+                <h5 class="fw-bold text-secondary">Không có dữ liệu</h5>
+                <p class="text-muted mb-4">Không lịch báo giảng nào.</p>
             </div>
         </div>
     }
@@ -86,7 +83,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.Items)
                         {
                             <tr onclick="window.location.href = '@Url.Action("Details", new { id = item.Id })'"
                                 style="cursor: pointer;" class="align-middle">
@@ -148,7 +145,14 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="card-footer bg-white border-top-0 py-3">
+                <div class="small text-muted mb-2 mb-md-0">
+                    Hiển thị <strong>@Model.Items.Count</strong> trên tổng số <strong>@Model.TotalRecords</strong> bản ghi
+                </div>
+            </div>
         </div>
+        <partial name="_Pagination" model="Model" />
     }
 </div>
 

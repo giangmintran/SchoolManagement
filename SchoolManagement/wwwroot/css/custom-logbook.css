@@ -1,0 +1,59 @@
+﻿/* File: wwwroot/css/custom-logbook.css */
+
+/* Style cho Badge Lớp học */
+.class-badge {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 6px rgba(118, 75, 162, 0.3);
+}
+
+/* Hiệu ứng dòng bảng */
+.hover-row {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .hover-row:hover {
+        background-color: #f8f9fa !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        z-index: 1;
+        position: relative;
+    }
+
+/* Badges màu nhẹ */
+.badge-soft {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.badge-soft-primary {
+    background-color: #e1effe;
+    color: #1a56db;
+}
+
+.badge-soft-warning {
+    background-color: #fdf6b2;
+    color: #9f580a;
+}
+
+.badge-soft-success {
+    background-color: #def7ec;
+    color: #03543f;
+}
+
+/* Form Search */
+.search-container {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+}

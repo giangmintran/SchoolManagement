@@ -1,0 +1,64 @@
+﻿@using SchoolManagement.Common
+@model dynamic
+@{
+    // Model truyền vào là PagedResult<T>
+    // Ép kiểu dynamic hoặc dùng base class nếu có để truy cập thuộc tính
+    var result = Model;
+    int pageIndex = result.PageIndex;
+    int totalPages = result.TotalPages;
+
+    // Logic để giữ lại các tham số filter trên URL
+    var queryParams = new Dictionary<string, string>();
+    foreach (var key in Context.Request.Query.Keys)
+    {
+        if (key.ToLower() != "pageindex") // Loại bỏ pageIndex cũ
+        {
+            queryParams[key] = Context.Request.Query[key];
+        }
+    }
+}
+
+@if (totalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+
+            @* Nút Previous *@
+            <li class="page-item @(result.HasPreviousPage ? "" : "disabled")">
+                @{
+                    queryParams["pageIndex"] = (pageIndex - 1).ToString();
+                }
+                <a class="page-link" asp-all-route-data="queryParams">
+                    <i class="fa fa-chevron-left"></i>
+                </a>
+            </li>
+
+            @* Logic hiển thị số trang rút gọn nếu quá dài (ví dụ: 1 ... 4 5 6 ... 10) *@
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                // Chỉ hiện trang đầu, trang cuối, và các trang xung quanh trang hiện tại
+                if (i == 1 || i == totalPages || (i >= pageIndex - 2 && i <= pageIndex + 2))
+                {
+                    queryParams["pageIndex"] = i.ToString();
+                    <li class="page-item @(i == pageIndex ? "active" : "")">
+                        <a class="page-link" asp-all-route-data="queryParams">@i</a>
+                    </li>
+                }
+                else if (i == pageIndex - 3 || i == pageIndex + 3)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+            }
+
+            @* Nút Next *@
+            <li class="page-item @(result.HasNextPage ? "" : "disabled")">
+                @{
+                    queryParams["pageIndex"] = (pageIndex + 1).ToString();
+                }
+                <a class="page-link" asp-all-route-data="queryParams">
+                    <i class="fa fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

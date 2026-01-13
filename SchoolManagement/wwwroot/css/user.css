@@ -1,65 +1,118 @@
-﻿@media (max-width: 768px) {
+﻿/* --- user.css --- */
+
+/* =========================================
+   1. BASE STYLES (Giao diện chung)
+   ========================================= */
+
+/* Style cho ảnh Avatar (Dùng thẻ IMG) */
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Bo tròn */
+    object-fit: cover; /* Cắt ảnh vừa khung, không méo */
+    border: 2px solid #fff; /* Viền trắng tạo nổi bật */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: #f8f9fc;
+}
+
+/* Style cho Avatar dạng chữ (Fallback cũ - giữ lại nếu cần) */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Badge Style mềm mại (Soft Badges) */
+.badge-soft-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    border: 1px solid rgba(13, 110, 253, 0.1);
+}
+
+.badge-soft-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.1);
+}
+
+/* =========================================
+   2. RESPONSIVE TABLE (Mobile Card View)
+   ========================================= */
+@media screen and (max-width: 768px) {
+
+    /* Ẩn tiêu đề bảng (Thead) */
     .mobile-responsive-table thead {
         display: none;
     }
 
+    /* Biến mỗi dòng (TR) thành một Card */
     .mobile-responsive-table tbody tr {
         display: block;
-        margin-bottom: 15px;
-        background: #fff;
+        margin-bottom: 1rem;
+        background-color: #fff;
         border: 1px solid #e3e6f0;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border-radius: 0.75rem; /* Bo góc card nhiều hơn chút */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Bóng đổ nhẹ */
+        overflow: hidden;
     }
 
+    /* Biến mỗi ô (TD) thành một dòng flex */
     .mobile-responsive-table tbody td {
-        display: block;
+        display: flex;
+        justify-content: space-between; /* Nhãn bên trái, nội dung bên phải */
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f3f9;
         text-align: right;
-        padding: 10px 15px;
-        border-bottom: 1px solid #eee;
-        position: relative;
-        padding-left: 50%;
     }
 
-        .mobile-responsive-table tbody td:last-child {
-            border-bottom: none;
-            text-align: center;
-            padding-left: 15px;
-        }
-
+        /* Tạo nhãn giả (Label) bên trái từ thuộc tính data-label */
         .mobile-responsive-table tbody td::before {
             content: attr(data-label);
-            position: absolute;
-            left: 15px;
-            width: 45%;
-            padding-right: 10px;
-            white-space: nowrap;
+            font-weight: 700;
+            color: #858796;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            margin-right: 1rem;
             text-align: left;
-            font-weight: bold;
-            color: #4e73df;
+            flex-shrink: 0; /* Đảm bảo label không bị co lại */
         }
 
-    .user-info-cell {
-        display: flex !important;
-        flex-direction: column;
-        align-items: center;
-        text-align: center !important;
-        padding-left: 15px !important;
-    }
-
-        .user-info-cell::before {
-            display: none;
+        /* Xử lý riêng ô cuối cùng (Hành động) */
+        .mobile-responsive-table tbody td:last-child {
+            border-bottom: none;
+            justify-content: center; /* Căn giữa các nút */
+            padding-top: 1.25rem;
+            padding-bottom: 1.25rem;
+            background-color: #fcfcfd; /* Nền hơi khác chút để tách biệt */
         }
 
+            /* Ẩn label của ô hành động cho gọn */
+            .mobile-responsive-table tbody td:last-child::before {
+                display: none;
+            }
+
+    /* --- Tinh chỉnh hiển thị User Info trên Mobile --- */
+
+    /* Đảm bảo wrapper hiển thị đúng chiều */
     .user-info-wrapper {
-        flex-direction: column;
-        text-align: center;
+        flex-direction: row; /* Avatar trái, tên phải */
+        justify-content: flex-end; /* Căn toàn bộ sang phải */
+        text-align: right;
     }
 
-        .user-info-wrapper .avatar-circle {
-            margin-right: 0 !important;
-            margin-bottom: 10px;
-            width: 60px !important;
-            height: 60px !important;
+        /* Xử lý trường hợp tên quá dài trên mobile */
+        .user-info-wrapper > div:last-child {
+            max-width: 180px; /* Giới hạn chiều rộng tên */
+            word-wrap: break-word;
         }
 }

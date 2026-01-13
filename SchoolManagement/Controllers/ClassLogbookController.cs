@@ -24,53 +24,50 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? className, int? weekNumber, DateTime? searchDate)
+        public async Task<IActionResult> Index(string? className, int? weekNumber, DateTime? searchDate, int pageIndex = 1)
         {
-            // Tạo list SelectListItem gồm các lớp 6A..9D
-            var listClasses = Enumerable.Range(6, 4) // Khối 6,7,8,9
+            int pageSize = 10; // Số bản ghi trên 1 trang
+
+            // --- Logic khởi tạo Dropdown Lớp (Giữ nguyên) ---
+            var listClasses = Enumerable.Range(6, 4)
                 .SelectMany(grade =>
-                    new[] { "A", "B", "C", "D" } // Các lớp A,B,C,D
+                    new[] { "A", "B", "C", "D" }
                     .Select(section => new SelectListItem
                     {
-                        Value = $"{grade}{section}", // Giá trị: "6A"
-                        Text = $"{grade}{section}",  // Hiển thị: "6A"
-                        Selected = ($"{grade}{section}" == className) // Giữ trạng thái selected nếu đang chọn
+                        Value = $"{grade}{section}",
+                        Text = $"{grade}{section}",
+                        Selected = ($"{grade}{section}" == className)
                     })
                 ).ToList();
-
             ViewBag.Classes = listClasses;
-            // 1. Khởi tạo query
+
+            // --- Logic Query và Filter (Giữ nguyên) ---
             var query = _context.ClassLogbooks.AsQueryable();
+
             if (!string.IsNullOrEmpty(className))
             {
                 query = query.Where(x => x.Class == className);
             }
-            else
-            {
-                return View(new List<ClassLogbook>());
-            }
-           
-            // 4. Logic lọc theo Ngày (Ưu tiên lọc ngày nếu user nhập cả 2)
-            // Yêu cầu: Ngày chọn nằm trong khoảng FromDate và ToDate
+
             if (searchDate.HasValue)
             {
                 query = query.Where(x => x.FromDate.Date <= searchDate.Value.Date
                                       && x.ToDate.Date >= searchDate.Value.Date);
-
-                // Lưu lại giá trị để hiển thị lại trên View
                 ViewBag.SelectedDate = searchDate;
             }
-            // 5. Logic lọc theo Tuần (Nếu không chọn ngày mới xét đến tuần)
             else if (weekNumber.HasValue)
             {
                 query = query.Where(x => x.WeekNumber == weekNumber);
                 ViewBag.SelectedWeek = weekNumber;
             }
 
-            // Sắp xếp dữ liệu (Ví dụ: Tuần giảm dần)
-            query = query.OrderByDescending(x => x.WeekNumber);
+            // Sắp xếp: Tuần giảm dần, sau đó đến Lớp
+            query = query.OrderByDescending(x => x.WeekNumber).ThenBy(x => x.Class);
 
-            return View(await query.ToListAsync());
+            // --- THAY ĐỔI QUAN TRỌNG: Phân trang ---
+            var pagedData = await query.ToPagedResultAsync(pageIndex, pageSize);
+
+            return View(pagedData);
         }
 
         public static string GetAcademicYear(DateTime? date = null)

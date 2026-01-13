@@ -23,15 +23,39 @@ namespace SchoolManagement.Controllers
 
         // GET: LectureCalendars
         [Authorize]
-        public async Task<IActionResult> Index(int? week, string searchTeacher)
+        public async Task<IActionResult> Index(int? week, string teacherName, DateTime? searchDate, int pageIndex = 1)
         {
-            var mySchedules = await _context.LectureCalendars
-                .OrderByDescending(l => l.Week)
-                .ToListAsync();
+            var pageSize = 10; // Số bản ghi trên 1 trang (có thể đưa vào config)
 
-            return View(mySchedules);
+            // Bắt đầu với IQueryable
+            var query = _context.LectureCalendars.AsQueryable();
+
+            // --- Giữ nguyên các logic lọc cũ ---
+            if (week.HasValue)
+            {
+                query = query.Where(l => l.Week == week.Value);
+            }
+
+            if (!string.IsNullOrEmpty(teacherName))
+            {
+                query = query.Where(l => l.TeacherName.Contains(teacherName));
+            }
+
+            if (searchDate.HasValue)
+            {
+                query = query.Where(l => searchDate.Value.Date >= l.StartDate.Date
+                                      && searchDate.Value.Date <= l.EndDate.Date);
+            }
+
+            // Sắp xếp trước khi phân trang
+            query = query.OrderByDescending(l => l.Week)
+                         .ThenByDescending(l => l.CreatedDate);
+
+            // Dùng Extension Method để lấy dữ liệu phân trang
+            var pagedData = await query.ToPagedResultAsync(pageIndex, pageSize);
+
+            return View(pagedData);
         }
-
         // GET: LectureCalendars/Details/5
         public async Task<IActionResult> Details(int? id)
         {
