@@ -21,6 +21,21 @@
     int globalIndex = 0;
 }
 
+<div class="d-block d-md-none">
+    @if (canEdit)
+    {
+        <div class="alert alert-info small mt-3">
+            <i class="fa fa-info-circle me-1"></i> Để sửa nội dung, vui lòng sử dụng giao diện Máy tính (Desktop).
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning small mt-3">
+            <i class="fa fa-lock me-1"></i> Bạn đang xem lịch báo giảng của giáo viên khác (Chế độ chỉ xem).
+        </div>
+    }
+</div>
+
 <form asp-action="UpdateQuick" asp-controller="LectureCalendar" method="post" id="form-update">
 
     <input type="hidden" asp-for="Id" />
@@ -275,18 +290,6 @@
                             </div>
                         </div>
                     }
-                </div>
-            }
-            @if (canEdit)
-            {
-                <div class="alert alert-info small mt-3">
-                    <i class="fa fa-info-circle me-1"></i> Để sửa nội dung, vui lòng sử dụng giao diện Máy tính (Desktop).
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-warning small mt-3">
-                    <i class="fa fa-lock me-1"></i> Bạn đang xem lịch báo giảng của giáo viên khác (Chế độ chỉ xem).
                 </div>
             }
         }

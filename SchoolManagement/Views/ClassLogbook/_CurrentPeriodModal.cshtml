@@ -1,0 +1,82 @@
+﻿@model SchoolManagement.Models.LogbookDetailViewModel
+
+<div class="modal fade" id="currentPeriodModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock"></i> Cập nhật: Thứ @Model.DayOfWeek - Tiết @Model.PeriodIndex
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="formCurrentPeriod" onsubmit="submitCurrentPeriod(event)">
+                <div class="modal-body">
+                    @* Các trường ẩn để định danh *@
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="DayOfWeek" />
+                    <input type="hidden" asp-for="PeriodIndex" />
+
+                    @* Vì đây là cập nhật lẻ, cần truyền thêm LogbookId để biết thuộc sổ nào *@
+                    <input type="hidden" name="ClassLogbookId" value="@ViewBag.ClassLogbookId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Môn học</label>
+                        <input asp-for="SubjectName" class="form-control" placeholder="Nhập tên môn..." required />
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Tiết CT</label>
+                            <input asp-for="CurriculumCode" class="form-control text-center" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">HS Nghỉ</label>
+                            <input asp-for="AbsentStudents" class="form-control" placeholder="Tên HS..." />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nội dung / Đầu bài</label>
+                        <textarea asp-for="LessonContent" class="form-control" rows="2" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Điểm & Đánh giá</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text" style="width: 100px;">Học tập</span>
+                            <input asp-for="ScoreLearning" type="number" min="0" max="4" class="form-control text-center" />
+                            <span class="input-group-text">/ 4</span>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text" style="width: 100px;">Kỷ luật</span>
+                            <input asp-for="ScoreDiscipline" type="number" min="0" max="3" class="form-control text-center" />
+                            <span class="input-group-text">/ 3</span>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text" style="width: 100px;">Vệ sinh</span>
+                            <input asp-for="ScoreSanitation" type="number" min="0" max="2" class="form-control text-center" />
+                            <span class="input-group-text">/ 2</span>
+                        </div>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text" style="width: 100px;">Chuyên cần</span>
+                            <input asp-for="ScoreDiligent" type="number" min="0" max="1" class="form-control text-center" />
+                            <span class="input-group-text">/ 1</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nhận xét của GV</label>
+                        <input asp-for="TeacherComment" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu dữ liệu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

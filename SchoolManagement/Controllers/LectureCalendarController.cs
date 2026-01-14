@@ -240,7 +240,14 @@ namespace SchoolManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var lectureCalendar = await _context.LectureCalendars.FindAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var lectureCalendar = await _context.LectureCalendars.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            if (lectureCalendar == null)
+            {
+                TempData.ToastError("Bạn không có quyền xóa lịch báo giảng này.");
+                return RedirectToAction(nameof(Index));
+            }
             if (lectureCalendar != null)
             {
                 _context.LectureCalendars.Remove(lectureCalendar);

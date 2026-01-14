@@ -91,7 +91,7 @@ namespace SchoolManagement.Data.Entities
 
         // --- Xác nhận ---
         [Display(Name = "Giáo viên xác nhận")]
-        public string ConfirmedBy { get; set; } // Lưu ID hoặc Tên giáo viên ký tên
+        public string? ConfirmedBy { get; set; } // Lưu ID hoặc Tên giáo viên ký tên
         public bool IsConfirmed { get; set; } = false;
 
         // Relationship

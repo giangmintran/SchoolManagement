@@ -3,14 +3,12 @@
 @if (TempData["ToastMessage"] != null)
 {
     var toastType = TempData["ToastType"] as string ?? "primary";
-
-    // Cấu hình Icon và Màu sắc dựa trên loại thông báo
+    // Cấu hình Icon và Màu sắc
     string iconClass = "", borderClass = "", textClass = "", title = "";
-
     switch (toastType)
     {
         case "success":
-            iconClass = "fa-solid fa-circle-check"; // Yêu cầu FontAwesome, hoặc thay bằng SVG
+            iconClass = "fa-solid fa-circle-check";
             borderClass = "border-success";
             textClass = "text-success";
             title = "Thành công";
@@ -27,7 +25,7 @@
             textClass = "text-warning";
             title = "Cảnh báo";
             break;
-        default: // primary/info
+        default:
             iconClass = "fa-solid fa-circle-info";
             borderClass = "border-primary";
             textClass = "text-primary";
@@ -39,10 +37,12 @@
         .custom-toast {
             background-color: #fff;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-            border-left: 5px solid; /* Viền màu bên trái */
+            border-left: 5px solid;
+            /* Mặc định desktop: Slide từ phải sang */
             animation: slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
+        /* Animation cho Desktop: Trượt từ phải sang */
         @@keyframes slideInRight {
             from {
                 transform: translateX(100%);
@@ -54,21 +54,56 @@
                 opacity: 1;
             }
         }
+
+        /* Animation cho Mobile: Trượt từ trên xuống */
+        @@keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @@media (max-width: 768px) {
+            .toast-container {
+                /* Canh giữa trên mobile */
+                width: 100%;
+                left: 0;
+                right: 0;
+                top: 10px !important; /* Ghi đè top mặc định */
+                margin-top: 0 !important; /* Bỏ margin cứng 60px nếu cần */
+                padding: 0 15px; /* Khoảng cách 2 bên mép màn hình */
+                display: flex;
+                justify-content: center;
+                pointer-events: none; /* Để click xuyên qua vùng trống */
+            }
+
+            .custom-toast {
+                width: 100%; /* Full chiều rộng container */
+                max-width: 100%;
+                pointer-events: auto; /* Bật lại click cho toast */
+                animation: slideInDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Đổi hướng animation */
+            }
+        }
     </style>
 
+    @* Container chính *@
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 60px;">
-        @* Thêm class borderClass và textClass để tô màu viền và icon *@
         <div id="liveToast" class="toast custom-toast @borderClass align-items-center border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                @* Phần Icon *@
-                <div class="toast-body d-flex align-items-center">
+                <div class="toast-body d-flex align-items-center w-100">
                     <i class="@iconClass @textClass fs-4 me-3"></i>
-                    <div>
+                    <div class="flex-grow-1">
+                        @* Để text tự co giãn *@
                         <strong class="@textClass d-block mb-1">@title</strong>
-                        <span class="text-secondary">@TempData["ToastMessage"]</span>
+                        <span class="text-secondary text-break">@TempData["ToastMessage"]</span> @* text-break để tránh vỡ layout *@
                     </div>
                 </div>
-                @* Nút đóng *@
                 <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
@@ -78,7 +113,6 @@
         document.addEventListener('DOMContentLoaded', function () {
             var toastEl = document.getElementById('liveToast');
             if (toastEl) {
-                // Tùy chỉnh delay: 5000ms = 5 giây
                 var toast = new bootstrap.Toast(toastEl, { delay: 5000 });
                 toast.show();
             }

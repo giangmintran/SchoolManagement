@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -205,7 +206,6 @@ namespace SchoolManagement.Controllers
                             ScoreDiscipline = itemVM.ScoreDiscipline,
                             ScoreSanitation = itemVM.ScoreSanitation,
                             ScoreDiligent = itemVM.ScoreDiligent,
-                            ConfirmedBy = userId ?? string.Empty,
                             IsConfirmed = true
                         };
 
@@ -308,8 +308,6 @@ namespace SchoolManagement.Controllers
             }
             try
             {
-               
-
                 if (logbookDb != null)
                 {
                     // Update Header
@@ -412,6 +410,140 @@ namespace SchoolManagement.Controllers
         {
             // Logic tính tuần hiện tại của bạn
             return 1;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentPeriodModal(int logbookId)
+        {
+            // 1. Xác định thời gian (Giữ nguyên logic cũ của bạn)
+            var now = DateTime.Now;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Map Thứ: C# Sunday=0 -> App T2=2, CN=8 (Tuỳ logic DB của bạn)
+            // Lưu ý: Logic dưới đây giả định T2=2, T3=3... T7=7, CN=1 hoặc 8 tuỳ bạn quy định
+            int currentDay = (int)now.DayOfWeek + 1;
+            if (now.DayOfWeek == DayOfWeek.Sunday) currentDay = 8; // Ví dụ CN là 8
+
+            // Map Tiết học
+            int currentHour = now.Hour;
+            int currentPeriod = 0;
+
+            // Logic khung giờ (Ví dụ)
+            if (currentHour >= 7 && currentHour < 8) currentPeriod = 1;
+            else if (currentHour >= 8 && currentHour < 9) currentPeriod = 2;
+            else if (currentHour >= 9 && currentHour < 10) currentPeriod = 3;
+            else if (currentHour >= 10 && currentHour < 11) currentPeriod = 4;
+            else if (currentHour >= 11 && currentHour < 12) currentPeriod = 5;
+            // ... (Thêm logic chiều nếu cần)
+
+            // Nếu không trong giờ học -> Trả về lỗi 204 (No Content) hoặc 400 để JS xử lý thông báo
+            if (currentPeriod == 0)
+            {
+                return BadRequest($"Bây giờ là {now:HH:mm}, không nằm trong khung giờ học chính khóa.");
+            }
+
+            // 2. Tìm dữ liệu trong DB
+            var logbook = await _context.ClassLogbooks
+                .Include(l => l.LogbookDetails)
+                .FirstOrDefaultAsync(l => l.Id == logbookId);
+
+            if (logbook == null) return NotFound("Không tìm thấy sổ đầu bài.");
+
+            var detailEntity = logbook.LogbookDetails
+                .FirstOrDefault(d => d.DayOfWeek == currentDay && d.PeriodIndex == currentPeriod && d.ConfirmedBy == userId);
+            if (detailEntity == null)
+            {
+                return BadRequest("Bạn không phải giáo viên dạy tiết này.");
+
+            }
+            // 3. Map sang ViewModel
+            var model = new LogbookDetailViewModel
+            {
+                DayOfWeek = currentDay,
+                PeriodIndex = currentPeriod,
+                // Nếu đã có dữ liệu thì load lên, chưa có thì để trống
+                Id = detailEntity?.Id ?? 0,
+                SubjectName = detailEntity?.SubjectName,
+                CurriculumCode = detailEntity?.CurriculumCode,
+                LessonContent = detailEntity?.LessonContent,
+                AbsentStudents = detailEntity?.AbsentStudents,
+                ScoreLearning = detailEntity?.ScoreLearning ?? 0,
+                ScoreDiscipline = detailEntity?.ScoreDiscipline ?? 0,
+                ScoreSanitation = detailEntity?.ScoreSanitation ?? 0,
+                ScoreDiligent = detailEntity?.ScoreDiligent ?? 0,
+                TeacherComment = detailEntity?.TeacherComment
+            };
+
+            // Truyền ID sổ cái để dùng khi lưu
+            ViewBag.ClassLogbookId = logbookId;
+
+            // Trả về Partial View chứa Modal
+            return PartialView("_CurrentPeriodModal", model);
+        }
+
+        // --- THÊM HÀM NÀY: Để lưu dữ liệu từ Modal ---
+        [HttpPost]
+        public async Task<IActionResult> UpdatePeriodDetail(LogbookDetailViewModel model, int ClassLogbookId)
+        {
+            if (ClassLogbookId == 0) return BadRequest("Thiếu ID sổ đầu bài.");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            try
+            {
+                // 1. Lấy sổ cái từ DB
+                var logbook = await _context.ClassLogbooks
+                    .Include(l => l.LogbookDetails)
+                    .FirstOrDefaultAsync(l => l.Id == ClassLogbookId);
+
+                if (logbook == null) return NotFound("Sổ không tồn tại.");
+
+                // 2. Kiểm tra xem tiết này đã có record chưa
+                var existingDetail = logbook.LogbookDetails
+                    .FirstOrDefault(d => d.DayOfWeek == model.DayOfWeek && d.PeriodIndex == model.PeriodIndex && (d.ConfirmedBy == null || d.ConfirmedBy == userId));
+
+                if (existingDetail != null)
+                {
+                    // UPDATE
+                    existingDetail.SubjectName = model.SubjectName;
+                    existingDetail.CurriculumCode = model.CurriculumCode;
+                    existingDetail.LessonContent = model.LessonContent;
+                    existingDetail.AbsentStudents = model.AbsentStudents;
+                    existingDetail.ScoreLearning = model.ScoreLearning;
+                    existingDetail.ScoreDiscipline = model.ScoreDiscipline;
+                    existingDetail.ScoreSanitation = model.ScoreSanitation;
+                    existingDetail.ScoreDiligent = model.ScoreDiligent;
+                    existingDetail.TeacherComment = model.TeacherComment;
+                    existingDetail.ConfirmedBy = userId;
+                    // Cập nhật người sửa cuối nếu cần
+                }
+                else
+                {
+                    // INSERT MỚI
+                    var newDetail = new ClassLogbookDetail
+                    {
+                        ClassLogbookId = ClassLogbookId,
+                        DayOfWeek = model.DayOfWeek,
+                        PeriodIndex = model.PeriodIndex,
+                        SubjectName = model.SubjectName,
+                        CurriculumCode = model.CurriculumCode,
+                        LessonContent = model.LessonContent,
+                        AbsentStudents = model.AbsentStudents,
+                        ScoreLearning = model.ScoreLearning,
+                        ScoreDiscipline = model.ScoreDiscipline,
+                        ScoreSanitation = model.ScoreSanitation,
+                        ScoreDiligent = model.ScoreDiligent,
+                        TeacherComment = model.TeacherComment,
+                        IsConfirmed = true,
+                        ConfirmedBy = userId
+                    };
+                    _context.ClassLogbookDetails.Add(newDetail);
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Cập nhật thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Lỗi khi lưu: " + ex.Message);
+            }
         }
     }
 }
