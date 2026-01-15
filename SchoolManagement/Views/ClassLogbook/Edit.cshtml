@@ -33,6 +33,59 @@
             min-width: 80px; /* Đảm bảo cột không quá bé */
         }
     }
+    @@media (max-width: 767.98px) {
+        /* 1. Cột Nội dung: Tăng từ 140px lên 220px */
+        .sticky-col-content {
+            /* ... các thuộc tính position, z-index giữ nguyên ... */
+            position: -webkit-sticky;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background-color: #fff !important;
+            border-right: 1px solid #dee2e6;
+            /* --- SỬA Ở ĐÂY --- */
+            min-width: 220px; /* Tăng độ rộng */
+            max-width: 220px;
+        }
+        /* 2. Cột HS Nghỉ: Phải dịch sang phải bằng đúng độ rộng cột trước (220px) */
+        .sticky-col-absent {
+            /* ... các thuộc tính position, z-index giữ nguyên ... */
+            position: -webkit-sticky;
+            position: sticky;
+            z-index: 5;
+            background-color: #fff !important;
+            border-right: 2px solid #ffc107;
+            min-width: 80px;
+            max-width: 80px;
+            /* --- SỬA Ở ĐÂY --- */
+            left: 220px; /* Bằng min-width của .sticky-col-content */
+        }
+    }
+    /* Thêm style cho textarea tự mở rộng */
+    textarea.auto-expand {
+        resize: none; /* Không cho kéo giãn thủ công */
+        overflow: hidden; /* Ẩn thanh cuộn */
+        min-height: 31px; /* Chiều cao tối thiểu bằng input bình thường */
+        line-height: 1.5;
+        transition: height 0.2s ease; /* Hiệu ứng mượt */
+    }
+    /* --- CẤU HÌNH MOBILE: CHỈ XEM --- */
+    @@media (max-width: 767.98px) {
+        /* Cho phép tương tác bấm vào để script chạy */
+        .mobile-readonly textarea.auto-expand {
+            pointer-events: auto !important; /* [Ghi đè source: 3] */
+            caret-color: transparent; /* Ẩn con trỏ soạn thảo */
+        }
+            /* Khi bấm vào (focus): Hiện nền trắng nhưng không hiện viền focus xanh/vàng như lúc sửa */
+            .mobile-readonly textarea.auto-expand:focus {
+                background-color: #fff !important;
+                border: 1px solid #dee2e6 !important;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+                z-index: 100;
+                position: relative;
+                outline: none; /* Bỏ viền highlight mặc định */
+            }
+    }
 </style>
 
 <div class="container-fluid mobile-readonly">
@@ -122,7 +175,7 @@
                                 <th style="width: 60px;">KL<br><small>(3đ)</small></th>
                                 <th style="width: 60px;">VS<br><small>(2đ)</small></th>
                                 <th style="width: 60px;">CC<br><small>(1đ)</small></th>
-                                <th style="width: 150px;">Nhận xét GV</th>
+                                <th style="width: 200px;">Nhận xét GV</th>
                             </tr>
                         </thead>
 
@@ -153,12 +206,15 @@
                                                class="form-control form-control-sm text-center border-0 bg-transparent" />
                                     </td>
                                     <td>
-                                        <input asp-for="Details[i].LessonContent"
-                                               class="form-control form-control-sm border-0 bg-transparent" />
+                                        <textarea asp-for="Details[i].LessonContent"
+                                                  rows="1"
+                                                  class="form-control form-control-sm border-0 bg-transparent auto-expand"
+                                                  placeholder="..."></textarea>
                                     </td>
                                     <td>
-                                        <input asp-for="Details[i].AbsentStudents"
-                                               class="form-control form-control-sm border-0 bg-transparent text-danger" />
+                                        <textarea asp-for="Details[i].AbsentStudents"
+                                                  rows="1"
+                                                  class="form-control form-control-sm border-0 bg-transparent text-danger auto-expand"></textarea>
                                     </td>
                                     <td>
                                         <input asp-for="Details[i].ScoreLearning" type="number" min="0" max="4"
@@ -177,8 +233,9 @@
                                                class="form-control form-control-sm text-center score-input border-0 bg-transparent" />
                                     </td>
                                     <td>
-                                        <input asp-for="Details[i].TeacherComment"
-                                               class="form-control form-control-sm border-0 bg-transparent" />
+                                        <textarea asp-for="Details[i].TeacherComment"
+                                                  rows="1"
+                                                  class="form-control form-control-sm border-0 bg-transparent auto-expand"></textarea>
                                     </td>
                                 </tr>
 
@@ -336,5 +393,62 @@
                 toastr.error("Đã xảy ra lỗi kết nối.", "Lỗi mạng");
             });
         }
+
+        $(document).ready(function () {
+            // 1. Khi bấm vào (focus) hoặc đang gõ (input): Mở rộng full nội dung
+            $(document).on('focus input', 'textarea.auto-expand', function () {
+                // Reset chiều cao về auto trước để tính toán chính xác scrollHeight khi xóa bớt text
+                this.style.height = 'auto';
+                // Đặt chiều cao bằng nội dung thực tế
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // 2. Khi bấm ra ngoài (blur): Thu gọn lại thành 1 dòng cho gọn bảng
+            $(document).on('blur', 'textarea.auto-expand', function () {
+                // Nếu muốn giữ nguyên độ rộng khi có nội dung thì bỏ dòng dưới đi
+                // Nhưng để bảng gọn gàng thì nên thu lại:
+                this.style.height = ''; // Trở về mặc định (theo thuộc tính rows="1")
+            });
+        });
+        $(document).ready(function () {
+
+            // 1. Hàm kiểm tra và áp dụng chế độ "Chỉ xem" cho mobile
+            function applyMobileReadonly() {
+                // Kiểm tra độ rộng màn hình (nhỏ hơn 768px là mobile)
+                var isMobile = $(window).width() < 768;
+
+                // Tìm tất cả textarea có class auto-expand
+                $('textarea.auto-expand').each(function() {
+                    if (isMobile) {
+                        // Nếu là mobile: Thêm readonly (Chặn sửa, chặn bàn phím ảo hiện lên)
+                        $(this).attr('readonly', 'readonly');
+                    } else {
+                        // Nếu là PC: Bỏ readonly (Cho phép sửa)
+                        $(this).removeAttr('readonly');
+                    }
+                });
+            }
+
+            // Chạy hàm này khi mới vào trang
+            applyMobileReadonly();
+
+            // Chạy lại hàm này nếu người dùng xoay màn hình hoặc co kéo trình duyệt
+            $(window).resize(function() {
+                applyMobileReadonly();
+            });
+
+            // 2. Logic tự mở rộng chiều cao (Vẫn chạy kể cả khi readonly)
+            $(document).on('focus input', 'textarea.auto-expand', function () {
+                // Reset chiều cao
+                this.style.height = 'auto';
+                // Đặt chiều cao bằng nội dung
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // 3. Logic thu gọn khi bấm ra ngoài
+            $(document).on('blur', 'textarea.auto-expand', function () {
+                this.style.height = ''; // Về mặc định 1 dòng
+            });
+        });
     </script>
 }

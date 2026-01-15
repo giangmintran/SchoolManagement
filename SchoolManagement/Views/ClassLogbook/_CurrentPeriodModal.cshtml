@@ -43,31 +43,47 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold text-primary">Điểm & Đánh giá</label>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text" style="width: 100px;">Học tập</span>
-                            <input asp-for="ScoreLearning" type="number" min="0" max="4" class="form-control text-center" />
-                            <span class="input-group-text">/ 4</span>
-                        </div>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text" style="width: 100px;">Kỷ luật</span>
-                            <input asp-for="ScoreDiscipline" type="number" min="0" max="3" class="form-control text-center" />
-                            <span class="input-group-text">/ 3</span>
-                        </div>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text" style="width: 100px;">Vệ sinh</span>
-                            <input asp-for="ScoreSanitation" type="number" min="0" max="2" class="form-control text-center" />
-                            <span class="input-group-text">/ 2</span>
-                        </div>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text" style="width: 100px;">Chuyên cần</span>
-                            <input asp-for="ScoreDiligent" type="number" min="0" max="1" class="form-control text-center" />
-                            <span class="input-group-text">/ 1</span>
+                        <div class="row g-2">
+                            @* Dòng 1: Học tập & Kỷ luật *@
+                            <div class="col-6">
+                                <div class="input-group">
+                                    @* Giảm width xuống 80px để vừa vặn hơn *@
+                                    <span class="input-group-text justify-content-center px-1" style="width: 80px;">HT</span>
+                                    <input asp-for="ScoreLearning" type="number" min="0" max="4" class="form-control text-center px-1" />
+                                    <span class="input-group-text px-2">/4</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text justify-content-center px-1" style="width: 80px;">KL</span>
+                                    <input asp-for="ScoreDiscipline" type="number" min="0" max="3" class="form-control text-center px-1" />
+                                    <span class="input-group-text px-2">/3</span>
+                                </div>
+                            </div>
+
+                            @* Dòng 2: Vệ sinh & Chuyên cần *@
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text justify-content-center px-1" style="width: 80px;">VS</span>
+                                    <input asp-for="ScoreSanitation" type="number" min="0" max="2" class="form-control text-center px-1" />
+                                    <span class="input-group-text px-2">/2</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    @* Viết tắt Chuyên cần thành C.Cần nếu cần tiết kiệm chỗ, hoặc giữ nguyên *@
+                                    <span class="input-group-text justify-content-center px-1" style="width: 80px;">CC</span>
+                                    <input asp-for="ScoreDiligent" type="number" min="0" max="1" class="form-control text-center px-1" />
+                                    <span class="input-group-text px-2">/1</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nhận xét của GV</label>
-                        <input asp-for="TeacherComment" class="form-control" />
+                        @* Sửa thành thẻ textarea có thẻ đóng và thêm rows để dễ nhập liệu *@
+                        <textarea asp-for="TeacherComment" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

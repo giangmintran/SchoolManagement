@@ -448,35 +448,45 @@ namespace SchoolManagement.Controllers
 
             if (logbook == null) return NotFound("Không tìm thấy sổ đầu bài.");
 
+            // 1. Tìm bản ghi chi tiết trong LogbookDetails
             var detailEntity = logbook.LogbookDetails
-                .FirstOrDefault(d => d.DayOfWeek == currentDay && d.PeriodIndex == currentPeriod && d.ConfirmedBy == userId);
-            if (detailEntity == null)
-            {
-                return BadRequest("Bạn không phải giáo viên dạy tiết này.");
+                .FirstOrDefault(d => d.DayOfWeek == currentDay && d.PeriodIndex == currentPeriod);
 
+            // 2. KIỂM TRA QUYỀN (Logic mới thêm)
+            // Chỉ kiểm tra khi tiết học ĐÃ CÓ dữ liệu (detailEntity != null).
+            // Nếu confirmBy (người đã lưu/ký) khác với userId (người đang sửa) thì chặn lại.
+            if (detailEntity != null && detailEntity.ConfirmedBy != userId)
+            {
+                return BadRequest("Bạn không phải giáo viên dạy tiết này (hoặc tiết này đã được giáo viên khác nhập).");
             }
+
             // 3. Map sang ViewModel
+            // Logic này xử lý được cả 2 trường hợp:
+            // - Nếu detailEntity == null: Id = 0, các trường khác null -> Form thêm mới.
+            // - Nếu detailEntity != null: Load dữ liệu cũ lên -> Form chỉnh sửa.
             var model = new LogbookDetailViewModel
             {
                 DayOfWeek = currentDay,
                 PeriodIndex = currentPeriod,
-                // Nếu đã có dữ liệu thì load lên, chưa có thì để trống
+
+                // Nếu detailEntity null thì Id = 0 (để action POST biết là thêm mới)
                 Id = detailEntity?.Id ?? 0,
+
                 SubjectName = detailEntity?.SubjectName,
                 CurriculumCode = detailEntity?.CurriculumCode,
                 LessonContent = detailEntity?.LessonContent,
                 AbsentStudents = detailEntity?.AbsentStudents,
+
                 ScoreLearning = detailEntity?.ScoreLearning ?? 0,
                 ScoreDiscipline = detailEntity?.ScoreDiscipline ?? 0,
                 ScoreSanitation = detailEntity?.ScoreSanitation ?? 0,
                 ScoreDiligent = detailEntity?.ScoreDiligent ?? 0,
+
                 TeacherComment = detailEntity?.TeacherComment
             };
 
             // Truyền ID sổ cái để dùng khi lưu
             ViewBag.ClassLogbookId = logbookId;
-
-            // Trả về Partial View chứa Modal
             return PartialView("_CurrentPeriodModal", model);
         }
 
