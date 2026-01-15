@@ -1,0 +1,38 @@
+﻿@model SchoolManagement.Data.Entities.ProfessionalActivity
+
+@{
+    ViewData["Title"] = "Xóa";
+}
+
+<div class="card shadow-sm border-danger">
+    <div class="card-header bg-danger text-white">
+        <h4 class="mb-0">Xác nhận xóa</h4>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title text-danger">Bạn có chắc chắn muốn xóa bản ghi này?</h5>
+        <p class="card-text">Hành động này không thể hoàn tác.</p>
+
+        <hr />
+
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.SequenceNumber)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.SequenceNumber)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Date)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Date)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Content)</dt>
+            <dd class="col-sm-9">
+                <pre style="white-space: pre-wrap; font-family: inherit;">@Html.DisplayFor(model => model.Content)</pre>
+            </dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="mt-4">
+                <a asp-action="Index" class="btn btn-secondary me-2">Hủy bỏ</a>
+                <input type="submit" value="Xác nhận xóa" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
+</div>

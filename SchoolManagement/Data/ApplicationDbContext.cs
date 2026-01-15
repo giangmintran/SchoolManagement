@@ -16,6 +16,7 @@ namespace SchoolManagement.Data
         public DbSet<LectureCalendar> LectureCalendars { get; set; }
         public DbSet<ClassLogbook> ClassLogbooks { get; set; }
         public DbSet<ClassLogbookDetail> ClassLogbookDetails { get; set; }
+        public DbSet<ProfessionalActivity> ProfessionalActivities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -24,6 +25,7 @@ namespace SchoolManagement.Data
             builder.ApplyConfiguration(new LectureCalendarDetailConfiguration());
             builder.ApplyConfiguration(new ClassLogbookConfiguration());
             builder.ApplyConfiguration(new ClassLogbookDetailConfiguration());
+            builder.ApplyConfiguration(new ProfessionalActivityConfiguration());
         }
 
         public override int SaveChanges()

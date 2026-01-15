@@ -1,0 +1,80 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model SchoolManagement.Data.Entities.ProfessionalActivity
+
+@{
+    ViewData["Title"] = "Chỉnh sửa";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0">Chỉnh sửa Sinh hoạt chuyên môn</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="SequenceNumber" class="control-label fw-bold"></label>
+                        <input asp-for="SequenceNumber" class="form-control" />
+                        <span asp-validation-for="SequenceNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Date" class="control-label fw-bold"></label>
+                        <input asp-for="Date" class="form-control" />
+                        <span asp-validation-for="Date" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Attendance" class="control-label fw-bold"></label>
+                        <input asp-for="Attendance" class="form-control" />
+                        <span asp-validation-for="Attendance" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="form-group mb-3">
+                        <label asp-for="Implementation" class="control-label fw-bold"></label>
+                        <textarea asp-for="Implementation" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Implementation" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Content" class="control-label fw-bold"></label>
+                        <textarea asp-for="Content" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Proposal" class="control-label fw-bold"></label>
+                        <textarea asp-for="Proposal" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Proposal" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Result" class="control-label fw-bold"></label>
+                        <textarea asp-for="Result" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Result" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-3 text-end">
+                <a asp-action="Index" class="btn btn-secondary me-2">Hủy bỏ</a>
+                <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

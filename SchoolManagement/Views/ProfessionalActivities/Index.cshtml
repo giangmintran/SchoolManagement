@@ -1,0 +1,356 @@
+﻿@using SchoolManagement.Data.Entities
+@model SchoolManagement.Common.PagedResult<ProfessionalActivity>
+@{
+    ViewData["Title"] = "Sinh hoạt chuyên môn";
+}
+
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --secondary-color: #e9ecef;
+        --success-soft: #d1e7dd;
+        --warning-soft: #fff3cd;
+        --danger-soft: #f8d7da;
+        --info-soft: #cff4fc;
+    }
+
+    /* Animation */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    /* Card styling */
+    .card-modern {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+
+    /* Table styling */
+    .table-modern thead th {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #edf2f9;
+        padding: 1rem;
+    }
+
+    .table-modern tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #edf2f9;
+        color: #344767;
+        font-size: 0.9rem;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: #fcfcfc;
+    }
+
+    /* Avatar styling */
+    .avatar-circle {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        margin-right: 12px;
+        box-shadow: 0 4px 6px rgba(67, 97, 238, 0.3);
+    }
+
+    /* Soft Action Buttons */
+    .btn-icon-soft {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: none;
+        transition: all 0.2s;
+        margin: 0 4px;
+    }
+
+    .btn-edit-soft {
+        background-color: var(--warning-soft);
+        color: #856404;
+    }
+
+    .btn-detail-soft {
+        background-color: var(--info-soft);
+        color: #0c5460;
+    }
+
+    .btn-delete-soft {
+        background-color: var(--danger-soft);
+        color: #721c24;
+    }
+
+    .btn-icon-soft:hover {
+        transform: translateY(-2px);
+        filter: brightness(0.95);
+    }
+
+    /* Badge Sequence */
+    .badge-sequence {
+        background-color: #e2e5ed;
+        color: #4a5568;
+        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 8px;
+    }
+
+    /* Content Clamp */
+    .content-clamp {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #6c757d;
+    }
+
+    /* Mobile Card Enhancements */
+    .mobile-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        margin-bottom: 1rem;
+        background: #fff;
+        border-left: 5px solid var(--primary-color);
+    }
+    /* --- CẤU HÌNH CỘT THAO TÁC (Cột cuối cùng) --- */
+    /* --- 1. Ép bảng mở rộng chiều ngang (Quan trọng nhất) --- */
+    .table-modern {
+        /* Ngăn không cho chữ xuống dòng, ép bảng phải dài ra và hiện thanh cuộn */
+        white-space: nowrap;
+        width: 100%;
+    }
+
+        /* --- 2. Cố định (Freeze) cột cuối cùng --- */
+        .table-modern th:last-child,
+        .table-modern td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 10; /* Đảm bảo nằm trên các cột khác */
+            /* Fix cứng kích thước */
+            width: 110px;
+            min-width: 110px;
+            max-width: 110px;
+            /* Đường viền ngăn cách */
+            border-left: 1px solid #dee2e6;
+            box-shadow: -5px 0 10px -5px rgba(0,0,0,0.1); /* Tạo bóng đổ nhẹ bên trái */
+        }
+
+        /* --- 3. Xử lý màu nền để che nội dung trôi bên dưới --- */
+        /* Header */
+        .table-modern thead th:last-child {
+            background-color: #f8f9fa; /* Màu xám nhạt giống header hiện tại */
+            z-index: 20; /* Header phải đè lên body */
+        }
+
+        /* Body (Dữ liệu) */
+        .table-modern tbody td:last-child {
+            background-color: #fff;
+        }
+
+        /* Khi Hover dòng */
+        .table-modern tbody tr:hover td:last-child {
+            background-color: #fcfcfc; /* Màu hover giống dòng 11 trong code cũ */
+        }
+</style>
+
+<div class="container-fluid px-4 animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4 mb-4 gap-3">
+        <div>
+            <h1 class="h3 mb-1 fw-bold text-dark">
+                <span class="text-primary me-2"><i class="fas fa-book-reader"></i></span>
+                Sổ Sinh Hoạt Chuyên Môn
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 bg-transparent p-0">
+                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home" class="text-decoration-none text-muted small">Trang chủ</a></li>
+                    <li class="breadcrumb-item active text-primary fw-bold small">Danh sách</li>
+                </ol>
+            </nav>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4 py-2 fw-medium">
+            <i class="fas fa-plus fa-sm text-white-50 me-2"></i>Tạo mới
+        </a>
+    </div>
+
+    <div class="card card-modern mb-4 d-none d-md-block">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-modern table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 50px;">STT</th>
+                            <th>Giáo viên</th>
+                            <th class="text-center">Ngày tạo</th>
+                            <th>Nội dung</th>
+                            <th>Kiểm diện</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Items != null && Model.Items.Any())
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                // Lấy chữ cái đầu của tên để làm Avatar
+                                string firstLetter = item.AppUser?.UserName?.Substring(0, 1).ToUpper() ?? "U";
+
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge-sequence">#@item.SequenceNumber</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle">@firstLetter</div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@(item.AppUser?.UserName ?? "N/A")</div>
+                                                <small class="text-muted">Giáo viên</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="fw-bold text-dark">@item.Date.ToString("dd/MM")</span>
+                                            <small class="text-muted">@item.Date.ToString("yyyy")</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="content-clamp" title="@item.Content">
+                                            @(string.IsNullOrEmpty(item.Content) ? "Không có nội dung" : item.Content)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="content-clamp small" title="@item.Attendance">
+                                            @(string.IsNullOrEmpty(item.Attendance) ? "-" : item.Attendance)
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon-soft btn-edit-soft" data-bs-toggle="tooltip" title="Sửa">
+                                            <i class="fas fa-pen fa-xs"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn-icon-soft btn-delete-soft" data-bs-toggle="tooltip" title="Xóa">
+                                            <i class="fas fa-trash fa-xs"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center justify-content-center">
+                                        <div class="bg-light rounded-circle p-4 mb-3">
+                                            <i class="fas fa-clipboard-list fa-3x text-secondary opacity-50"></i>
+                                        </div>
+                                        <h5 class="text-secondary fw-bold">Chưa có dữ liệu</h5>
+                                        <p class="text-muted mb-3">Hiện chưa có biên bản sinh hoạt chuyên môn nào.</p>
+                                        <a asp-action="Create" class="btn btn-sm btn-primary rounded-pill px-4">
+                                            Tạo bản ghi đầu tiên
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-block d-md-none">
+        @if (Model.Items != null && Model.Items.Any())
+        {
+            @foreach (var item in Model.Items)
+            {
+                <div class="mobile-card p-3 position-relative">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-2">#@item.SequenceNumber</span>
+                            <span class="fw-bold text-dark">@item.Date.ToString("dd/MM/yyyy")</span>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                <li><a class="dropdown-item py-2" asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-pen text-warning me-2"></i>Chỉnh sửa</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger" asp-action="Delete" asp-route-id="@item.Id"><i class="fas fa-trash me-2"></i>Xóa bỏ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-circle" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                            @(item.AppUser?.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                        </div>
+                        <span class="fw-medium ms-2">@(item.AppUser?.UserName ?? "N/A")</span>
+                    </div>
+
+                    <div class="bg-light p-2 rounded mb-2">
+                        <p class="mb-0 text-muted content-clamp small" style="-webkit-line-clamp: 3;">
+                            <i class="fas fa-align-justify"></i>
+                            @(string.IsNullOrEmpty(item.Content) ? "Không có nội dung" : item.Content)
+                        </p>
+                    </div>
+
+                    <small class="text-muted d-block">
+                        <i class="fas fa-indent"></i>
+                        @(string.IsNullOrEmpty(item.Attendance) ? "(Trống)" : item.Attendance)
+                    </small>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-gray-300 mb-3"></i>
+                <p class="text-muted">Không có dữ liệu hiển thị trên thiết bị di động.</p>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        <partial name="_Pagination" model="Model" />
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Khởi tạo tooltip
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

@@ -1,4 +1,6 @@
-﻿namespace SchoolManagement.Common
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace SchoolManagement.Common
 {
     // Ví dụ class chứa dữ liệu phân trang
     public class PagedResult<T>
@@ -9,6 +11,5 @@
         public int TotalRecords { get; set; } // Tổng số trang
         public bool HasPreviousPage => PageIndex > 1;
         public bool HasNextPage => PageIndex < TotalPages;
-
     }
 }
