@@ -222,18 +222,8 @@ namespace SchoolManagement.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        private async Task<LogbookUpsertViewModel> GetEditViewModel(int id, ClassLogbook logbook)
         {
-            // 1. Lấy dữ liệu Header và Details từ DB
-            var logbook = await _context.ClassLogbooks
-                .Include(l => l.LogbookDetails)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (logbook == null) return NotFound();
-
-            // 2. Khởi tạo ViewModel
             var viewModel = new LogbookUpsertViewModel
             {
                 Id = logbook.Id,
@@ -290,8 +280,20 @@ namespace SchoolManagement.Controllers
                     }
                 }
             }
+            return viewModel;
+        }
 
-            return View(viewModel);
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            // 1. Lấy dữ liệu Header và Details từ DB
+            var logbook = await _context.ClassLogbooks
+                .Include(l => l.LogbookDetails)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (logbook == null) return NotFound();
+            return View(await GetEditViewModel(id, logbook));
         }
 
         [HttpPost]
@@ -328,8 +330,31 @@ namespace SchoolManagement.Controllers
                             var itemDb = logbookDb.LogbookDetails.FirstOrDefault(d => d.Id == itemModel.Id);
                             if (itemDb != null)
                             {
+                                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                                 if (hasContent)
                                 {
+                                    bool hasChanges =
+                                        itemDb.SubjectName != itemModel.SubjectName ||
+                                        itemDb.CurriculumCode != itemModel.CurriculumCode ||
+                                        itemDb.LessonContent != itemModel.LessonContent ||
+                                        itemDb.AbsentStudents != itemModel.AbsentStudents ||
+                                        itemDb.ScoreLearning != itemModel.ScoreLearning ||
+                                        itemDb.ScoreDiscipline != itemModel.ScoreDiscipline ||
+                                        itemDb.ScoreSanitation != itemModel.ScoreSanitation ||
+                                        itemDb.ScoreDiligent != itemModel.ScoreDiligent ||
+                                        itemDb.TeacherComment != itemModel.TeacherComment;
+
+                                    // 2. Nếu CÓ thay đổi thì mới check quyền
+                                    if (hasChanges)
+                                    {
+                                        // Logic: Đã được xác nhận (ConfirmedBy có data) VÀ người xác nhận KHÁC userId hiện tại
+                                        if (!string.IsNullOrEmpty(itemDb.ConfirmedBy) && itemDb.ConfirmedBy != userId)
+                                        {
+                                            TempData.ToastWarning($"Bạn không có quyền chỉnh sửa nội dung môn {itemDb.SubjectName}. (Thứ {itemDb.DayOfWeek}, tiết {itemDb.PeriodIndex})");
+                                            ModelState.Clear();
+                                            return View(await GetEditViewModel(logbookDb.Id, logbookDb));
+                                        }
+                                    }
                                     // A. Nếu còn dữ liệu -> Update
                                     itemDb.SubjectName = itemModel.SubjectName;
                                     itemDb.CurriculumCode = itemModel.CurriculumCode;

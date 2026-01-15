@@ -64,6 +64,7 @@ namespace SchoolManagement.Controllers
                 return NotFound();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             // 1. Lấy dữ liệu từ Database (Entity)
             var lectureCalendar = await _context.LectureCalendars
                 .Include(l => l.Details)
@@ -83,6 +84,7 @@ namespace SchoolManagement.Controllers
                 StartDate = lectureCalendar.StartDate,
                 EndDate = lectureCalendar.EndDate,
                 CreatedDate = lectureCalendar.CreatedDate,
+                UserId = userId,
                 // Map danh sách chi tiết và sắp xếp luôn ở đây cho gọn
                 Details = lectureCalendar.Details.Select(d => new LectureCalendarDetailReadVM
                 {
