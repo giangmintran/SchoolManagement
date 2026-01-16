@@ -89,31 +89,51 @@ namespace SchoolManagement.Controllers
         }
 
         // GET: Tạo sổ đầu bài mới
+        // Thay thế toàn bộ method [HttpGet] Create cũ bằng đoạn code sau:
+
         [HttpGet]
-        public IActionResult Create(string className, int? weekNumber)
+        public async Task<IActionResult> Create(string className, int? weekNumber)
         {
-            var classNameQuery = Request.Query["ClassName"].ToString();
-            if (Request.Query.ContainsKey("ClassName") && string.IsNullOrWhiteSpace(classNameQuery) && string.IsNullOrWhiteSpace(className))
+            // 1. Lấy danh sách lớp (cho Dropdown)
+            var availableClasses = await GetClassSelectList();
+
+            // 2. KIỂM TRA: Có phải người dùng đang bấm nút "Lập Sổ" (Submit form) không?
+            // Dấu hiệu: URL có chứa tham số query string (dù rỗng)
+            bool isSubmit = Request.Query.ContainsKey("ClassName") || Request.Query.ContainsKey("WeekNumber");
+
+            // --- XỬ LÝ LỖI ---
+            // Nếu là hành động Submit nhưng thiếu dữ liệu
+            if (isSubmit && (string.IsNullOrEmpty(className) || !weekNumber.HasValue))
             {
-                TempData.ToastWarning("Vui lòng chọn lớp");
+                TempData.ToastWarning("Vui lòng chọn Lớp và nhập Tuần học!");
+
+                // QUAN TRỌNG: Redirect về lại trang Create gốc (không tham số) 
+                // Lệnh này sẽ xóa sạch Query String trên URL (?ClassName=...). 
+                // Nhờ vậy, khi User F5 (Reload) ở bước sau sẽ không bị hiện lại thông báo lỗi.
+                return RedirectToAction(nameof(Create));
             }
 
-            var weekQuery = Request.Query["WeekNumber"].ToString();
-            if (Request.Query.ContainsKey("WeekNumber") && string.IsNullOrWhiteSpace(weekQuery) && weekNumber is null)
+            // --- TRƯỜNG HỢP MỚI VÀO TRANG HOẶC SAU KHI REDIRECT ---
+            // Nếu thiếu dữ liệu -> Trả về View rỗng (chỉ hiện bộ lọc)
+            if (string.IsNullOrEmpty(className) || !weekNumber.HasValue)
             {
-                TempData.ToastWarning("Vui lòng nhập số tuần");
+                return View(new LogbookUpsertViewModel
+                {
+                    AvailableClasses = availableClasses,
+                    ClassName = className, // Giữ lại giá trị (nếu có)
+                    WeekNumber = weekNumber,
+                    Details = new List<LogbookDetailViewModel>() // List rỗng -> View sẽ tự ẩn form nhập liệu
+                });
             }
 
+            // --- TRƯỜNG HỢP HỢP LỆ: TẠO KHUNG NHẬP LIỆU ---
+            // (Logic cũ giữ nguyên từ đây)
             var now = DateTime.Now;
             var academicYear = GetAcademicYear(now);
 
-            // DayOfWeek: Sunday = 0, Monday = 1, ..., Saturday = 6
-            int diffToMonday = now.DayOfWeek == DayOfWeek.Sunday
-                ? -6
-                : DayOfWeek.Monday - now.DayOfWeek;
-
+            int diffToMonday = now.DayOfWeek == DayOfWeek.Sunday ? -6 : DayOfWeek.Monday - now.DayOfWeek;
             var fromDate = now.AddDays(diffToMonday);
-            var toDate = fromDate.AddDays(5); // Thứ 7
+            var toDate = fromDate.AddDays(5);
 
             var model = new LogbookUpsertViewModel
             {
@@ -123,29 +143,18 @@ namespace SchoolManagement.Controllers
                 FromDate = fromDate,
                 ToDate = toDate,
                 Details = new List<LogbookDetailViewModel>(),
-                AvailableClasses = [.. Enumerable
-                    .Range(6, 4) // 6,7,8,9
-                    .SelectMany(grade =>
-                        new[] { "A", "B", "C", "D" }
-                            .Select(section => new SelectListItem
-                            {
-                                Value = $"{grade}{section}",
-                                Text = $"{grade}{section}"
-                            })
-                    )]
+                AvailableClasses = availableClasses
             };
 
-            // LOGIC QUAN TRỌNG: Khởi tạo sẵn khung cho 6 ngày (Thứ 2 -> Thứ 7) x 5 tiết
             for (DateTime date = fromDate; date <= toDate; date = date.AddDays(1))
             {
                 for (int period = 1; period <= 5; period++)
                 {
                     model.Details.Add(new LogbookDetailViewModel
                     {
-                        DayOfWeek = (int) date.DayOfWeek + 1,
+                        DayOfWeek = (int)date.DayOfWeek + 1,
                         PeriodIndex = period,
                         Date = date
-                        // Mặc định ngày học dựa trên FromDate (bạn có thể tính toán logic ngày ở đây)
                     });
                 }
             }

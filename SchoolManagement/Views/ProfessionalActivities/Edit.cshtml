@@ -1,77 +1,139 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@using SchoolManagement.Models.ViewModels
 @model SchoolManagement.Data.Entities.ProfessionalActivity
 
 @{
-    ViewData["Title"] = "Chỉnh sửa";
+    ViewData["Title"] = "Sinh hoạt chuyên môn";
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Sổ Sinh Hoạt Chuyên Môn",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            // Không cần thêm Trang chủ vì đã hardcode trong partial
+            new BreadcrumbItem { Title = "Danh sách", IsActive = false, Url = "/ProfessionalActivities" },
+            new BreadcrumbItem { Title = "Chỉnh sửa", IsActive = true }
+        }
+    };
 }
 
-<div class="card shadow-sm">
-    <div class="card-header bg-warning text-dark">
-        <h4 class="mb-0">Chỉnh sửa Sinh hoạt chuyên môn</h4>
-    </div>
-    <div class="card-body">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group mb-3">
-                        <label asp-for="SequenceNumber" class="control-label fw-bold"></label>
-                        <input asp-for="SequenceNumber" class="form-control" />
-                        <span asp-validation-for="SequenceNumber" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Date" class="control-label fw-bold"></label>
-                        <input asp-for="Date" class="form-control" />
-                        <span asp-validation-for="Date" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Attendance" class="control-label fw-bold"></label>
-                        <input asp-for="Attendance" class="form-control" />
-                        <span asp-validation-for="Attendance" class="text-danger"></span>
-                    </div>
+<div class="container-fluid animate-fade-in">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-md-center">
+                <div>
+                    <partial name="_PageHeader" model="pageHeader" />
                 </div>
-
-                <div class="col-md-8">
-                    <div class="form-group mb-3">
-                        <label asp-for="Implementation" class="control-label fw-bold"></label>
-                        <textarea asp-for="Implementation" class="form-control" rows="2"></textarea>
-                        <span asp-validation-for="Implementation" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Content" class="control-label fw-bold"></label>
-                        <textarea asp-for="Content" class="form-control" rows="4"></textarea>
-                        <span asp-validation-for="Content" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Proposal" class="control-label fw-bold"></label>
-                        <textarea asp-for="Proposal" class="form-control" rows="2"></textarea>
-                        <span asp-validation-for="Proposal" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Result" class="control-label fw-bold"></label>
-                        <textarea asp-for="Result" class="form-control" rows="2"></textarea>
-                        <span asp-validation-for="Result" class="text-danger"></span>
-                    </div>
-                </div>
+                
             </div>
 
-            <div class="form-group mt-3 text-end">
-                <a asp-action="Index" class="btn btn-secondary me-2">Hủy bỏ</a>
-                <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-4">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row g-4">
+                            <div class="col-lg-4 col-md-5 border-end-lg">
+                                <div class="bg-light p-3 rounded-3 mb-3">
+                                    <h6 class="fw-bold text-uppercase text-muted small mb-3">Thông tin chung</h6>
+
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="SequenceNumber" class="form-control fw-bold" type="number" min="1" placeholder="Số thứ tự" />
+                                        <label asp-for="SequenceNumber"><i class="bi bi-sort-numeric-down me-1"></i> Số thứ tự</label>
+                                        <span asp-validation-for="SequenceNumber" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="Date" class="form-control" type="date" placeholder="Ngày tháng" />
+                                        <label asp-for="Date"><i class="bi bi-calendar-event me-1"></i> Thời gian</label>
+                                        <span asp-validation-for="Date" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input asp-for="Attendance" class="form-control" placeholder="Thành phần tham dự" />
+                                        <label asp-for="Attendance"><i class="bi bi-people me-1"></i> Thành phần tham dự</label>
+                                        <span asp-validation-for="Attendance" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8 col-md-7">
+                                <h6 class="fw-bold text-uppercase text-muted small mb-3">Nội dung chi tiết</h6>
+
+                                <div class="form-group mb-4">
+                                    <label asp-for="Implementation" class="form-label fw-bold">
+                                        <i class="bi bi-gear-wide-connected me-1 text-primary"></i> Quá trình thực hiện
+                                    </label>
+                                    <textarea asp-for="Implementation" class="form-control shadow-sm" rows="3"></textarea>
+                                    <span asp-validation-for="Implementation" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label asp-for="Content" class="form-label fw-bold">
+                                        <i class="bi bi-file-text me-1 text-primary"></i> Nội dung sinh hoạt
+                                    </label>
+                                    <textarea asp-for="Content" class="form-control shadow-sm" rows="6"></textarea>
+                                    <span asp-validation-for="Content" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Proposal" class="form-label fw-bold">
+                                                <i class="bi bi-lightbulb me-1 text-warning"></i> Đề xuất / Kiến nghị
+                                            </label>
+                                            <textarea asp-for="Proposal" class="form-control shadow-sm" rows="4"></textarea>
+                                            <span asp-validation-for="Proposal" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Result" class="form-label fw-bold">
+                                                <i class="bi bi-check-circle me-1 text-success"></i> Kết quả
+                                            </label>
+                                            <textarea asp-for="Result" class="form-control shadow-sm" rows="4"></textarea>
+                                            <span asp-validation-for="Result" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-light border">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">
+                                <i class="bi bi-check-circle me-1"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
+
+<style>
+    /* Custom CSS để đồng bộ với trang Create */
+    .form-control:focus {
+        border-color: #ffc107; /* Màu vàng cho Edit */
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    @@media (min-width: 992px) {
+        .border-end-lg {
+            border-right: 1px solid #dee2e6;
+        }
+    }
+</style>
 
 @section Scripts {
     @{

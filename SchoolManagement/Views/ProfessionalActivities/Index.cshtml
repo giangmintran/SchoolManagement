@@ -1,9 +1,20 @@
 ﻿@using SchoolManagement.Data.Entities
+@using SchoolManagement.Models.ViewModels
 @model SchoolManagement.Common.PagedResult<ProfessionalActivity>
 @{
     ViewData["Title"] = "Sinh hoạt chuyên môn";
-}
 
+    // Cấu hình dữ liệu cho Header
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Sổ Sinh Hoạt Chuyên Môn",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            // Không cần thêm Trang chủ vì đã hardcode trong partial
+            new BreadcrumbItem { Title = "Danh sách", IsActive = true }
+        }
+    };
+}
 <style>
     :root {
         --primary-color: #4361ee;
@@ -181,22 +192,13 @@
         }
 </style>
 
-<div class="container-fluid px-4 animate-fade-in">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4 mb-4 gap-3">
+<div class="container-fluid animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
-            <h1 class="h3 mb-1 fw-bold text-dark">
-                <span class="text-primary me-2"><i class="fas fa-book-reader"></i></span>
-                Sổ Sinh Hoạt Chuyên Môn
-            </h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 bg-transparent p-0">
-                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home" class="text-decoration-none text-muted small">Trang chủ</a></li>
-                    <li class="breadcrumb-item active text-primary fw-bold small">Danh sách</li>
-                </ol>
-            </nav>
+            <partial name="_PageHeader" model="pageHeader" />
         </div>
 
-        <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4 py-2 fw-medium">
+        <a asp-action="Create" class="btn btn-primary shadow-sm px-4 py-2 fw-medium">
             <i class="fas fa-plus fa-sm text-white-50 me-2"></i>Tạo mới
         </a>
     </div>
@@ -291,43 +293,40 @@
         {
             @foreach (var item in Model.Items)
             {
-                <div class="mobile-card p-3 position-relative">
+                <div class="mobile-card p-3 position-relative shadow-sm border rounded mb-3">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="d-flex align-items-center">
                             <span class="badge bg-primary rounded-pill me-2">#@item.SequenceNumber</span>
                             <span class="fw-bold text-dark">@item.Date.ToString("dd/MM/yyyy")</span>
                         </div>
 
-                        <div class="dropdown">
-                            <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
-                                <li><a class="dropdown-item py-2" asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-pen text-warning me-2"></i>Chỉnh sửa</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" asp-action="Delete" asp-route-id="@item.Id"><i class="fas fa-trash me-2"></i>Xóa bỏ</a></li>
-                            </ul>
+                        <a asp-action="Delete" asp-route-id="@item.Id"
+                           class="text-danger p-2 position-relative"
+                           style="z-index: 2;">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="text-decoration-none text-reset stretched-link">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-circle" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                @(item.AppUser?.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                            </div>
+                            <span class="fw-medium ms-2">@(item.AppUser?.UserName ?? "N/A")</span>
                         </div>
-                    </div>
 
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="avatar-circle" style="width: 30px; height: 30px; font-size: 0.75rem;">
-                            @(item.AppUser?.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                        <div class="bg-light p-2 rounded mb-2">
+                            <p class="mb-0 text-muted content-clamp small" style="-webkit-line-clamp: 3;">
+                                <i class="fas fa-align-justify me-1"></i>
+                                @(string.IsNullOrEmpty(item.Content) ? "Không có nội dung" : item.Content)
+                            </p>
                         </div>
-                        <span class="fw-medium ms-2">@(item.AppUser?.UserName ?? "N/A")</span>
-                    </div>
 
-                    <div class="bg-light p-2 rounded mb-2">
-                        <p class="mb-0 text-muted content-clamp small" style="-webkit-line-clamp: 3;">
-                            <i class="fas fa-align-justify"></i>
-                            @(string.IsNullOrEmpty(item.Content) ? "Không có nội dung" : item.Content)
-                        </p>
-                    </div>
-
-                    <small class="text-muted d-block">
-                        <i class="fas fa-indent"></i>
-                        @(string.IsNullOrEmpty(item.Attendance) ? "(Trống)" : item.Attendance)
-                    </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-indent me-1"></i>
+                            @(string.IsNullOrEmpty(item.Attendance) ? "(Trống)" : item.Attendance)
+                        </small>
+                    </a>
                 </div>
             }
         }

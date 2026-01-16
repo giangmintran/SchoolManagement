@@ -1,0 +1,75 @@
+﻿@model SchoolManagement.Models.ViewModels.PageHeaderViewModel
+
+@* Đảm bảo bạn đã nhúng Bootstrap Icons trong _Layout.cshtml *@
+@* <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"> *@
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4 mb-4 gap-3">
+
+    <div>
+        <div class="mb-2">
+            <h1 class="h3 text-primary fw-bold border-start border-4 border-primary ps-3 mb-0">
+                @Model.Title
+            </h1>
+        </div>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 px-3 py-2 bg-body-tertiary rounded-pill shadow-sm d-inline-flex align-items-center">
+
+                <li class="breadcrumb-item">
+                    <a href="/" class="text-decoration-none text-secondary d-flex align-items-center small transition-link">
+                        <i class="bi bi-house-door-fill me-1"></i> Trang chủ
+                    </a>
+                </li>
+
+                @if (Model.Breadcrumbs != null)
+                {
+                    @foreach (var item in Model.Breadcrumbs)
+                    {
+                        if (item.IsActive)
+                        {
+                            <li class="breadcrumb-item active text-primary fw-bold small d-flex align-items-center" aria-current="page">
+                                @item.Title
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="breadcrumb-item">
+                                <a href="@item.Url" class="text-decoration-none text-secondary small transition-link">
+                                    @item.Title
+                                </a>
+                            </li>
+                        }
+                    }
+                }
+            </ol>
+        </nav>
+    </div>
+
+    <div>
+        @* Bạn có thể render các nút Action tại đây nếu ViewModel có hỗ trợ *@
+    </div>
+</div>
+
+<style>
+    /* CSS nhỏ để đổi dấu gạch chéo (/) thành dấu mũi tên (>) cho hiện đại hơn */
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: var(--bs-breadcrumb-divider, ">") !important; /* Đổi thành dấu > */
+        font-size: 0.8rem;
+        color: #adb5bd;
+    }
+
+    /* Hiệu ứng hover cho link */
+    .transition-link {
+        transition: color 0.2s ease;
+    }
+
+        .transition-link:hover {
+            color: var(--bs-primary) !important; /* Đổi màu khi hover */
+            text-decoration: underline !important;
+        }
+
+    /* Màu nền nhẹ cho breadcrumb (tương thích dark mode nếu dùng bs-tertiary) */
+    .bg-body-tertiary {
+        background-color: #f8f9fa !important;
+    }
+</style>

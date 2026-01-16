@@ -1,10 +1,22 @@
-﻿@model SchoolManagement.Models.LogbookUpsertViewModel
+﻿@using SchoolManagement.Models.ViewModels
+@model SchoolManagement.Models.LogbookUpsertViewModel
 
 @{
     ViewData["Title"] = "Cập nhật Sổ Đầu Bài";
+
+    // Cấu hình Header
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = $"Cập nhật Sổ đầu bài - Lớp {Model.ClassName}",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") ?? string.Empty },
+            new BreadcrumbItem { Title = "Chỉnh sửa", IsActive = true }
+        }
+    };
 }
 
-@* --- 1. THÊM CSS ĐỂ XỬ LÝ GIAO DIỆN MOBILE --- *@
+@* --- 1. THÊM CSS ĐỂ XỬ LÝ GIAO DIỆN MOBILE (GIỮ NGUYÊN) --- *@
 <style>
     /* Áp dụng cho màn hình nhỏ hơn 768px (Mobile) */
     @@media (max-width: 767.98px) {
@@ -18,7 +30,7 @@
             box-shadow: none !important; /* Bỏ bóng */
             color: #212529 !important; /* Màu chữ đen */
             resize: none; /* Không cho kéo giãn textarea */
-            -webkit-appearance: none; /* Ẩn style mặc định của browser (ví dụ mũi tên select) */
+            -webkit-appearance: none; /* Ẩn style mặc định của browser */
             -moz-appearance: none;
             padding-left: 0;
             padding-right: 0;
@@ -33,23 +45,21 @@
             min-width: 80px; /* Đảm bảo cột không quá bé */
         }
     }
+
     @@media (max-width: 767.98px) {
         /* 1. Cột Nội dung: Tăng từ 140px lên 220px */
         .sticky-col-content {
-            /* ... các thuộc tính position, z-index giữ nguyên ... */
             position: -webkit-sticky;
             position: sticky;
             left: 0;
             z-index: 5;
             background-color: #fff !important;
             border-right: 1px solid #dee2e6;
-            /* --- SỬA Ở ĐÂY --- */
-            min-width: 220px; /* Tăng độ rộng */
+            min-width: 220px;
             max-width: 220px;
         }
         /* 2. Cột HS Nghỉ: Phải dịch sang phải bằng đúng độ rộng cột trước (220px) */
         .sticky-col-absent {
-            /* ... các thuộc tính position, z-index giữ nguyên ... */
             position: -webkit-sticky;
             position: sticky;
             z-index: 5;
@@ -57,24 +67,23 @@
             border-right: 2px solid #ffc107;
             min-width: 80px;
             max-width: 80px;
-            /* --- SỬA Ở ĐÂY --- */
-            left: 220px; /* Bằng min-width của .sticky-col-content */
+            left: 220px;
         }
     }
     /* Thêm style cho textarea tự mở rộng */
     textarea.auto-expand {
-        resize: none; /* Không cho kéo giãn thủ công */
-        overflow: hidden; /* Ẩn thanh cuộn */
-        min-height: 31px; /* Chiều cao tối thiểu bằng input bình thường */
+        resize: none;
+        overflow: hidden;
+        min-height: 31px;
         line-height: 1.5;
-        transition: height 0.2s ease; /* Hiệu ứng mượt */
+        transition: height 0.2s ease;
     }
     /* --- CẤU HÌNH MOBILE: CHỈ XEM --- */
     @@media (max-width: 767.98px) {
         /* Cho phép tương tác bấm vào để script chạy */
         .mobile-readonly textarea.auto-expand {
-            pointer-events: auto !important; /* [Ghi đè source: 3] */
-            caret-color: transparent; /* Ẩn con trỏ soạn thảo */
+            pointer-events: auto !important;
+            caret-color: transparent;
         }
             /* Khi bấm vào (focus): Hiện nền trắng nhưng không hiện viền focus xanh/vàng như lúc sửa */
             .mobile-readonly textarea.auto-expand:focus {
@@ -83,20 +92,15 @@
                 box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
                 z-index: 100;
                 position: relative;
-                outline: none; /* Bỏ viền highlight mặc định */
+                outline: none;
             }
     }
 </style>
 
-<div class="container-fluid mobile-readonly">
-    @* Thêm class mobile-readonly bao quanh *@
+<div class="container-fluid animate-fade-in mobile-readonly">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-edit text-warning"></i> Cập nhật Sổ đầu bài</h2>
-        <a asp-action="Index" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i>
-            <span class="d-none d-md-inline ms-1">Quay lại</span>
-        </a>
+    <div class="mb-4">
+        <partial name="_PageHeader" model="pageHeader" />
     </div>
 
     @* --- 2. THÊM THÔNG BÁO CHỈ HIỆN TRÊN MOBILE --- *@
@@ -106,13 +110,12 @@
 
     @* --- BUTTON MOBILE: CẬP NHẬT TIẾT HIỆN TẠI --- *@
     <div class="d-block d-md-none mb-3">
-        @* --- SỬA DÒNG DƯỚI ĐÂY --- *@
         <button type="button" onclick="openCurrentPeriodModal(@Model.Id)" class="btn btn-primary w-100 shadow-sm">
             <i class="fas fa-clock"></i> Cập nhật tiết học hiện tại
         </button>
     </div>
 
-    <div class="card mb-4 border-warning">
+    <div class="card mb-4 border-warning shadow-sm">
         <div class="card-header bg-warning text-dark">
             <i class="fas fa-info-circle"></i> Thông tin Sổ
         </div>
@@ -145,7 +148,7 @@
         <input type="hidden" asp-for="FromDate" />
         <input type="hidden" asp-for="ToDate" />
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3">
                 <div class="row align-items-center">
                     <div class="col-md-6">
@@ -257,7 +260,6 @@
                     </div>
 
                     @* --- 3. ẨN NÚT LƯU TRÊN MOBILE --- *@
-                    @* Thêm class d-none d-md-flex: Ẩn trên mobile, hiện (flex) trên desktop *@
                     <div class="col-md-4 align-items-end justify-content-end gap-2 d-none d-md-flex">
                         <a asp-action="Index" class="btn btn-secondary">Hủy</a>
                         <button type="submit" class="btn btn-warning px-4">
@@ -287,7 +289,6 @@
     </script>
     <script>
         document.getElementById('formLogbook')?.addEventListener('submit', function (e) {
-            // ... (Giữ nguyên phần script của bạn, không cần thay đổi gì ở đây) ...
             const rows = document.querySelectorAll('tr.logbook-row');
             let isValid = true;
             let errorMsg = "";
@@ -323,7 +324,6 @@
                     allInputs.forEach(input => input.disabled = false);
                 }
             });
-
             if (!isValid) {
                 e.preventDefault();
                 rows.forEach(row => {
@@ -334,42 +334,30 @@
             }
         });
 
-        // --- HÀM MỚI: Mở Modal (Đã sửa để chạy Toastr) ---
         function openCurrentPeriodModal(logbookId) {
             fetch(`/ClassLogbook/GetCurrentPeriodModal?logbookId=${logbookId}`)
                 .then(async response => {
                     if (response.ok) {
-                        return response.text(); // [cite: 69]
+                        return response.text();
                     } else {
-                        // Lấy nội dung lỗi từ server
-                        const errorText = await response.text(); // [cite: 69]
-
-                        // --- HIỂN THỊ TOASTR ERROR ---
-                        // Bây giờ code này sẽ chạy được vì đã nạp thư viện ở trên
-                        toastr.error(errorText, "Đã xảy ra lỗi!"); // [cite: 71]
-
+                        const errorText = await response.text();
+                        toastr.error(errorText, "Đã xảy ra lỗi!");
                         throw new Error(errorText);
                     }
                 })
                 .then(html => {
-                    // 1. Chèn HTML vào container
-                    document.getElementById('modalContainer').innerHTML = html; // [cite: 72]
-
-                    // 2. Khởi tạo và hiện Modal Bootstrap
-                    const modalElement = document.getElementById('currentPeriodModal'); // [cite: 73]
-                    // Lưu ý: Cần chắc chắn bootstrap.js đã có trong _Layout hoặc thêm vào đây nếu lỗi
-                    const modal = new bootstrap.Modal(modalElement); // [cite: 74]
+                    document.getElementById('modalContainer').innerHTML = html;
+                    const modalElement = document.getElementById('currentPeriodModal');
+                    const modal = new bootstrap.Modal(modalElement);
                     modal.show();
                 })
                 .catch(error => console.error('Lỗi:', error));
         }
 
-        // --- HÀM MỚI: Submit Form trong Modal ---
         function submitCurrentPeriod(e) {
-            e.preventDefault(); // [cite: 75]
-
+            e.preventDefault();
             const form = e.target;
-            const formData = new FormData(form); // [cite: 77]
+            const formData = new FormData(form);
 
             fetch('/ClassLogbook/UpdatePeriodDetail', {
                 method: 'POST',
@@ -377,16 +365,13 @@
             })
             .then(async response => {
                 if (response.ok) {
-                    // Thay alert bằng Toastr Success
-                    toastr.success("Cập nhật thành công!", "Thông báo"); //
-
-                    // Đợi 1s để người dùng đọc thông báo rồi reload
+                    toastr.success("Cập nhật thành công!", "Thông báo");
                     setTimeout(() => {
                         location.reload();
                     }, 1000);
                 } else {
-                    const errorText = await response.text(); // [cite: 79]
-                    toastr.error(errorText, "Lỗi cập nhật"); // Thay alert lỗi
+                    const errorText = await response.text();
+                    toastr.error(errorText, "Lỗi cập nhật");
                 }
             })
             .catch(error => {
@@ -395,59 +380,38 @@
         }
 
         $(document).ready(function () {
-            // 1. Khi bấm vào (focus) hoặc đang gõ (input): Mở rộng full nội dung
             $(document).on('focus input', 'textarea.auto-expand', function () {
-                // Reset chiều cao về auto trước để tính toán chính xác scrollHeight khi xóa bớt text
                 this.style.height = 'auto';
-                // Đặt chiều cao bằng nội dung thực tế
                 this.style.height = (this.scrollHeight) + 'px';
             });
 
-            // 2. Khi bấm ra ngoài (blur): Thu gọn lại thành 1 dòng cho gọn bảng
             $(document).on('blur', 'textarea.auto-expand', function () {
-                // Nếu muốn giữ nguyên độ rộng khi có nội dung thì bỏ dòng dưới đi
-                // Nhưng để bảng gọn gàng thì nên thu lại:
-                this.style.height = ''; // Trở về mặc định (theo thuộc tính rows="1")
+                this.style.height = '';
             });
         });
+
         $(document).ready(function () {
-
-            // 1. Hàm kiểm tra và áp dụng chế độ "Chỉ xem" cho mobile
             function applyMobileReadonly() {
-                // Kiểm tra độ rộng màn hình (nhỏ hơn 768px là mobile)
                 var isMobile = $(window).width() < 768;
-
-                // Tìm tất cả textarea có class auto-expand
                 $('textarea.auto-expand').each(function() {
                     if (isMobile) {
-                        // Nếu là mobile: Thêm readonly (Chặn sửa, chặn bàn phím ảo hiện lên)
                         $(this).attr('readonly', 'readonly');
                     } else {
-                        // Nếu là PC: Bỏ readonly (Cho phép sửa)
                         $(this).removeAttr('readonly');
                     }
                 });
             }
-
-            // Chạy hàm này khi mới vào trang
             applyMobileReadonly();
-
-            // Chạy lại hàm này nếu người dùng xoay màn hình hoặc co kéo trình duyệt
             $(window).resize(function() {
                 applyMobileReadonly();
             });
 
-            // 2. Logic tự mở rộng chiều cao (Vẫn chạy kể cả khi readonly)
             $(document).on('focus input', 'textarea.auto-expand', function () {
-                // Reset chiều cao
                 this.style.height = 'auto';
-                // Đặt chiều cao bằng nội dung
                 this.style.height = (this.scrollHeight) + 'px';
             });
-
-            // 3. Logic thu gọn khi bấm ra ngoài
             $(document).on('blur', 'textarea.auto-expand', function () {
-                this.style.height = ''; // Về mặc định 1 dòng
+                this.style.height = '';
             });
         });
     </script>

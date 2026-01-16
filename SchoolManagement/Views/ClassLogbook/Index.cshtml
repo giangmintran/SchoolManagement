@@ -1,5 +1,6 @@
 ﻿@using SchoolManagement.Common
 @using SchoolManagement.Data.Entities
+@using SchoolManagement.Models.ViewModels
 @model PagedResult<ClassLogbook>
 
 @{
@@ -7,16 +8,21 @@
     // Ép kiểu các ViewBag để dùng lại trong form
     var selectedWeek = ViewBag.SelectedWeek as int?;
     var selectedDate = ViewBag.SelectedDate as DateTime?;
+    // Cấu hình dữ liệu cho Header
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Sổ đầu bài",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", IsActive = true }
+        }
+    };
 }
 
-<div class="container-fluid py-4">
-
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+<div class="container-fluid animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
-            <h1 class="h3 text-primary fw-bold border-start border-4 border-primary ps-3 mb-0">
-                Sổ đầu bài
-            </h1>
-            <small class="text-muted">Quản lý, theo dõi nề nếp và học tập các lớp</small>
+            <partial name="_PageHeader" model="pageHeader" />
         </div>
         <a asp-action="Create" class="btn btn-primary px-4 shadow-sm">
             <i class="fas fa-plus me-1"></i> Lập sổ mới

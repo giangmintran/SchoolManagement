@@ -1,82 +1,104 @@
-﻿@model SchoolManagement.Models.LectureCalendarCreateViewModel
+﻿@using SchoolManagement.Models.ViewModels
+@model SchoolManagement.Models.LectureCalendarCreateViewModel
 
 @{
     ViewData["Title"] = "Tạo Lịch Báo Giảng";
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Tạo mới lịch báo giảng",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") },
+            new BreadcrumbItem { Title = "Tạo mới", IsActive = true }
+        }
+    };
 }
 
-<div class="container mt-4">
-    <h2>Tạo Lịch Báo Giảng Mới (Tự động 5 tiết/ngày)</h2>
-    <hr />
+<div class="container-fluid animate-fade-in">
+    <div class="mb-3">
+        <partial name="_PageHeader" model="pageHeader" />
+    </div>
 
     <form asp-action="Create" id="createForm">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                Thông tin chung
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <i class="fa fa-info-circle me-2"></i>
+                <h5 class="mb-0 fs-6 fs-md-5">Thông tin chung</h5>
             </div>
             <div class="card-body">
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-md-4">
-                        <div class="form-group mb-3">
-                            <label asp-for="TeacherName" class="control-label fw-bold"></label>
-                            <input asp-for="TeacherName" class="form-control" />
-                            <span asp-validation-for="TeacherName" class="text-danger"></span>
+                        <div class="form-group">
+                            <label asp-for="TeacherName" class="form-label fw-bold text-secondary small text-uppercase">Tên Giáo viên</label>
+                            <input asp-for="TeacherName" class="form-control" placeholder="Nhập tên giáo viên..." />
+                            <span asp-validation-for="TeacherName" class="text-danger small"></span>
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <div class="form-group mb-3">
-                            <label asp-for="Week" class="control-label fw-bold"></label>
-                            <input asp-for="Week" class="form-control" type="number" min="1" max="52" />
-                            <span asp-validation-for="Week" class="text-danger"></span>
+                        <div class="form-group">
+                            <label asp-for="Week" class="form-label fw-bold text-secondary small text-uppercase">Tuần</label>
+                            <input asp-for="Week" class="form-control" type="number" min="1" max="52" placeholder="Ví dụ: 1" />
+                            <span asp-validation-for="Week" class="text-danger small"></span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="form-group mb-3">
-                            <label asp-for="StartDate" class="control-label fw-bold"></label>
+                        <div class="form-group">
+                            <label asp-for="StartDate" class="form-label fw-bold text-secondary small text-uppercase">Từ ngày</label>
                             <input asp-for="StartDate" class="form-control" id="StartDate" type="date" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                            <span asp-validation-for="StartDate" class="text-danger small"></span>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="form-group mb-3">
-                            <label asp-for="EndDate" class="control-label fw-bold"></label>
+                        <div class="form-group">
+                            <label asp-for="EndDate" class="form-label fw-bold text-secondary small text-uppercase">Đến ngày</label>
                             <input asp-for="EndDate" class="form-control" id="EndDate" type="date" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                            <span asp-validation-for="EndDate" class="text-danger small"></span>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-12 text-end">
-                        <button type="button" class="btn btn-warning" onclick="generateScheduleTable()">
-                            <i class="fa fa-table"></i> Tạo lưới 5 tiết/ngày
-                        </button>
-                    </div>
+
+                <div class="mt-4 pt-3 border-top text-end">
+                    <button type="button" class="btn btn-warning shadow-sm" onclick="generateScheduleTable()">
+                        <i class="fa fa-table me-1"></i> Tạo lưới (Tự động 5 tiết/ngày)
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div id="detailsSection" style="display:none;">
-            <h4 class="mb-3">Chi tiết giảng dạy</h4>
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm" id="detailsTable">
-                    <thead class="table-light text-center align-middle">
-                        <tr>
-                            <th style="width: 120px;">Ngày</th>
-                            <th style="width: 60px;">Tiết</th>
-                            <th style="width: 100px;">Lớp</th>
-                            <th>Môn học</th>
-                            <th style="width: 80px;">Tiết PPCT</th>
-                            <th>Tên bài dạy</th>
-                            <th>Ghi chú</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+        <div id="detailsSection" style="display:none;" class="card shadow-sm border-0 mb-5">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 text-primary"><i class="fa fa-list-alt me-2"></i>Chi tiết giảng dạy</h5>
             </div>
 
-            <div class="mt-4 mb-5">
-                <button type="submit" class="btn btn-success btn-lg">Lưu Lịch Báo Giảng</button>
-                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Quay lại</a>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0 align-middle" id="detailsTable">
+                        <thead class="bg-light text-secondary text-center text-uppercase small fw-bold">
+                            <tr>
+                                <th style="width: 120px;">Ngày</th>
+                                <th style="width: 60px;">Tiết</th>
+                                <th style="width: 100px;">Lớp</th>
+                                <th style="min-width: 150px;">Môn học</th>
+                                <th style="width: 80px;">PPCT</th>
+                                <th style="min-width: 200px;">Tên bài dạy</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 py-3">
+                <div class="d-flex gap-2 justify-content-end">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-success shadow-sm px-4">
+                        <i class="fa fa-save me-1"></i> Lưu Lịch Báo Giảng
+                    </button>
+                </div>
             </div>
         </div>
     </form>
@@ -103,73 +125,97 @@
 
             if (end < start) {
                  alert("Ngày kết thúc phải lớn hơn ngày bắt đầu.");
-                 return;
+                return;
             }
 
             var tbody = $("#detailsTable tbody");
             tbody.empty();
-
             var globalIndex = 0; // Index chạy liên tục cho toàn bộ mảng Details[...]
 
             // Vòng lặp từng ngày
             for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
 
-                // Bỏ qua Chủ nhật (nếu muốn)
+                // Bỏ qua Chủ nhật (nếu muốn - uncomment dòng dưới)
                 // if (d.getDay() === 0) continue;
 
                 var displayDate = d.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' });
                 var dateInputVal = d.toISOString().split('T')[0];
 
+                // Xác định màu nền cho ngày chủ nhật nếu có
+                var isSunday = d.getDay() === 0;
+                var rowClass = isSunday ? "table-warning" : "";
+
                 // Vòng lặp 5 tiết cho mỗi ngày
                 for (var period = 1; period <= 5; period++) {
 
                     var isFirstRowOfDay = (period === 1);
-
-                    var tr = $("<tr>");
+                    var tr = $("<tr>").addClass(rowClass);
 
                     // Cột NGÀY: Chỉ hiện ở dòng đầu tiên của ngày (dùng rowspan=5)
                     if (isFirstRowOfDay) {
                         tr.append(`
-                            <td class="align-middle text-center bg-light" rowspan="5">
-                                <strong>${displayDate}</strong>
+                            <td class="align-middle text-center bg-white" rowspan="5">
+                                <div class="fw-bold text-primary">${displayDate.split(' ')[0]}</div>
+                                <div class="small text-muted">${displayDate.split(' ')[1]}</div>
                             </td>
                         `);
                     }
 
                     // Các cột input dữ liệu
-                    // Lưu ý: Cột Date ẩn vẫn phải có ở mọi dòng để Model Binding nhận đủ dữ liệu
                     tr.append(`
                         <td class="text-center align-middle">
                             <input type="hidden" name="Details[${globalIndex}].Date" value="${dateInputVal}" />
-
-                            <input type="number" name="Details[${globalIndex}].Period" class="form-control text-center border-0 bg-transparent" value="${period}" readonly />
+                            <span class="fw-bold text-secondary">${period}</span>
+                            <input type="hidden" name="Details[${globalIndex}].Period" value="${period}" />
                         </td>
-                        <td>
-                            <input type="text" name="Details[${globalIndex}].Class" class="form-control form-control-sm" />
+                        <td class="p-1">
+                            <input type="text" name="Details[${globalIndex}].Class" class="form-control form-control-sm text-center border-0 bg-transparent fw-bold text-info" placeholder="..." />
                         </td>
-                        <td>
-                            <input type="text" name="Details[${globalIndex}].Subject" class="form-control form-control-sm" />
+                        <td class="p-1">
+                            <input type="text" name="Details[${globalIndex}].Subject" class="form-control form-control-sm border-0 bg-transparent fw-semibold" placeholder="..." />
                         </td>
-                        <td>
-                            <input type="number" name="Details[${globalIndex}].Lesson" class="form-control form-control-sm text-center" />
+                        <td class="p-1">
+                            <input type="number" name="Details[${globalIndex}].Lesson" class="form-control form-control-sm text-center border-0 bg-transparent" placeholder="..." />
                         </td>
-                        <td>
-                            <input type="text" name="Details[${globalIndex}].LessonTitle" class="form-control form-control-sm" />
+                        <td class="p-1">
+                            <input type="text" name="Details[${globalIndex}].LessonTitle" class="form-control form-control-sm border-0 bg-transparent fw-bold text-primary" placeholder="..." />
                         </td>
-                        <td>
-                            <input type="text" name="Details[${globalIndex}].Note" class="form-control form-control-sm" />
+                        <td class="p-1">
+                            <input type="text" name="Details[${globalIndex}].Note" class="form-control form-control-sm border-0 bg-transparent text-muted fst-italic" placeholder="..." />
                         </td>
                     `);
-
                     tbody.append(tr);
                     globalIndex++; // Tăng index sau mỗi dòng tiết
                 }
 
-                // Thêm một dòng ngăn cách mờ giữa các ngày (tùy chọn)
-                tbody.append('<tr class="table-group-divider border-top border-3"></tr>');
+                // Thêm một dòng ngăn cách mờ giữa các ngày
+                tbody.append('<tr class="border-top border-2 border-light"></tr>');
             }
 
-            $("#detailsSection").show();
+            $("#detailsSection").fadeIn();
+
+            // Cuộn xuống bảng vừa tạo
+            $('html, body').animate({
+                scrollTop: $("#detailsSection").offset().top - 100
+            }, 500);
         }
     </script>
+
+    <style>
+        /* CSS nội bộ để làm đẹp input trong bảng giống file Details */
+        #detailsTable input.form-control {
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+            #detailsTable input.form-control:focus {
+                background-color: #fff !important;
+                border-bottom: 2px solid #0d6efd !important;
+            }
+        /* Placeholder styling */
+        #detailsTable input::placeholder {
+            color: #dee2e6;
+            font-size: 0.8rem;
+        }
+    </style>
 }

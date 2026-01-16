@@ -1,10 +1,23 @@
-﻿@model SchoolManagement.Models.LogbookUpsertViewModel
+﻿@using SchoolManagement.Models.ViewModels
+@model SchoolManagement.Models.LogbookUpsertViewModel
 
 @{
     ViewData["Title"] = "Lập Sổ Đầu Bài";
+
+    // Cấu hình Header
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Lập Sổ đầu bài mới",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") },
+            new BreadcrumbItem { Title = "Tạo mới", IsActive = true }
+        }
+    };
 }
 
-@* --- CUSTOM CSS CHO TRANG NÀY --- *@
+@* --- CUSTOM CSS CHO TRANG NÀY (GIỮ NGUYÊN) --- *@
+@* --- CUSTOM CSS CHO TRANG NÀY (ĐÃ CHỈNH SỬA FONT NHỎ) --- *@
 <style>
     /* Làm đẹp Card */
     .card-custom {
@@ -28,21 +41,24 @@
         position: sticky;
         top: 0;
         z-index: 1;
-        background-color: #f8f9fa !important; /* Màu nền header */
+        background-color: #f8f9fa !important;
         color: #495057;
         font-weight: 600;
         vertical-align: middle !important;
-        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* Bóng nhẹ dưới header */
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        font-size: 13px; /* [MỚI] Chữ tiêu đề nhỏ đi */
     }
 
     /* Ô nhập liệu phong cách Excel */
     .grid-input {
         border: 1px solid transparent;
         border-radius: 4px;
-        padding: 4px 8px;
+        padding: 3px 5px; /* [MỚI] Giảm padding để ô gọn hơn */
+        font-size: 13px; /* [MỚI] Cỡ chữ nội dung nhỏ (13px) */
         transition: all 0.2s;
         background-color: transparent;
         width: 100%;
+        color: #212529;
     }
 
         .grid-input:hover {
@@ -68,27 +84,26 @@
         font-weight: bold;
         color: #495057;
         vertical-align: middle;
+        font-size: 13px; /* [MỚI] Cỡ chữ cột Thứ/Tiết */
     }
 
     /* Dòng ngăn cách buổi (Tiết 5) */
     .separator-row td {
         background-color: #dee2e6 !important;
-        height: 8px;
+        height: 4px; /* [MỚI] Giảm chiều cao dòng ngăn cách */
         padding: 0 !important;
+    }
+
+    /* Chỉnh lại bảng để compact hơn */
+    .table-bordered > :not(caption) > * > * {
+        padding: 0.25rem 0.25rem; /* Giảm padding của cell bảng */
     }
 </style>
 
-<div class="container-fluid py-3">
+<div class="container-fluid animate-fade-in">
 
-    @* --- HEADER & BACK BUTTON --- *@
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-primary m-0"><i class="fas fa-book-open me-2"></i>Quản lý Sổ đầu bài</h2>
-            <p class="text-muted m-0 small">Nhập liệu và theo dõi nề nếp học tập</p>
-        </div>
-        <a asp-action="Index" class="btn btn-outline-secondary px-4">
-            <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-md-inline ms-1">Quay lại</span>
-        </a>
+    <div class="mb-3">
+        <partial name="_PageHeader" model="pageHeader" />
     </div>
 
     @* --- BỘ LỌC (FILTER CARD) --- *@
@@ -97,20 +112,20 @@
             <form asp-action="Create" method="get" class="row g-3 align-items-end" id="formSearchLogbook">
                 <div class="col-md-3">
                     <label class="form-label fw-bold text-secondary text-uppercase small">Lớp học</label>
-                    <select asp-for="ClassName" asp-items="Model.AvailableClasses" class="form-select form-select-lg shadow-none" id="ClassName">
+                    <select asp-for="ClassName" asp-items="Model.AvailableClasses" class="form-select form-select shadow-none" id="ClassName">
                         <option value="">-- Chọn lớp --</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label fw-bold text-secondary text-uppercase small">Tuần học</label>
-                    <input asp-for="WeekNumber" class="form-control form-control-lg shadow-none" type="number" placeholder="Ví dụ: 1" />
+                    <input asp-for="WeekNumber" class="form-control form-control shadow-none" type="number" placeholder="Ví dụ: 1" />
                 </div>
                 <div class="col-md-2">
                     <label class="form-label fw-bold text-secondary text-uppercase small">Năm học</label>
-                    <input asp-for="SchoolYear" class="form-control form-control-lg shadow-none" placeholder="2025-2026" />
+                    <input asp-for="SchoolYear" class="form-control form-control shadow-none" placeholder="2025-2026" />
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
                         <i class="fas fa-search me-1"></i> Lập Sổ
                     </button>
                 </div>
@@ -128,7 +143,7 @@
             <input type="hidden" asp-for="FromDate" />
             <input type="hidden" asp-for="ToDate" />
 
-            <div class="card card-custom shadow">
+            <div class="card card-custom shadow border-0">
                 <div class="card-header bg-white py-3 border-bottom">
                     <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <div class="d-flex align-items-center">
