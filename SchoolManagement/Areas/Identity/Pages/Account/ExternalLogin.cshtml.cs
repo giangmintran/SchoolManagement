@@ -30,13 +30,15 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public ExternalLoginModel(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -44,6 +46,7 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -112,11 +115,27 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
+            // 1. Thử đăng nhập nếu user đã tồn tại liên kết
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            if (result.Succeeded)
+                if (result.Succeeded)
             {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                // 1. Lấy thông tin user vừa đăng nhập thành công
+                var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+
+                if (user != null)
+                {
+                    // 2. Kiểm tra xem user đã thiết lập mật khẩu chưa (HasPassword)
+                    var hasPassword = await _userManager.HasPasswordAsync(user);
+
+                    if (!hasPassword)
+                    {
+                        _logger.LogInformation("User đăng nhập lần đầu qua {Name} và chưa có mật khẩu.", info.LoginProvider);
+                        // Redirect về trang SetPassword trong khu vực Manage
+                        return RedirectToPage("./Manage/SetPassword");
+                    }
+                }
+
+                _logger.LogInformation("{Name} đã đăng nhập bằng {LoginProvider}.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -125,17 +144,52 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an account.
-                ReturnUrl = returnUrl;
-                ProviderDisplayName = info.ProviderDisplayName;
-                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                // 2. Nếu user chưa có tài khoản, tiến hành tạo luôn
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrEmpty(email))
                 {
-                    Input = new InputModel
-                    {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
-                    };
+                    ErrorMessage = "Email not provided by external provider.";
+                    return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
                 }
-                return Page();
+
+                var user = CreateUser();
+                user.EmailConfirmed = true;
+
+                await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (createResult.Succeeded)
+                {
+                    // --- BẮT ĐẦU PHẦN XỬ LÝ ROLE ---
+                    string defaultRole = "User";
+
+                    // Kiểm tra nếu Role "User" chưa tồn tại trong DB thì tạo mới
+                    if (!await _roleManager.RoleExistsAsync(defaultRole))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(defaultRole));
+                    }
+
+                    // Gán Role "User" cho user mới tạo
+                    await _userManager.AddToRoleAsync(user, defaultRole);
+                    // --- KẾT THÚC PHẦN XỬ LÝ ROLE ---
+
+                    createResult = await _userManager.AddLoginAsync(user, info);
+                    if (createResult.Succeeded)
+                    {
+                        _logger.LogInformation("User created an account using {Name} provider with role {Role}.", info.LoginProvider, defaultRole);
+
+                        // Tự động đăng nhập
+                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+
+                        // Yêu cầu thiết lập mật khẩu cục bộ
+                        return RedirectToPage("./Manage/SetPassword");
+                    }
+                }
+
+                // Xử lý lỗi nếu không tạo được user
+                ErrorMessage = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
         }
 

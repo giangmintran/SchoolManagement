@@ -1,13 +1,24 @@
-﻿@* Views/Shared/_NotificationPartial.cshtml *@
+﻿@using SchoolManagement.Data.Entities
+@model IEnumerable<NotificationUser>
 
 <div class="dropdown me-2 me-lg-3">
     <button class="btn-notif-trigger position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-bell-fill fs-5"></i>
-        <span class="notif-badge-count">5</span>
+        @* Hiển thị số lượng thông báo chưa đọc *@
+        @{
+            var unreadCount = 0;
+            if (Model != null && Model.Any())
+            {
+                unreadCount = Model.Count(n => !n.IsRead);
+                if (unreadCount > 0)
+                {
+                    <span class="notif-badge-count"> @unreadCount</span>
+                }
+            }
+        }
     </button>
 
     <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="notificationDropdown">
-
         <div class="notif-header d-flex justify-content-between align-items-center">
             <h3 class="notif-title m-0">Thông báo</h3>
             <button class="btn btn-sm btn-light rounded-circle"><i class="bi bi-three-dots"></i></button>
@@ -19,58 +30,68 @@
         </div>
 
         <div class="list-group list-group-flush py-2">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <a href="@item.RedirectUrl" class="notif-item @(item.IsRead ? "" : "unread")">
+                        <div class="notif-avatar">
+                            <img src="@item.SenderAvatar" alt="User">
 
-            <a href="#" class="notif-item">
-                <div class="notif-avatar">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="User">
-                    <div class="notif-icon-badge bg-primary">
-                        <i class="bi bi-shield-lock-fill" style="font-size: 14px;"></i>
-                    </div>
-                </div>
-                <div class="notif-content">
-                    <div class="notif-text">
-                        <strong>Hệ thống SchoolMgt</strong> đã cập nhật chính sách bảo mật mới.
-                    </div>
-                    <div class="notif-time">5 phút trước</div>
-                </div>
-                <div class="notif-unread-dot"></div>
-            </a>
+                            @* Logic hiển thị icon badge dựa trên Type *@
+                            @switch (item.Type)
+                            {
+                                case NotificationType.System:
+                                    <div class="notif-icon-badge bg-primary">
+                                        <i class="bi bi-shield-lock-fill" style="font-size: 14px;"></i>
+                                    </div>
+                                    break;
+                                case NotificationType.Feedback:
+                                    <div class="notif-icon-badge bg-success">
+                                        <i class="bi bi-chat-fill" style="font-size: 12px;"></i>
+                                    </div>
+                                    break;
+                                case NotificationType.Warning:
+                                    <div class="notif-icon-badge bg-warning text-dark">
+                                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 12px;"></i>
+                                    </div>
+                                    break;
+                            }
+                        </div>
 
-            <a href="#" class="notif-item">
-                <div class="notif-avatar">
-                    <img src="https://ui-avatars.com/api/?name=Nguyen+Van+A&background=0D8ABC&color=fff" alt="User">
-                    <div class="notif-icon-badge bg-success">
-                        <i class="bi bi-chat-fill" style="font-size: 12px;"></i>
-                    </div>
-                </div>
-                <div class="notif-content">
-                    <div class="notif-text">
-                        <strong>Nguyễn Văn A</strong> đã gửi một phản hồi về khóa học Lập trình C#.
-                    </div>
-                    <div class="notif-time">1 giờ trước</div>
-                </div>
-                <div class="notif-unread-dot"></div>
-            </a>
+                        <div class="notif-content">
+                            <div class="notif-text">
+                                <strong>@item.SenderName</strong> @item.Content
+                            </div>
+                            <div class="notif-time">@GetTimeAgo(item.CreatedAt)</div>
+                        </div>
 
-            <a href="#" class="notif-item">
-                <div class="notif-avatar">
-                    <img src="https://ui-avatars.com/api/?name=Tran+Thi+B&background=random" alt="User">
-                    <div class="notif-icon-badge bg-warning text-dark">
-                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 12px;"></i>
-                    </div>
-                </div>
-                <div class="notif-content">
-                    <div class="notif-text">
-                        <strong>Cảnh báo:</strong> Học phí kỳ 2 của bạn sắp đến hạn thanh toán.
-                    </div>
-                    <div class="notif-time">Hôm qua lúc 10:30</div>
-                </div>
-            </a>
-
+                        @if (!item.IsRead)
+                        {
+                            <div class="notif-unread-dot"></div>
+                        }
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="p-3 text-center text-muted">Không có thông báo mới</div>
+            }
         </div>
 
         <div class="p-2 text-center border-top">
-            <a href="#" class="text-decoration-none fw-bold text-primary small">Xem thông báo trước đó</a>
+            <a href="/Notifications/All" class="text-decoration-none fw-bold text-primary small">Xem thông báo trước đó</a>
         </div>
     </div>
 </div>
+
+@functions {
+    // Hàm phụ trợ để hiển thị thời gian thân thiện
+    public string GetTimeAgo(DateTime dateTime)
+    {
+        var span = DateTime.Now - dateTime;
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} phút trước";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} giờ trước";
+        return dateTime.ToString("dd/MM/yyyy");
+    }
+}
