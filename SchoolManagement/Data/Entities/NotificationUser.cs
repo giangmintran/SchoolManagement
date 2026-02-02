@@ -10,14 +10,16 @@
     {
         public int Id { get; set; }
 
-        // Tên người gửi hoặc hệ thống (ví dụ: "Hệ thống SchoolMgt" [cite: 4] hoặc "Nguyễn Văn A" [cite: 7])
-        public string SenderName { get; set; }
+        public string UserId { get; set; }
 
-        // Ảnh đại diện người gửi [cite: 3, 6]
-        public string SenderAvatar { get; set; }
+        // Tên người gửi hoặc hệ thống (ví dụ: "Hệ thống SchoolMgt" hoặc "Nguyễn Văn A" 
+        public string? SenderName { get; set; }
 
-        // Nội dung thông báo [cite: 4, 7, 10]
-        public string Content { get; set; }
+        // Ảnh đại diện người gửi
+        public string? SenderAvatar { get; set; }
+
+        // Nội dung thông báo
+        public string? Content { get; set; }
 
         // Loại thông báo để hiển thị Icon Badge (Primary, Success, Warning...) 
         public NotificationType Type { get; set; }
@@ -25,10 +27,10 @@
         // Thời gian gửi 
         public DateTime CreatedAt { get; set; }
 
-        // Trạng thái đã đọc hay chưa (để hiển thị .notif-unread-dot) [cite: 5, 8]
+        // Trạng thái đã đọc hay chưa (để hiển thị .notif-unread-dot)
         public bool IsRead { get; set; }
 
         // Đường dẫn khi người dùng nhấn vào thông báo
-        public string RedirectUrl { get; set; }
+        public string? RedirectUrl { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace SchoolManagement.Data
         public DbSet<ClassLogbook> ClassLogbooks { get; set; }
         public DbSet<ClassLogbookDetail> ClassLogbookDetails { get; set; }
         public DbSet<ProfessionalActivity> ProfessionalActivities { get; set; }
+        public DbSet<NotificationUser> NotificationUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

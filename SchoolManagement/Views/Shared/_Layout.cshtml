@@ -146,7 +146,7 @@
                     <div class="ms-auto d-flex align-items-center">
                         @if (SignInManager.IsSignedIn(User))
                         {
-                            <partial name="_NotificationPartial" />
+                            @await Component.InvokeAsync("Notification")
                             <div class="dropdown d-none d-lg-block">
                                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle p-1 pe-3 rounded-pill border bg-white shadow-sm transition-hover"
                                    id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
