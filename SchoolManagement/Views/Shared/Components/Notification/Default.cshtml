@@ -4,16 +4,11 @@
 <div class="dropdown me-2 me-lg-3">
     <button class="btn-notif-trigger position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-bell-fill fs-5"></i>
-        @* Hiển thị số lượng thông báo chưa đọc *@
         @{
-            var unreadCount = 0;
-            if (Model != null && Model.Any())
+            var unreadCount = Model?.Count(n => !n.IsRead) ?? 0;
+            if (unreadCount > 0)
             {
-                unreadCount = Model.Count(n => !n.IsRead);
-                if (unreadCount > 0)
-                {
-                    <span class="notif-badge-count"> @unreadCount</span>
-                }
+                <span class="notif-badge-count">@unreadCount</span>
             }
         }
     </button>
@@ -25,73 +20,44 @@
         </div>
 
         <div class="px-3 pb-2 notif-filter">
-            <button class="btn-pill active">Tất cả</button>
-            <button class="btn-pill">Chưa đọc</button>
+            <button class="btn-pill active" id="btn-filter-all" onclick="loadNotifications('all')">Tất cả</button>
+            <button class="btn-pill" id="btn-filter-unread" onclick="loadNotifications('unread')">Chưa đọc</button>
         </div>
 
-        <div class="list-group list-group-flush py-2">
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
-                {
-                    <a href="@item.RedirectUrl" class="notif-item @(item.IsRead ? "" : "unread")">
-                        <div class="notif-avatar">
-                            <img src="@item.SenderAvatar" alt="User">
-
-                            @* Logic hiển thị icon badge dựa trên Type *@
-                            @switch (item.Type)
-                            {
-                                case NotificationType.System:
-                                    <div class="notif-icon-badge bg-primary">
-                                        <i class="bi bi-shield-lock-fill" style="font-size: 14px;"></i>
-                                    </div>
-                                    break;
-                                case NotificationType.Feedback:
-                                    <div class="notif-icon-badge bg-success">
-                                        <i class="bi bi-chat-fill" style="font-size: 12px;"></i>
-                                    </div>
-                                    break;
-                                case NotificationType.Warning:
-                                    <div class="notif-icon-badge bg-warning text-dark">
-                                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 12px;"></i>
-                                    </div>
-                                    break;
-                            }
-                        </div>
-
-                        <div class="notif-content">
-                            <div class="notif-text">
-                                <strong>@item.SenderName</strong> @item.Content
-                            </div>
-                            <div class="notif-time">@GetTimeAgo(item.CreatedAt)</div>
-                        </div>
-
-                        @if (!item.IsRead)
-                        {
-                            <div class="notif-unread-dot"></div>
-                        }
-                    </a>
-                }
-            }
-            else
-            {
-                <div class="p-3 text-center text-muted">Không có thông báo mới</div>
-            }
+        <div class="list-group list-group-flush py-2" id="notification-list-container">
+            @await Html.PartialAsync("_NotificationList", Model)
         </div>
 
         <div class="p-2 text-center border-top">
-            <a href="/Notifications/All" class="text-decoration-none fw-bold text-primary small">Xem thông báo trước đó</a>
+            <a href="/Notifications/Index" class="text-decoration-none fw-bold text-primary small">Xem thông báo trước đó</a>
         </div>
     </div>
 </div>
 
-@functions {
-    // Hàm phụ trợ để hiển thị thời gian thân thiện
-    public string GetTimeAgo(DateTime dateTime)
-    {
-        var span = DateTime.Now - dateTime;
-        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} phút trước";
-        if (span.TotalHours < 24) return $"{(int)span.TotalHours} giờ trước";
-        return dateTime.ToString("dd/MM/yyyy");
+<script>
+    function loadNotifications(filterType) {
+        // 1. Cập nhật trạng thái Active cho nút
+        document.querySelectorAll('.btn-pill').forEach(btn => btn.classList.remove('active'));
+        if (filterType === 'all') {
+            document.getElementById('btn-filter-all').classList.add('active');
+        } else {
+            document.getElementById('btn-filter-unread').classList.add('active');
+        }
+
+        // 2. Hiệu ứng loading (tuỳ chọn)
+        const container = document.getElementById('notification-list-container');
+        container.innerHTML = '<div class="text-center p-3"><span class="spinner-border spinner-border-sm"></span> Đang tải...</div>';
+
+        // 3. Gọi AJAX về Controller
+        fetch(`/Notification/GetNotifications?filter=${filterType}`)
+            .then(response => response.text())
+            .then(html => {
+                // 4. Thay thế nội dung danh sách
+                container.innerHTML = html;
+            })
+            .catch(err => {
+                console.error('Lỗi tải thông báo:', err);
+                container.innerHTML = '<div class="text-danger p-3 text-center">Lỗi tải dữ liệu.</div>';
+            });
     }
-}
+</script>

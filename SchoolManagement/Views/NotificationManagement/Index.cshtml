@@ -1,0 +1,519 @@
+﻿@model IEnumerable<SchoolManagement.Data.Entities.NotificationUser>
+@using SchoolManagement.Data.Entities
+@using SchoolManagement.Models.ViewModels
+
+@{
+    // --- SAFE CHECK MODEL ---
+    // Tạo một danh sách an toàn, nếu Model null thì coi như là danh sách rỗng
+    var notificationList = Model ?? Enumerable.Empty<SchoolManagement.Data.Entities.NotificationUser>();
+    var totalCount = notificationList.Count();
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Quản lý thông báo",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") },
+        }
+    };
+}
+
+<style>
+    /* --- GIỮ NGUYÊN CSS SOFT UI NHƯ TRƯỚC --- */
+    :root {
+        --ntf-primary: #4e73df;
+        --ntf-bg: #f8f9fc;
+        --ntf-card-bg: #ffffff;
+        --ntf-text-main: #2e384d;
+        --ntf-text-sub: #8798ad;
+        --ntf-border-radius: 16px;
+        --ntf-shadow: 0 10px 30px 0 rgba(29, 36, 55, 0.05);
+        --ntf-hover-shadow: 0 15px 35px 0 rgba(29, 36, 55, 0.1);
+    }
+
+    body {
+        background-color: var(--ntf-bg);
+    }
+
+    .ntf-wrapper {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* --- Header & Search Section --- */
+    .ntf-header-card {
+        background: transparent;
+        margin-bottom: 2rem;
+    }
+
+    .ntf-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--ntf-text-main);
+        letter-spacing: -0.5px;
+    }
+
+    .ntf-subtitle {
+        color: var(--ntf-text-sub);
+        font-size: 0.95rem;
+    }
+
+    /* Search & Filter Inputs */
+    .ntf-control-group {
+        background: white;
+        padding: 0.5rem;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        display: flex;
+        gap: 0.5rem;
+        border: 1px solid #edf2f9;
+    }
+
+    .ntf-search-input {
+        border: none;
+        background: transparent;
+        padding: 0.6rem 1.2rem;
+        flex-grow: 1;
+        outline: none;
+        color: var(--ntf-text-main);
+        font-weight: 500;
+    }
+    
+    .ntf-search-input::placeholder {
+        color: #b0b8c4;
+    }
+
+    /* Tinh chỉnh Dropdown (Select) */
+    .ntf-select {
+        border: none;
+        background-color: #f1f5f9;
+        color: var(--ntf-text-main);
+        border-radius: 30px;
+        padding: 0.6rem 2.5rem 0.6rem 1.2rem; /* Tăng padding phải cho icon custom */
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        appearance: none; /* Xóa icon mặc định */
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234e73df' class='bi bi-chevron-down' viewBox='0 0 16 16'%3group%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 12px;
+        transition: all 0.2s;
+    }
+    .ntf-select:hover {
+    background-color: #e2e8f0;
+}
+
+    .ntf-btn-filter {
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        border: none;
+        background: var(--ntf-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+    
+    .ntf-btn-filter:hover {
+        transform: scale(1.05);
+        background-color: #375a7f;
+    }
+
+    /* --- Main List Card --- */
+    .ntf-list-card {
+        background: var(--ntf-card-bg);
+        border-radius: var(--ntf-border-radius);
+        box-shadow: var(--ntf-shadow);
+        border: none;
+        overflow: hidden;
+    }
+
+    .ntf-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .ntf-table thead th {
+        background-color: #fafbfc;
+        color: var(--ntf-text-sub);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1.2rem 1rem;
+        border-bottom: 2px solid #edf2f9;
+    }
+
+    .ntf-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .ntf-table tbody tr:hover {
+        background-color: #f8faff;
+        transform: scale(1.005);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        z-index: 2;
+        position: relative;
+    }
+
+    .ntf-table td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f4f8;
+        color: var(--ntf-text-main);
+    }
+
+    .ntf-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Icon Types */
+    .ntf-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        transition: transform 0.2s;
+    }
+    
+    .ntf-table tr:hover .ntf-icon-box {
+        transform: rotate(10deg);
+    }
+
+    /* Content Styling */
+    .ntf-sender-name {
+        font-size: 0.8rem;
+        color: var(--ntf-text-sub);
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .ntf-content-text {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--ntf-text-main);
+        display: block;
+    }
+    
+    .ntf-content-text a {
+        color: var(--ntf-primary);
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 1px dashed transparent;
+        transition: all 0.2s;
+    }
+    
+    .ntf-content-text a:hover {
+        border-bottom-color: var(--ntf-primary);
+    }
+
+    /* Read vs Unread logic styling */
+    .ntf-row-unread .ntf-content-text {
+        font-weight: 700;
+        color: #000;
+    }
+    
+    .ntf-row-unread {
+        background-color: #fff;
+    }
+
+    .ntf-row-unread td:first-child {
+        position: relative;
+    }
+    
+    .ntf-row-unread td:first-child::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 60%;
+        width: 4px;
+        background-color: var(--ntf-primary);
+        border-radius: 0 4px 4px 0;
+    }
+
+    /* Badges */
+    .ntf-badge {
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+    .ntf-badge-read { background: #f0f2f5; color: #64748b; }
+    .ntf-badge-new { background: #eef2ff; color: var(--ntf-primary); box-shadow: 0 2px 5px rgba(78, 115, 223, 0.2); }
+
+    /* Actions */
+    .ntf-action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ntf-text-sub);
+        transition: all 0.2s;
+        background: transparent;
+        border: 1px solid transparent;
+    }
+
+    .ntf-action-btn:hover {
+        background: #f1f5f9;
+        color: var(--ntf-primary);
+        transform: translateY(-2px);
+    }
+    
+    .ntf-action-del:hover {
+        background: #fff5f5;
+        color: #e3342f;
+    }
+
+    /* Empty State */
+    .ntf-empty {
+        padding: 4rem 1rem;
+        text-align: center;
+    }
+    .ntf-empty-img {
+        font-size: 4rem;
+        color: #e2e8f0;
+        margin-bottom: 1rem;
+    }
+
+    /* --- Mobile Responsive --- */
+    @@media (max-width: 768px) {
+        .ntf-table thead { display: none; }
+        .ntf-table, .ntf-table tbody, .ntf-table tr, .ntf-table td { display: block; width: 100%; }
+        
+        .ntf-table tbody tr {
+            margin-bottom: 1rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 1rem;
+            border: 1px solid #edf2f9;
+        }
+
+        .ntf-table td {
+            padding: 0.5rem 0;
+            border: none;
+            text-align: left;
+        }
+        
+        .ntf-mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px dashed #f1f4f8;
+            padding-bottom: 0.5rem;
+        }
+
+        .ntf-cell-icon { display: none; }
+        
+        .ntf-cell-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+            border-top: 1px solid #f1f4f8;
+            padding-top: 10px !important;
+        }
+
+        /* Nút Tạo mới */
+        .ntf-btn-create {
+            background: var(--ntf-primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.25);
+            text-decoration: none;
+        }
+
+        .ntf-btn-create:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 115, 223, 0.35);
+            filter: brightness(1.1);
+        }
+    }
+</style>
+
+<div class="container-fluid animate-fade-in">
+     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+        <div>
+            <partial name="_PageHeader" model="pageHeader" />
+        </div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm w-md-auto d-none d-md-block">
+            <i class="fa fa-plus me-2"></i>Tạo mới
+        </a>
+    </div>
+    <div class="row align-items-center mb-2">
+        <div class="col-md-12">
+            <form method="get" class="m-0">
+                <div class="ntf-control-group">
+                    <span class="ps-3 d-flex align-items-center text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="ntf-search-input" 
+                           placeholder="Tìm kiếm..." 
+                           value="@Context.Request.Query["search"]" autocomplete="off">
+                    
+                    <div class="d-none d-lg-block border-start mx-2"></div>
+                    <select name="type" class="ntf-select d-none d-lg-block" onchange="this.form.submit()">
+                        <option value="">Tất cả loại</option>
+                        <option value="System" selected="@(Context.Request.Query["type"] == "System")">Hệ thống</option>
+                        <option value="Warning" selected="@(Context.Request.Query["type"] == "Warning")">Cảnh báo</option>
+                        <option value="Feedback" selected="@(Context.Request.Query["type"] == "Feedback")">Phản hồi</option>
+                    </select>
+
+                    <button type="submit" class="ntf-btn-filter shadow-sm">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+                
+                <div class="mt-2 d-lg-none">
+                    <select name="type" class="form-select rounded-pill shadow-sm" style="border: 1px solid #edf2f9;" onchange="this.form.submit()">
+                        <option value="">-- Lọc theo loại --</option>
+                        <option value="System" selected="@(Context.Request.Query["type"] == "System")">Hệ thống</option>
+                        <option value="Warning" selected="@(Context.Request.Query["type"] == "Warning")">Cảnh báo</option>
+                        <option value="Feedback" selected="@(Context.Request.Query["type"] == "Feedback")">Phản hồi</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="ntf-list-card">
+        <div class="card-body p-0">
+            <table class="ntf-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4 text-center" style="width: 100px;">Loại</th>
+                        <th>Nội dung thông báo</th>
+                        <th style="width: 180px;">Thời gian</th>
+                        <th style="width: 120px;">Trạng thái</th>
+                        <th class="text-end pe-4" style="width: 120px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in notificationList)
+                    {
+                        // Logic Màu sắc & Icon
+                        string iconClass = "bi-info-circle";
+                        string bgStyle = "background-color: #e7f1ff; color: #0d6efd;";
+                        
+                        switch (item.Type)
+                        {
+                            case NotificationType.System:
+                                iconClass = "bi-shield-check";
+                                bgStyle = "background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); color: #fff;";
+                                break;
+                            case NotificationType.Feedback:
+                                iconClass = "bi-chat-heart-fill";
+                                bgStyle = "background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #00b86a;";
+                                break;
+                            case NotificationType.Warning:
+                                iconClass = "bi-exclamation-diamond-fill";
+                                bgStyle = "background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #fff;";
+                                break;
+                        }
+
+                        string rowClass = item.IsRead ? "ntf-row-read" : "ntf-row-unread";
+
+                        <tr class="@rowClass">
+                            <td class="ps-4 text-center ntf-cell-icon">
+                                <div class="ntf-icon-box shadow-sm" style="@bgStyle">
+                                    <i class="bi @iconClass"></i>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="ntf-mobile-header d-md-none">
+                                    <span class="badge rounded-pill bg-light text-dark border">
+                                        <i class="bi @iconClass me-1"></i> @item.Type
+                                    </span>
+                                    <small class="text-muted">@item.CreatedAt.ToString("HH:mm dd/MM")</small>
+                                </div>
+
+                                <div class="ntf-sender-name">
+                                    <i class="bi bi-person-circle"></i> @item.SenderName
+                                </div>
+                                <div class="ntf-content-text">
+                                    @if (!string.IsNullOrEmpty(item.RedirectUrl))
+                                    {
+                                        <a href="@item.RedirectUrl" title="@item.Content">
+                                            @item.Content <i class="bi bi-arrow-up-right-square small ms-1" style="font-size: 0.8em;"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span>@item.Content</span>
+                                    }
+                                </div>
+                            </td>
+
+                            <td class="d-none d-md-table-cell">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark">@item.CreatedAt.ToString("HH:mm")</span>
+                                    <span class="text-muted small">@item.CreatedAt.ToString("dd thg MM, yyyy")</span>
+                                </div>
+                            </td>
+
+                            <td class="ntf-cell-status">
+                                @if (item.IsRead)
+                                {
+                                    <span class="ntf-badge ntf-badge-read">Đã xem</span>
+                                }
+                                else
+                                {
+                                    <span class="ntf-badge ntf-badge-new">Mới</span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4 ntf-cell-actions">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="ntf-action-btn" title="Chi tiết">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="ntf-action-btn ntf-action-del" title="Xóa" 
+                                   onclick="return confirm('Bạn muốn xóa thông báo này?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!notificationList.Any())
+            {
+                <div class="ntf-empty">
+                    <div class="ntf-empty-img">
+                        <i class="bi bi-inbox"></i>
+                    </div>
+                    <h5 class="text-muted fw-bold">Chưa có thông báo nào</h5>
+                    <p class="text-muted small">Hệ thống sẽ gửi thông báo khi có cập nhật mới.</p>
+                    <a href="@Url.Action("Index")" class="btn btn-light btn-sm text-primary fw-bold mt-2">Làm mới trang</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

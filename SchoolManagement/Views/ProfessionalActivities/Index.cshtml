@@ -190,19 +190,135 @@
         .table-modern tbody tr:hover td:last-child {
             background-color: #fcfcfc; /* Màu hover giống dòng 11 trong code cũ */
         }
+    /* Filter Area Styling */
+    .filter-wrapper {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        margin-bottom: 2rem;
+        border: 1px solid #f0f2f5;
+    }
+
+    .search-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+        .search-input-group i {
+            position: absolute;
+            left: 15px;
+            color: #adb5bd;
+            transition: color 0.3s;
+        }
+
+    .form-control-custom {
+        padding: 0.6rem 1rem 0.6rem 2.5rem; /* Cách lề trái để chừa chỗ cho icon */
+        border-radius: 10px;
+        border: 1.5px solid #e9ecef;
+        background-color: #f8f9fa;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control-custom:focus {
+            background-color: #fff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+            outline: none;
+        }
+
+            .form-control-custom:focus + i {
+                color: var(--primary-color);
+            }
+
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Nút bấm bo góc đồng bộ */
+        .btn-filter {
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-filter-primary {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            border: none;
+            color: white;
+        }
+
+            .btn-filter-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            }
+
+        .btn-filter-light {
+            background-color: #f8f9fa;
+            border: 1.5px solid #e9ecef;
+            color: #495057;
+        }
+
+        .btn-filter-light:hover {
+            background-color: #e9ecef;
+        }
 </style>
 
-<div class="container-fluid animate-fade-in">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-        <div>
-            <partial name="_PageHeader" model="pageHeader" />
+    <div class="container-fluid animate-fade-in">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <partial name="_PageHeader" model="pageHeader" />
+            </div>
+
+            <a asp-action="Create" class="btn btn-primary shadow-sm px-4 py-2 fw-medium">
+                <i class="fas fa-plus fa-sm text-white-50 me-2"></i>Tạo mới
+            </a>
         </div>
+        <div class="filter-card">
+        <div class="filter-wrapper">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-12 col-lg-5">
+                    <label class="filter-label">Tìm kiếm nội dung</label>
+                    <div class="search-input-group">
+                        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm"
+                               class="form-control form-control-custom"
+                               placeholder="Nhập tên giáo viên hoặc nội dung họp...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
 
-        <a asp-action="Create" class="btn btn-primary shadow-sm px-4 py-2 fw-medium">
-            <i class="fas fa-plus fa-sm text-white-50 me-2"></i>Tạo mới
-        </a>
+                <div class="col-6 col-lg-2">
+                    <label class="filter-label">Từ ngày</label>
+                    <input type="date" name="fromDate" value="@ViewBag.FromDate"
+                           class="form-control form-control-custom">
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <label class="filter-label">Đến ngày</label>
+                    <input type="date" name="toDate" value="@ViewBag.ToDate"
+                           class="form-control form-control-custom">
+                </div>
+
+                <div class="col-12 col-lg-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-filter btn-filter-primary flex-grow-1">
+                        <i class="fas fa-filter me-2"></i>Áp dụng
+                    </button>
+                    <a asp-action="Index" class="btn btn-filter btn-filter-light" title="Làm mới">
+                        <i class="fas fa-sync-alt"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-
     <div class="card card-modern mb-4 d-none d-md-block">
         <div class="card-body p-0">
             <div class="table-responsive">

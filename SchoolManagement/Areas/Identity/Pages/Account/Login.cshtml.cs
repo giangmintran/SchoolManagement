@@ -117,6 +117,7 @@ namespace SchoolManagement.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    TempData.ToastSuccess("Đang nhập thành công.");
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

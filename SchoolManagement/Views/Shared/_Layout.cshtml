@@ -103,27 +103,20 @@
                 <a asp-controller="Teachers" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("Teachers")">
                     <i class="bi bi-person-video3"></i><span>Teachers</span>
                 </a> *@
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-controller="AdminClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("AdminClassLogbook", "Index")">
-                        <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
-                    </a>
-                }
-                else
-                {
-                    <a asp-controller="ClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("ClassLogbook", "Index")">
-                        <i class="bi bi-journal-text"></i><span>Sổ đầu bài</span>
-                    </a>
-                }
+                <a asp-controller="ClassLogbook" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("ClassLogbook", "Index")">
+                    <i class="bi bi-journal-check"></i><span>Sổ đầu bài</span>
+                </a>
                 
                 <a asp-controller="LectureCalendar" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("LectureCalendar", "Index")">
                     <i class="bi bi-journal-text"></i><span>Lịch báo giảng</span>
                 </a>
                
                 <a asp-controller="ProfessionalActivities" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("ProfessionalActivities", "Index")">
-                    <i class="bi bi-journal-text"></i><span>Sổ SHCM</span>
+                    <i class="bi bi-journals"></i><span>Sổ SHCM</span>
                 </a>
-
+                <a asp-controller="NotificationManagement" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("NotificationManagement", "Index")">
+                    <i class="bi bi-envelope-at"></i></i><span>Thông báo</span>
+                </a>
                 <a asp-controller="Home" asp-action="Privacy" class="list-group-item list-group-item-action @GetActiveClass("Home", "Privacy")">
                     <i class="bi bi-shield-lock"></i><span>Chính sách bảo mật</span>
                 </a>

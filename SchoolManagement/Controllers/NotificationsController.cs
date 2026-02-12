@@ -1,28 +1,42 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.InkML;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SchoolManagement.Data;
 using SchoolManagement.Data.Entities;
+using System.Security.Claims;
 
 namespace SchoolManagement.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
     public class NotificationsController : Controller
     {
-        // Mock data hoặc gọi từ Repository
-        [HttpGet]
-        public IActionResult GetNotifications()
+        private readonly ApplicationDbContext _dbContext;
+        public NotificationsController(ApplicationDbContext dbContext)
         {
-            // Giả sử lấy 5 thông báo mới nhất như badge hiển thị 
-            var notifications = new List<NotificationUser>
-            {
-                new NotificationUser {
-                    SenderName = "Hệ thống SchoolMgt",
-                    Content = "đã cập nhật chính sách bảo mật mới.",
-                    Type = NotificationType.System,
-                    CreatedAt = DateTime.Now.AddMinutes(-5),
-                    IsRead = false
-                },
-            };
+            _dbContext = dbContext;
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetNotifications(string filter = "all")
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
 
-            return PartialView("_NotificationPartial", notifications);
+            var query = _dbContext.NotificationUsers
+                .Where(n => n.UserId == userId);
+
+            // Xử lý lọc theo yêu cầu
+            if (filter == "unread")
+            {
+                query = query.Where(n => !n.IsRead);
+            }
+
+            var notifications = await query
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            // Trả về Partial View đã tạo ở Bước 1
+            return PartialView("_NotificationList", notifications);
         }
 
         [HttpPost("mark-as-read/{id}")]
@@ -30,6 +44,21 @@ namespace SchoolManagement.Controllers
         {
             // Logic cập nhật IsRead = true trong Database
             return Ok();
+        }
+
+
+        public async Task<IActionResult> Index(string search, NotificationType? type)
+        {
+            // Lấy UserId hiện tại
+            var userId = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var query = _dbContext.NotificationUsers
+                .OrderByDescending(n => n.CreatedAt)
+                .Where(e => e.UserId == userId);
+
+            if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.Content.Contains(search));
+            if (type.HasValue) query = query.Where(x => x.Type == type);
+            return View(query);
         }
     }
 }

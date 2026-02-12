@@ -1,0 +1,438 @@
+﻿@model IEnumerable<SchoolManagement.Data.Entities.NotificationUser>
+@using SchoolManagement.Data.Entities
+
+@{
+    ViewData["Title"] = "Danh sách Thông báo";
+}
+
+<style>
+    /* * QUY TẮC ĐẶT TÊN: ntf-[tên-thành-phần]
+         * Giúp tránh xung đột với các trang khác
+         */
+
+    /* Wrapper tổng */
+    .ntf-wrapper {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #fcfcfc;
+    }
+
+    /* Tiêu đề trang */
+    .ntf-header-title {
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+    }
+
+    /* Card bao quanh bảng */
+    .ntf-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        background: white;
+        overflow: hidden;
+    }
+
+    /* Tùy chỉnh Bảng (Desktop) */
+    .ntf-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+    }
+
+        .ntf-table thead th {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #eaecf4;
+            padding: 16px;
+        }
+
+        .ntf-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+            .ntf-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .ntf-table tbody tr:hover {
+                background-color: #fbfdff;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                z-index: 1;
+                position: relative;
+            }
+
+        .ntf-table td {
+            padding: 16px;
+            vertical-align: middle;
+        }
+
+    /* Avatar Styles */
+    .ntf-avatar-box {
+        position: relative;
+        width: 48px;
+        height: 48px;
+    }
+
+    .ntf-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .ntf-avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    /* Icon nhỏ đè lên avatar */
+    .ntf-type-icon {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        font-size: 10px;
+        color: white;
+    }
+
+    /* Trạng thái dòng chưa đọc */
+    .ntf-row-unread {
+        background-color: #f0f7ff; /* Xanh nhạt */
+        border-left: 4px solid #0d6efd;
+    }
+
+    .ntf-row-read {
+        border-left: 4px solid transparent;
+    }
+
+    .ntf-text-unread {
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .ntf-text-read {
+        font-weight: 400;
+        color: #555;
+    }
+
+    /* Badges Custom */
+    .ntf-badge {
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .ntf-badge-sys {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+    }
+    /* Xanh dương */
+    .ntf-badge-fb {
+        background-color: #e6f8f0;
+        color: #00b86a;
+    }
+    /* Xanh lá */
+    .ntf-badge-warn {
+        background-color: #fff8dd;
+        color: #ffc107;
+    }
+    /* Vàng */
+    .ntf-badge-err {
+        background-color: #fee2e2;
+        color: #ef4444;
+    }
+    /* Đỏ */
+
+    /* Link hover effect */
+    .ntf-link {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+        .ntf-link:hover {
+            color: #0d6efd;
+            text-decoration: underline;
+        }
+
+    /* Nút hành động */
+    .ntf-btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .ntf-btn-view {
+        color: #17a2b8;
+        background: rgba(23, 162, 184, 0.1);
+    }
+
+        .ntf-btn-view:hover {
+            background: #17a2b8;
+            color: white;
+        }
+
+    .ntf-btn-del {
+        color: #dc3545;
+        background: rgba(220, 53, 69, 0.1);
+    }
+
+        .ntf-btn-del:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+    /* --- RESPONSIVE MOBILE (< 768px) --- */
+    @@media (max-width: 768px) {
+        .ntf-table thead {
+            display: none; /* Ẩn header bảng */
+        }
+
+        .ntf-table, .ntf-table tbody, .ntf-table tr, .ntf-table td {
+            display: block;
+            width: 100%;
+        }
+
+            .ntf-table tbody tr {
+                margin-bottom: 15px;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                border: 1px solid #eee;
+                position: relative; /* Để căn chỉnh ngày tháng */
+                padding-bottom: 10px;
+            }
+
+            .ntf-table td {
+                padding: 10px 15px;
+                text-align: left;
+                border: none;
+            }
+        /* Avatar section on mobile */
+        .ntf-cell-sender {
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        /* Content section on mobile */
+        .ntf-cell-content {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        /* Time section - Đẩy lên góc trên cùng bên phải */
+        .ntf-cell-time {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            text-align: right;
+            padding: 0;
+        }
+        /* Ẩn bớt text ngày tháng chi tiết trên mobile nếu cần */
+        .ntf-time-date {
+            font-size: 0.75rem;
+        }
+        /* Actions section */
+        .ntf-cell-actions {
+            text-align: right;
+            border-top: 1px dashed #eee;
+            padding-top: 10px;
+            margin-top: 5px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        /* Badge trạng thái mobile */
+        .ntf-cell-status {
+            display: inline-block;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    }
+</style>
+
+<div class="container-fluid p-4 ntf-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="ntf-header-title mb-0">
+                <i class="bi bi-bell-fill text-primary me-2"></i>Quản lý Thông báo
+            </h2>
+            <p class="text-muted mb-0 small mt-1">Danh sách cập nhật và cảnh báo hệ thống</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0 bg-light"
+                               placeholder="Tìm kiếm nội dung..." value="@Context.Request.Query["search"]">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <select name="type" class="form-select bg-light" onchange="this.form.submit()">
+                        <option value="">-- Tất cả loại --</option>
+                        <option value="System" selected="@(Context.Request.Query["type"] == "System")">Hệ thống</option>
+                        <option value="Warning" selected="@(Context.Request.Query["type"] == "Warning")">Cảnh báo</option>
+                        <option value="Feedback" selected="@(Context.Request.Query["type"] == "Feedback")">Phản hồi</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="ntf-card">
+        <div class="card-body p-0">
+            <table class="ntf-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4 text-center" style="width: 80px;">Loại</th>
+                        <th style="width: 40%;">Nội dung</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        // --- Xử lý Logic C# (Giữ nguyên logic màu sắc của bạn) ---
+                        string iconTypeClass = "bi-info-circle";
+                        string badgeColorClass = "ntf-badge-sys";
+                        string typeBgColor = "#0d6efd"; // Màu nền icon
+                        string typeSoftColor = "#e7f1ff"; // Màu nền nhạt bao quanh icon (Optional)
+
+                        switch (item.Type)
+                        {
+                            case NotificationType.System:
+                                iconTypeClass = "bi-shield-lock";
+                                typeBgColor = "#0d6efd";
+                                typeSoftColor = "#cfe2ff"; // Xanh dương nhạt
+                                break;
+                            case NotificationType.Feedback:
+                                iconTypeClass = "bi-chat-dots";
+                                typeBgColor = "#00b86a";
+                                typeSoftColor = "#d1e7dd"; // Xanh lá nhạt
+                                break;
+                            case NotificationType.Warning:
+                                iconTypeClass = "bi-exclamation-triangle";
+                                typeBgColor = "#ffc107";
+                                typeSoftColor = "#fff3cd"; // Vàng nhạt
+                                break;
+                        }
+
+                        string rowClass = item.IsRead ? "ntf-row-read" : "ntf-row-unread";
+                        string textClass = item.IsRead ? "ntf-text-read" : "ntf-text-unread";
+
+                        <tr class="@rowClass">
+
+                            <td class="ps-4 text-center">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle shadow-sm"
+                                     style="width: 45px; height: 45px; background-color: @typeSoftColor;">
+                                    <i class="bi @iconTypeClass fs-5" style="color: @typeBgColor;"></i>
+                                </div>
+                            </td>
+
+                            <td class="ntf-cell-content">
+                                <div class="text-muted small mb-1">
+                                    <i class="bi bi-person me-1"></i> @item.SenderName
+                                </div>
+
+                                <div class="@textClass text-break">
+                                    @if (!string.IsNullOrEmpty(item.RedirectUrl))
+                                    {
+                                        <a href="@item.RedirectUrl" class="ntf-link fw-bold" title="@item.Content">
+                                            @item.Content <i class="bi bi-box-arrow-up-right small ms-1 text-muted"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-bold">@item.Content</span>
+                                    }
+                                </div>
+                            </td>
+
+                            <td class="ntf-cell-time">
+                                <div class="d-flex flex-column align-items-end align-items-md-start">
+                                    <span class="fw-bold text-dark fs-6">@item.CreatedAt.ToString("HH:mm")</span>
+                                    <small class="text-muted ntf-time-date">@item.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                </div>
+                            </td>
+
+                            <td class="ntf-cell-status">
+                                @if (item.IsRead)
+                                {
+                                    <span class="badge bg-light text-secondary border rounded-pill">
+                                        Đã đọc
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger rounded-pill shadow-sm">
+                                        Mới
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4 ntf-cell-actions">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="ntf-btn-action ntf-btn-view me-1" title="Xem chi tiết">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="ntf-btn-action ntf-btn-del" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-filter-circle text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                    <h5 class="text-secondary">Không tìm thấy kết quả phù hợp</h5>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-primary btn-sm mt-2">Xóa bộ lọc</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

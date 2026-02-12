@@ -1,0 +1,49 @@
+﻿@using SchoolManagement.Data.Entities
+@model IEnumerable<NotificationUser>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <a href="@item.RedirectUrl" class="notif-item @(item.IsRead ? "" : "unread")">
+            <div class="notif-avatar">
+                @* Logic icon giữ nguyên *@
+                @switch (item.Type)
+                {
+                    case NotificationType.System:
+                        <div class="notif-icon-badge bg-primary">
+                            <i class="bi bi-shield-lock-fill" style="font-size: 14px;"></i>
+                        </div>
+                        break;
+                    case NotificationType.Feedback:
+                        <div class="notif-icon-badge bg-success">
+                            <i class="bi bi-chat-fill" style="font-size: 12px;"></i>
+                        </div>
+                        break;
+                    case NotificationType.Warning:
+                        <div class="notif-icon-badge bg-warning text-dark">
+                            <i class="bi bi-exclamation-triangle-fill" style="font-size: 12px;"></i>
+                        </div>
+                        break;
+                }
+            </div>
+
+            <div class="notif-content">
+                <div class="notif-text">
+                    <strong>@item.SenderName</strong> @item.Content
+                </div>
+                @* Lưu ý: Bạn nên chuyển hàm GetTimeAgo sang Helper hoặc Extension method để dùng chung *@
+                <div class="notif-time">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+
+            @if (!item.IsRead)
+            {
+                <div class="notif-unread-dot"></div>
+            }
+        </a>
+    }
+}
+else
+{
+    <div class="p-3 text-center text-muted">Không có thông báo nào</div>
+}

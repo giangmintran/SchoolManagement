@@ -22,29 +22,51 @@ namespace SchoolManagement.Controllers
 
         // GET: ProfessionalActivities
         // Đổi tên tham số thành pageIndex cho khớp với property của class PagedResult
-        public async Task<IActionResult> Index(int pageIndex = 1)
+        // GET: ProfessionalActivities
+        public async Task<IActionResult> Index(string searchTerm, DateTime? fromDate, DateTime? toDate, int pageIndex = 1)
         {
             // 1. Chuẩn bị truy vấn
             var query = _context.ProfessionalActivities
                 .Include(p => p.AppUser)
-                .OrderByDescending(p => p.Date)
-                .ThenByDescending(p => p.SequenceNumber)
-                .AsNoTracking();
+                .AsQueryable(); // Sử dụng AsQueryable để cộng dồn các điều kiện lọc
 
-            // 2. Cấu hình phân trang
+            // 2. Thực hiện lọc dữ liệu
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(p => p.Content.Contains(searchTerm) ||
+                                         p.Attendance.Contains(searchTerm) ||
+                                         p.AppUser.UserName.Contains(searchTerm));
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(p => p.Date >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(p => p.Date <= toDate.Value);
+            }
+
+            // Sắp xếp sau khi lọc
+            query = query.OrderByDescending(p => p.Date)
+                         .ThenByDescending(p => p.SequenceNumber)
+                         .AsNoTracking();
+
+            // 3. Cấu hình phân trang
             int pageSize = 10;
-
-            // 3. Tính toán dữ liệu
-            // Đếm tổng số bản ghi
             int totalRecords = await query.CountAsync();
 
-            // Lấy dữ liệu trang hiện tại
             var items = await query
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            // 4. Đóng gói vào PagedResult
+            // 4. Lưu lại giá trị lọc để hiển thị lại trên Form ở View
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+
             var result = new PagedResult<ProfessionalActivity>
             {
                 Items = items,
