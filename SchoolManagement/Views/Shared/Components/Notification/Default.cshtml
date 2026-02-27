@@ -1,16 +1,18 @@
 ﻿@using SchoolManagement.Data.Entities
 @model IEnumerable<NotificationUser>
 
-<div class="dropdown me-2 me-lg-3">
+<div class="dropdown me-2 me-lg-3" id="notificationDropdownContainer">
     <button class="btn-notif-trigger position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-bell-fill fs-5"></i>
-        @{
-            var unreadCount = Model?.Count(n => !n.IsRead) ?? 0;
-            if (unreadCount > 0)
-            {
-                <span class="notif-badge-count">@unreadCount</span>
+        <div id="badge-container">
+            @{
+                var unreadCount = Model?.Count(n => !n.IsRead) ?? 0;
+                if (unreadCount > 0)
+                {
+                    <span class="notif-badge-count">@unreadCount</span>
+                }
             }
-        }
+        </div>
     </button>
 
     <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="notificationDropdown">
@@ -20,11 +22,11 @@
         </div>
 
         <div class="px-3 pb-2 notif-filter">
-            <button class="btn-pill active" id="btn-filter-all" onclick="loadNotifications('all')">Tất cả</button>
-            <button class="btn-pill" id="btn-filter-unread" onclick="loadNotifications('unread')">Chưa đọc</button>
+            <button type="button" class="btn-pill active" id="btn-filter-all" onclick="loadNotifications('all', event)">Tất cả</button>
+            <button type="button" class="btn-pill" id="btn-filter-unread" onclick="loadNotifications('unread', event)">Chưa đọc</button>
         </div>
 
-        <div class="list-group list-group-flush py-2" id="notification-list-container">
+        <div class="list-group list-group-flush py-2" id="notification-list-container" style="min-height: 100px; max-height: 400px; overflow-y: auto;">
             @await Html.PartialAsync("_NotificationList", Model)
         </div>
 
@@ -35,8 +37,13 @@
 </div>
 
 <script>
-    function loadNotifications(filterType) {
-        // 1. Cập nhật trạng thái Active cho nút
+    function loadNotifications(filterType, event) {
+        // Ngăn chặn dropdown bị đóng khi click vào tab (nếu cần)
+        if (event) {
+            event.stopPropagation();
+        }
+
+        // 1. Cập nhật UI cho các nút Tab ngay lập tức
         document.querySelectorAll('.btn-pill').forEach(btn => btn.classList.remove('active'));
         if (filterType === 'all') {
             document.getElementById('btn-filter-all').classList.add('active');
@@ -44,20 +51,65 @@
             document.getElementById('btn-filter-unread').classList.add('active');
         }
 
-        // 2. Hiệu ứng loading (tuỳ chọn)
         const container = document.getElementById('notification-list-container');
-        container.innerHTML = '<div class="text-center p-3"><span class="spinner-border spinner-border-sm"></span> Đang tải...</div>';
 
-        // 3. Gọi AJAX về Controller
-        fetch(`/Notification/GetNotifications?filter=${filterType}`)
-            .then(response => response.text())
+        // 2. Hiệu ứng loading nhẹ (không xóa hết để tránh giật lag)
+        container.style.opacity = '0.6';
+
+        // 3. Gọi AJAX về Controller (Sử dụng đúng tên NotificationsController)
+        fetch(`/Notifications/GetNotifications?filter=${filterType}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response error');
+                return response.text();
+            })
             .then(html => {
-                // 4. Thay thế nội dung danh sách
+                // 4. Chỉ thay thế nội dung danh sách, dropdown vẫn giữ nguyên trạng thái 'show'
                 container.innerHTML = html;
+                container.style.opacity = '1';
+
+                // 5. Cập nhật lại Badge (số đỏ) dựa trên dữ liệu mới tải về
+                updateBadge();
             })
             .catch(err => {
                 console.error('Lỗi tải thông báo:', err);
-                container.innerHTML = '<div class="text-danger p-3 text-center">Lỗi tải dữ liệu.</div>';
+                container.style.opacity = '1';
             });
     }
+
+    function updateBadge() {
+        // Đếm số lượng item có class 'unread' trong danh sách vừa load
+        // Lưu ý: Trong file _NotificationList.cshtml bạn nên đặt class 'is-unread' cho các mục chưa đọc
+        const unreadItems = document.querySelectorAll('#notification-list-container .is-unread').length;
+        const badgeContainer = document.getElementById('badge-container');
+
+        if (unreadItems > 0) {
+            badgeContainer.innerHTML = `<span class="notif-badge-count">${unreadItems}</span>`;
+        } else {
+            badgeContainer.innerHTML = '';
+        }
+    }
+    /// Xử lý khi click vào 1 thông báo: Mark as read -> Fetch lại
+    function markAsRead(id, event) {
+        // Ngăn Bootstrap tự động đóng dropdown khi click
+        if (event) {
+            event.preventDefault(); // Dùng nếu thông báo là thẻ <a> và bạn không muốn chuyển trang ngay lập tức
+            event.stopPropagation(); // Chặn sự kiện click lan ra ngoài làm đóng dropdown
+        }
+
+        fetch(`/Notifications/mark-as-read/${id}`, { method: 'POST' })
+            .then(() => {
+                // Sau khi đánh dấu xong, tự động load lại tab hiện tại để cập nhật UI
+                const currentFilter = document.getElementById('btn-filter-unread').classList.contains('active') ? 'unread' : 'all';
+                loadNotifications(currentFilter);
+            })
+            .catch(err => console.error('Lỗi khi đánh dấu đã đọc:', err));
+    }
+    // Tùy chọn: Tự động cập nhật mỗi 30 giây nếu dropdown đang mở
+    setInterval(() => {
+        const dropdownMenu = document.querySelector('.notification-dropdown-menu');
+        if (dropdownMenu.classList.contains('show')) {
+            const currentFilter = document.getElementById('btn-filter-unread').classList.contains('active') ? 'unread' : 'all';
+            loadNotifications(currentFilter);
+        }
+    }, 30000);
 </script>

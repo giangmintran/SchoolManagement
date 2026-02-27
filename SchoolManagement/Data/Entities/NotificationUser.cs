@@ -1,36 +1,31 @@
-﻿namespace SchoolManagement.Data.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SchoolManagement.Data.Entities
 {
-    public enum NotificationType
-    {
-        System,   // Tương ứng bi-shield-lock-fill
-        Feedback, // Tương ứng bi-chat-fill
-        Warning   // Tương ứng bi-exclamation-triangle-fill
-    }
     public class NotificationUser
     {
-        public int Id { get; set; }
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string UserId { get; set; }
+        [Required]
+        public Guid UserId { get; set; }
 
-        // Tên người gửi hoặc hệ thống (ví dụ: "Hệ thống SchoolMgt" hoặc "Nguyễn Văn A" 
-        public string? SenderName { get; set; }
+        [Required]
+        public Guid NotificationId { get; set; }
 
-        // Ảnh đại diện người gửi
-        public string? SenderAvatar { get; set; }
+        public bool IsRead { get; set; } = false;
 
-        // Nội dung thông báo
-        public string? Content { get; set; }
+        public DateTime? ReadAt { get; set; }
 
-        // Loại thông báo để hiển thị Icon Badge (Primary, Success, Warning...) 
-        public NotificationType Type { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Thời gian gửi 
-        public DateTime CreatedAt { get; set; }
+        // Navigation properties
+        [ForeignKey(nameof(NotificationId))]
+        public virtual Notification Notification { get; set; } = null!;
 
-        // Trạng thái đã đọc hay chưa (để hiển thị .notif-unread-dot)
-        public bool IsRead { get; set; }
-
-        // Đường dẫn khi người dùng nhấn vào thông báo
-        public string? RedirectUrl { get; set; }
+        // Bỏ comment đoạn dưới nếu bạn đã có sẵn class User trong project
+        [ForeignKey(nameof(UserId))]
+        public virtual ApplicationUser User { get; set; } = null!;
     }
 }

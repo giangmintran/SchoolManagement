@@ -1,0 +1,435 @@
+﻿@model SchoolManagement.Models.ViewModels.CreateNotificationViewModel
+@using SchoolManagement.Data.Entities
+@using SchoolManagement.Models.ViewModels
+
+@{
+    ViewData["Title"] = "Tạo mới thông báo";
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Tạo thông báo mới",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Quản lý", Url = Url.Action("Index") },
+            new BreadcrumbItem { Title = "Tạo mới", Url = "javascript:void(0)" }
+        }
+    };
+}
+
+<style>
+    /* Các biến CSS Soft UI */
+    :root {
+        --ntf-primary: #4e73df;
+        --ntf-bg: #f8f9fc;
+        --ntf-card-bg: #ffffff;
+        --ntf-text-main: #2e384d;
+        --ntf-text-sub: #8798ad;
+        --ntf-border-radius: 16px;
+        --ntf-shadow: 0 10px 30px 0 rgba(29, 36, 55, 0.05);
+    }
+
+    body {
+        background-color: var(--ntf-bg);
+    }
+
+    .ntf-card-form {
+        background: var(--ntf-card-bg);
+        border-radius: var(--ntf-border-radius);
+        box-shadow: var(--ntf-shadow);
+        border: none;
+        padding: 2rem;
+        height: 100%;
+    }
+
+    .ntf-form-label {
+        font-weight: 600;
+        color: var(--ntf-text-main);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .ntf-input {
+        border-radius: 10px;
+        border: 1px solid #edf2f9;
+        padding: 0.75rem 1.2rem;
+        color: var(--ntf-text-main);
+        transition: all 0.2s;
+        background-color: #f8faff;
+    }
+
+        .ntf-input:focus {
+            border-color: var(--ntf-primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+            background-color: #ffffff;
+            outline: none;
+        }
+
+    /* CSS cho Panel User bên phải */
+    .user-list-panel {
+        background-color: #f8faff;
+        border: 1px solid #edf2f9;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .user-list-header {
+        background-color: #fff;
+        padding: 1rem;
+        border-bottom: 1px solid #edf2f9;
+    }
+
+    .search-user-input {
+        border-radius: 30px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .user-list-body {
+        max-height: 450px;
+        overflow-y: auto;
+        padding: 0.75rem;
+    }
+
+        /* Tùy chỉnh thanh cuộn cho mượt */
+        .user-list-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .user-list-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .user-list-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+    /* Nâng cấp giao diện item user */
+    .user-item-row {
+        padding: 12px 16px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        margin-bottom: 8px;
+        background: #ffffff;
+        border: 1px solid transparent;
+        cursor: pointer;
+    }
+
+        .user-item-row:hover {
+            border-color: #edf2f9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            transform: translateY(-1px);
+        }
+
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(78, 115, 223, 0.1);
+        color: var(--ntf-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        cursor: pointer;
+    }
+
+        .form-check-input:checked {
+            background-color: var(--ntf-primary);
+            border-color: var(--ntf-primary);
+        }
+
+    /* Nút Submit/Cancel */
+    .ntf-btn-submit {
+        background: var(--ntf-primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+        .ntf-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 115, 223, 0.35);
+            color: white;
+        }
+
+    .ntf-btn-cancel {
+        background: #f1f5f9;
+        color: var(--ntf-text-sub);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .text-ellipsis {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+</style>
+
+<div class="container-fluid animate-fade-in">
+
+    <div class="mb-4">
+        <partial name="_PageHeader" model="pageHeader" />
+    </div>
+
+    <form asp-action="Create" method="post" id="notificationForm">
+
+        <div id="hiddenInputsContainer">
+            @if (Model?.SelectedUserIds != null)
+            {
+                foreach (var id in Model.SelectedUserIds)
+                {
+                    <input type="hidden" name="SelectedUserIds" value="@id" class="initial-selected-user" />
+                }
+            }
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="ntf-card-form">
+                    <h5 class="fw-bold mb-4" style="color: var(--ntf-text-main);">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>Nội dung thông báo
+                    </h5>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Type" class="ntf-form-label">Loại thông báo <span class="text-danger">*</span></label>
+                        <select asp-for="Type" class="form-select ntf-input" asp-items="Html.GetEnumSelectList<NotificationType>()"></select>
+                        <span asp-validation-for="Type" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Content" class="ntf-form-label">Nội dung <span class="text-danger">*</span></label>
+                        <textarea asp-for="Content" class="form-control ntf-input" rows="6" placeholder="Nhập nội dung thông báo..." required></textarea>
+                        <span asp-validation-for="Content" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="RedirectUrl" class="ntf-form-label">Đường dẫn đính kèm (Redirect URL)</label>
+                        <input asp-for="RedirectUrl" class="form-control ntf-input" placeholder="Ví dụ: /Student/Details/1" />
+                        <span asp-validation-for="RedirectUrl" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="ntf-card-form p-0 d-flex flex-column">
+                    <div class="p-4 pb-0">
+                        <h5 class="fw-bold mb-3" style="color: var(--ntf-text-main);">
+                            <i class="bi bi-people-fill me-2 text-primary"></i>Chọn người nhận
+                        </h5>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 30px 0 0 30px;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="searchUserInput" class="form-control ntf-input border-start-0 search-user-input"
+                                   placeholder="Tìm tên người dùng (Enter hoặc đợi 0.5s)..." style="border-radius: 0 30px 30px 0;">
+                        </div>
+                    </div>
+
+                    <div class="user-list-panel flex-grow-1 mx-4 mb-4">
+                        <div class="user-list-header d-flex justify-content-between align-items-center">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input shadow-sm" type="checkbox" id="selectAllUsers">
+                                <label class="form-check-label fw-bold text-dark" for="selectAllUsers" style="cursor: pointer;">
+                                    Chọn tất cả trang này
+                                </label>
+                            </div>
+                            <span class="badge bg-primary rounded-pill" id="selectedCountBadge">0</span>
+                        </div>
+
+                        <div class="user-list-body" id="userListContainer">
+                            <div class="text-center p-4 text-muted">
+                                <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                <span class="ms-2">Đang tải dữ liệu...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-4 pb-3">
+                        <span asp-validation-for="SelectedUserIds" class="text-danger small fw-bold"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-4">
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                    <a asp-action="Index" class="ntf-btn-cancel">
+                        <i class="bi bi-x-circle me-2"></i>Hủy bỏ
+                    </a>
+                    <button type="submit" class="ntf-btn-submit">
+                        <i class="bi bi-send-fill me-2"></i>Gửi thông báo
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // State quản lý danh sách người dùng đã chọn (Giữ state khi render lại DOM)
+            const selectedUsersSet = new Set();
+
+            const userListContainer = document.getElementById('userListContainer');
+            const searchInput = document.getElementById('searchUserInput');
+            const selectAllCheckbox = document.getElementById('selectAllUsers');
+            const selectedCountBadge = document.getElementById('selectedCountBadge');
+            const hiddenInputsContainer = document.getElementById('hiddenInputsContainer');
+
+            // 1. Khởi tạo state từ model nếu có (trường hợp submit form bị lỗi validation)
+            document.querySelectorAll('.initial-selected-user').forEach(input => {
+                selectedUsersSet.add(input.value);
+            });
+            updateHiddenInputsAndBadge();
+
+            // 2. Fetch data ban đầu
+            fetchUsers('');
+
+            // 3. Hàm gọi API tìm kiếm
+            function fetchUsers(keyword) {
+                userListContainer.innerHTML = `
+                    <div class="text-center p-4 text-muted">
+                        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                    </div>`;
+
+                fetch(`/NotificationManagement/SearchUsers?keyword=${encodeURIComponent(keyword)}`)
+                    .then(response => response.json())
+                    .then(data => renderUsers(data))
+                    .catch(err => {
+                        console.error('Lỗi khi tải danh sách:', err);
+                        userListContainer.innerHTML = '<div class="text-center p-3 text-danger">Lỗi kết nối. Vui lòng thử lại.</div>';
+                    });
+            }
+
+            // 4. Hàm render UI
+            function renderUsers(users) {
+                userListContainer.innerHTML = '';
+
+                if (users.length === 0) {
+                    userListContainer.innerHTML = '<div class="text-center p-4 text-muted small">Không tìm thấy người dùng.</div>';
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                    return;
+                }
+
+                let allChecked = true;
+                let someChecked = false;
+
+                users.forEach(user => {
+                    const isChecked = selectedUsersSet.has(user.id);
+                    if (!isChecked) allChecked = false;
+                    if (isChecked) someChecked = true;
+
+                    const html = `
+                        <div class="user-item-row d-flex align-items-center" onclick="document.getElementById('user_${user.id}').click()">
+                            <div class="form-check m-0 flex-shrink-0 ms-2">
+                                <input class="form-check-input user-checkbox shadow-sm" type="checkbox"
+                                       value="${user.id}" id="user_${user.id}"
+                                       ${isChecked ? 'checked' : ''}
+                                       onclick="event.stopPropagation()">
+                            </div>
+
+                            <div class="flex-grow-1 ms-3" style="min-width: 0;">
+                                <label class="mb-0 fw-semibold text-dark text-ellipsis"
+                                       title="${user.name}"
+                                       style="cursor: pointer; width: 100%;">
+                                    ${user.name}
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                    userListContainer.insertAdjacentHTML('beforeend', html);
+                });
+
+                // Cập nhật trạng thái nút "Chọn tất cả"
+                selectAllCheckbox.checked = allChecked && users.length > 0;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+
+                // Gán sự kiện cho các checkbox vừa tạo
+                document.querySelectorAll('.user-checkbox').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (this.checked) {
+                            selectedUsersSet.add(this.value);
+                        } else {
+                            selectedUsersSet.delete(this.value);
+                        }
+                        updateHiddenInputsAndBadge();
+                        checkSelectAllState();
+                    });
+                });
+            }
+
+            // 5. Đồng bộ state vào form để submit
+            function updateHiddenInputsAndBadge() {
+                selectedCountBadge.textContent = selectedUsersSet.size;
+
+                hiddenInputsContainer.innerHTML = '';
+                selectedUsersSet.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'SelectedUserIds';
+                    input.value = id;
+                    hiddenInputsContainer.appendChild(input);
+                });
+            }
+
+            // 6. Cập nhật state của checkbox "Select All"
+            function checkSelectAllState() {
+                const checkboxes = document.querySelectorAll('.user-checkbox');
+                if (checkboxes.length === 0) return;
+
+                const allChecked = Array.from(checkboxes).every(c => c.checked);
+                const someChecked = Array.from(checkboxes).some(c => c.checked);
+
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            }
+
+            // 7. Xử lý logic chọn tất cả (Chỉ áp dụng cho những user đang hiển thị trên màn hình)
+            selectAllCheckbox.addEventListener('change', function () {
+                const isChecked = this.checked;
+                document.querySelectorAll('.user-checkbox').forEach(cb => {
+                    cb.checked = isChecked;
+                    if (isChecked) {
+                        selectedUsersSet.add(cb.value);
+                    } else {
+                        selectedUsersSet.delete(cb.value);
+                    }
+                });
+                updateHiddenInputsAndBadge();
+            });
+
+            // 8. Debounce tính năng Tìm kiếm
+            let timeoutId;
+            searchInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    fetchUsers(keyword);
+                }, 500); // Đợi 0.5s sau khi ngừng gõ mới gọi API
+            });
+        });
+    </script>
+}

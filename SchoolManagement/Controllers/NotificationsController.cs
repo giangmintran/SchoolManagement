@@ -39,10 +39,19 @@ namespace SchoolManagement.Controllers
             return PartialView("_NotificationList", notifications);
         }
 
-        [HttpPost("mark-as-read/{id}")]
-        public IActionResult MarkAsRead(int id)
+        [HttpPost("[controller]/mark-as-read/{id}")]
+        public async Task<IActionResult> MarkAsRead(int id)
         {
-            // Logic cập nhật IsRead = true trong Database
+            var notification = await _dbContext.NotificationUsers.FindAsync(id);
+            if (notification == null) return NotFound();
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                _dbContext.NotificationUsers.Update(notification);
+                await _dbContext.SaveChangesAsync();
+            }
+
             return Ok();
         }
 

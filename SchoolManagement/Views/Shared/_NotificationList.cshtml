@@ -5,9 +5,8 @@
 {
     foreach (var item in Model)
     {
-        <a href="@item.RedirectUrl" class="notif-item @(item.IsRead ? "" : "unread")">
+        <a href="@item.RedirectUrl" class="notif-item @(item.IsRead ? "" : "unread")" onclick="markAsRead('@item.Id', event)">
             <div class="notif-avatar">
-                @* Logic icon giữ nguyên *@
                 @switch (item.Type)
                 {
                     case NotificationType.System:
@@ -32,7 +31,6 @@
                 <div class="notif-text">
                     <strong>@item.SenderName</strong> @item.Content
                 </div>
-                @* Lưu ý: Bạn nên chuyển hàm GetTimeAgo sang Helper hoặc Extension method để dùng chung *@
                 <div class="notif-time">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
             </div>
 
