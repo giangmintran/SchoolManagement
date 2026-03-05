@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagement.Data;
+using SchoolManagement.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 var mvcBuilder = builder.Services.AddRazorPages();
 if (builder.Environment.IsDevelopment())
 {
@@ -70,7 +72,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapStaticAssets();
 
 app.MapControllerRoute(

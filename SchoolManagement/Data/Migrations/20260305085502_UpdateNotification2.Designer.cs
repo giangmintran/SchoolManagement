@@ -12,8 +12,8 @@ using SchoolManagement.Data;
 namespace SchoolManagement.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260202084124_AddNotification1")]
-    partial class AddNotification1
+    [Migration("20260305085502_UpdateNotification2")]
+    partial class UpdateNotification2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -418,16 +418,46 @@ namespace SchoolManagement.Data.Migrations
                     b.ToTable("LectureCalendarDetails", (string)null);
                 });
 
-            modelBuilder.Entity("SchoolManagement.Data.Entities.NotificationUser", b =>
+            modelBuilder.Entity("SchoolManagement.Data.Entities.NotificationType", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NotificationTypes");
+                });
+
+            modelBuilder.Entity("SchoolManagement.Data.Entities.NotificationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -435,23 +465,24 @@ namespace SchoolManagement.Data.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("NotificationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("RedirectUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SenderAvatar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SenderName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NotificationId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("NotificationUsers");
                 });
@@ -597,6 +628,25 @@ namespace SchoolManagement.Data.Migrations
                     b.Navigation("LectureCalendar");
                 });
 
+            modelBuilder.Entity("SchoolManagement.Data.Entities.NotificationUser", b =>
+                {
+                    b.HasOne("SchoolManagement.Data.Entities.NotificationType", "NotificationType")
+                        .WithMany("UserNotifications")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SchoolManagement.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationType");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SchoolManagement.Data.Entities.ProfessionalActivity", b =>
                 {
                     b.HasOne("SchoolManagement.Data.ApplicationUser", "AppUser")
@@ -616,6 +666,11 @@ namespace SchoolManagement.Data.Migrations
             modelBuilder.Entity("SchoolManagement.Data.Entities.LectureCalendar", b =>
                 {
                     b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("SchoolManagement.Data.Entities.NotificationType", b =>
+                {
+                    b.Navigation("UserNotifications");
                 });
 #pragma warning restore 612, 618
         }

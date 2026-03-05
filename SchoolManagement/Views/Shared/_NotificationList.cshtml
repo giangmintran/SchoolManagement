@@ -1,5 +1,6 @@
 ﻿@using SchoolManagement.Data.Entities
-@model IEnumerable<NotificationUser>
+@using SchoolManagement.Models.ReadModels
+@model IEnumerable<NotificationUserRM>
 
 @if (Model != null && Model.Any())
 {
@@ -9,17 +10,17 @@
             <div class="notif-avatar">
                 @switch (item.Type)
                 {
-                    case NotificationType.System:
+                    case (int) NotificationCategory.System:
                         <div class="notif-icon-badge bg-primary">
                             <i class="bi bi-shield-lock-fill" style="font-size: 14px;"></i>
                         </div>
                         break;
-                    case NotificationType.Feedback:
+                    case (int) NotificationCategory.Other:
                         <div class="notif-icon-badge bg-success">
                             <i class="bi bi-chat-fill" style="font-size: 12px;"></i>
                         </div>
                         break;
-                    case NotificationType.Warning:
+                    case (int) NotificationCategory.Warning:
                         <div class="notif-icon-badge bg-warning text-dark">
                             <i class="bi bi-exclamation-triangle-fill" style="font-size: 12px;"></i>
                         </div>
@@ -29,7 +30,7 @@
 
             <div class="notif-content">
                 <div class="notif-text">
-                    <strong>@item.SenderName</strong> @item.Content
+                    <strong>@item.Sender</strong> @item.Content
                 </div>
                 <div class="notif-time">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
             </div>

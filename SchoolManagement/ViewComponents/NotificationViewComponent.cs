@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagement.Data;
+using SchoolManagement.Models.ReadModels;
 using System.Security.Claims;
 
 namespace SchoolManagement.ViewComponents
@@ -21,10 +22,23 @@ namespace SchoolManagement.ViewComponents
 
             // Lấy danh sách thông báo của user này
             var notifications = await _context.NotificationUsers
+                .Include(e => e.NotificationType)
                 .Where(n => n.UserId == userId)
-                .OrderByDescending(n => n.CreatedAt)
+                .OrderByDescending(e => e.NotificationType.CreatedAt)
+                 .Select(e => new NotificationUserRM
+                 {
+                     Id = e.Id,
+                     UserId = userId,
+                     NotificationType = e.NotificationType,
+                     CreatedAt = e.NotificationType.CreatedAt,
+                     Content = e.NotificationType.Content,
+                     IsRead = e.IsRead,
+                     ReadAt = e.ReadAt,
+                     RedirectUrl = e.NotificationType.RedirectUrl,
+                     Sender = e.NotificationType.CreatedBy,
+                     Type = e.NotificationType.Type
+                 })
                 .ToListAsync();
-
             return View(notifications);
         }
     }

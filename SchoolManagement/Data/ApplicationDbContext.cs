@@ -18,6 +18,7 @@ namespace SchoolManagement.Data
         public DbSet<ClassLogbookDetail> ClassLogbookDetails { get; set; }
         public DbSet<ProfessionalActivity> ProfessionalActivities { get; set; }
         public DbSet<NotificationUser> NotificationUsers { get; set; }
+        public DbSet<NotificationType> NotificationTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -27,6 +28,8 @@ namespace SchoolManagement.Data
             builder.ApplyConfiguration(new ClassLogbookConfiguration());
             builder.ApplyConfiguration(new ClassLogbookDetailConfiguration());
             builder.ApplyConfiguration(new ProfessionalActivityConfiguration());
+            builder.ApplyConfiguration(new NotificationTypeConfiguration());
+            builder.ApplyConfiguration(new NotificationUserConfiguration());
         }
 
         public override int SaveChanges()

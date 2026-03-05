@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagement.Data;
 using SchoolManagement.Data.Entities;
+using SchoolManagement.Models.ReadModels;
 using System.Security.Claims;
 
 namespace SchoolManagement.Controllers
@@ -23,6 +24,8 @@ namespace SchoolManagement.Controllers
             if (userId == null) return Unauthorized();
 
             var query = _dbContext.NotificationUsers
+                .Include(e => e.NotificationType)
+                .OrderByDescending(e => e.NotificationType.CreatedAt)
                 .Where(n => n.UserId == userId);
 
             // Xử lý lọc theo yêu cầu
@@ -32,7 +35,18 @@ namespace SchoolManagement.Controllers
             }
 
             var notifications = await query
-                .OrderByDescending(n => n.CreatedAt)
+                .Select(e => new NotificationUserRM
+                {
+                    UserId = userId,
+                    NotificationType = e.NotificationType,
+                    CreatedAt = e.NotificationType.CreatedAt,
+                    Content = e.NotificationType.Content,
+                    IsRead = e.IsRead,
+                    ReadAt = e.ReadAt,
+                    RedirectUrl = e.NotificationType.RedirectUrl,
+                    Sender = e.NotificationType.CreatedBy,
+                    Type = e.NotificationType.Type
+                })
                 .ToListAsync();
 
             // Trả về Partial View đã tạo ở Bước 1
@@ -40,18 +54,18 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpPost("[controller]/mark-as-read/{id}")]
-        public async Task<IActionResult> MarkAsRead(int id)
+        public async Task<IActionResult> MarkAsRead(Guid id)
         {
-            var notification = await _dbContext.NotificationUsers.FindAsync(id);
+            var notification = await _dbContext.NotificationUsers.FirstOrDefaultAsync(e => e.Id == id && !e.IsRead);
             if (notification == null) return NotFound();
 
             if (!notification.IsRead)
             {
                 notification.IsRead = true;
+                notification.ReadAt = DateTime.Now;
                 _dbContext.NotificationUsers.Update(notification);
                 await _dbContext.SaveChangesAsync();
             }
-
             return Ok();
         }
 
@@ -62,11 +76,24 @@ namespace SchoolManagement.Controllers
             var userId = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             var query = _dbContext.NotificationUsers
-                .OrderByDescending(n => n.CreatedAt)
-                .Where(e => e.UserId == userId);
+                .Include(e => e.NotificationType)
+                .OrderByDescending(e => e.NotificationType.CreatedAt)
+                .Where(e => e.UserId == userId)
+                 .Select(e => new NotificationUserRM
+                 {
+                     UserId = userId,
+                     NotificationType = e.NotificationType,
+                     CreatedAt = e.NotificationType.CreatedAt,
+                     Content = e.NotificationType.Content,
+                     IsRead = e.IsRead,
+                     ReadAt = e.ReadAt,
+                     RedirectUrl = e.NotificationType.RedirectUrl,
+                     Sender = e.User.UserName,
+                     Type = e.NotificationType.Type
+                 });
 
-            if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.Content.Contains(search));
-            if (type.HasValue) query = query.Where(x => x.Type == type);
+            //if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.Content.Contains(search));
+            //if (type.HasValue) query = query.Where(x => x.Type == type);
             return View(query);
         }
     }

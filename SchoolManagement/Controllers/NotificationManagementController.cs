@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SchoolManagement.Data;
 using SchoolManagement.Data.Entities;
 using SchoolManagement.Models.ViewModels;
@@ -18,7 +19,10 @@ namespace SchoolManagement.Controllers
 
         public IActionResult Index()
         {
-            var notifications = _context.NotificationUsers.OrderByDescending(n => n.CreatedAt).ToList();
+            var notifications = _context.NotificationUsers
+                .Include(e => e.NotificationType)
+                .OrderByDescending(e => e.NotificationType.CreatedAt)
+                .ToList();
             return View(notifications);
         }
 
@@ -50,51 +54,51 @@ namespace SchoolManagement.Controllers
             return View(new CreateNotificationViewModel());
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(CreateNotificationViewModel model)
-        {
-            if (ModelState.IsValid && model.SelectedUserIds != null && model.SelectedUserIds.Any())
-            {
-                try
-                {
-                    var notificationsToInsert = new List<NotificationUser>();
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Create(CreateNotificationViewModel model)
+        //{
+        //    if (ModelState.IsValid && model.SelectedUserIds != null && model.SelectedUserIds.Any())
+        //    {
+        //        try
+        //        {
+        //            var notificationsToInsert = new List<NotificationUser>();
 
-                    foreach (var userId in model.SelectedUserIds)
-                    {
-                        var notification = new NotificationUser
-                        {
-                            UserId = userId,
-                            Type = model.Type,
-                            Content = model.Content,
-                            RedirectUrl = model.RedirectUrl,
-                            SenderName = "Admin",
-                            SenderAvatar = null,
-                            CreatedAt = DateTime.Now,
-                            IsRead = false
-                        };
-                        notificationsToInsert.Add(notification);
-                    }
+        //            foreach (var userId in model.SelectedUserIds)
+        //            {
+        //                var notification = new NotificationUser
+        //                {
+        //                    UserId = userId,
+        //                    Type = model.Type,
+        //                    Content = model.Content,
+        //                    RedirectUrl = model.RedirectUrl,
+        //                    SenderName = "Admin",
+        //                    SenderAvatar = null,
+        //                    CreatedAt = DateTime.Now,
+        //                    IsRead = false
+        //                };
+        //                notificationsToInsert.Add(notification);
+        //            }
 
-                    _context.NotificationUsers.AddRange(notificationsToInsert);
-                    _context.SaveChanges();
+        //            _context.NotificationUsers.AddRange(notificationsToInsert);
+        //            _context.SaveChanges();
 
-                    TempData["SuccessMessage"] = $"Đã gửi thông báo thành công tới {model.SelectedUserIds.Count} người dùng!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", "Đã xảy ra lỗi khi lưu: " + ex.Message);
-                }
-            }
+        //            TempData["SuccessMessage"] = $"Đã gửi thông báo thành công tới {model.SelectedUserIds.Count} người dùng!";
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            ModelState.AddModelError("", "Đã xảy ra lỗi khi lưu: " + ex.Message);
+        //        }
+        //    }
 
-            if (model.SelectedUserIds == null || model.SelectedUserIds.Count == 0)
-            {
-                ModelState.AddModelError("SelectedUserIds", "Vui lòng chọn ít nhất 1 người nhận.");
-            }
+        //    if (model.SelectedUserIds == null || model.SelectedUserIds.Count == 0)
+        //    {
+        //        ModelState.AddModelError("SelectedUserIds", "Vui lòng chọn ít nhất 1 người nhận.");
+        //    }
 
-            // Trả về View cùng model (View sẽ tự render lại danh sách ID đã chọn thông qua JS)
-            return View(model);
-        }
+        //    // Trả về View cùng model (View sẽ tự render lại danh sách ID đã chọn thông qua JS)
+        //    return View(model);
+        //}
     }
 }

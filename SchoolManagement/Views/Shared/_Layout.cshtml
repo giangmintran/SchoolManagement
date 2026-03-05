@@ -33,12 +33,8 @@
             bool isActionMatch = string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase);
             return (isControllerMatch && isActionMatch) ? "active" : "";
         }
-
         return isControllerMatch ? "active" : "";
-
     }
-
-    
 }
 
 <!DOCTYPE html>
@@ -55,7 +51,12 @@
     <link rel="stylesheet" href="~/SchoolManagement.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/custom-logbook.css" />
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 </head>
 <body>
     <div id="sidebar-overlay"></div>

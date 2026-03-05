@@ -1,11 +1,10 @@
-﻿@model IEnumerable<SchoolManagement.Data.Entities.NotificationUser>
+﻿@model IEnumerable<SchoolManagement.Data.Entities.NotificationType>
 @using SchoolManagement.Data.Entities
 @using SchoolManagement.Models.ViewModels
 
 @{
     // --- SAFE CHECK MODEL ---
-    // Tạo một danh sách an toàn, nếu Model null thì coi như là danh sách rỗng
-    var notificationList = Model ?? Enumerable.Empty<SchoolManagement.Data.Entities.NotificationUser>();
+    var notificationList = Model ?? Enumerable.Empty<SchoolManagement.Data.Entities.NotificationType>();
     var totalCount = notificationList.Count();
     var pageHeader = new PageHeaderViewModel
     {
@@ -82,20 +81,19 @@
             color: #b0b8c4;
         }
 
-    /* Tinh chỉnh Dropdown (Select) */
     .ntf-select {
         border: none;
         background-color: #f1f5f9;
         color: var(--ntf-text-main);
         border-radius: 30px;
-        padding: 0.6rem 2.5rem 0.6rem 1.2rem; /* Tăng padding phải cho icon custom */
+        padding: 0.6rem 2.5rem 0.6rem 1.2rem;
         font-weight: 600;
         font-size: 0.9rem;
         cursor: pointer;
         outline: none;
-        appearance: none; /* Xóa icon mặc định */
+        appearance: none;
         -webkit-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234e73df' class='bi bi-chevron-down' viewBox='0 0 16 16'%3group%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234e73df' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 1rem center;
         background-size: 12px;
@@ -192,9 +190,9 @@
 
     /* Content Styling */
     .ntf-sender-name {
-        font-size: 0.8rem;
-        color: var(--ntf-text-sub);
-        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--ntf-text-main);
+        font-weight: 700;
         margin-bottom: 4px;
         display: flex;
         align-items: center;
@@ -202,49 +200,11 @@
     }
 
     .ntf-content-text {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         line-height: 1.5;
-        color: var(--ntf-text-main);
+        color: var(--ntf-text-sub);
         display: block;
     }
-
-        .ntf-content-text a {
-            color: var(--ntf-primary);
-            text-decoration: none;
-            font-weight: 600;
-            border-bottom: 1px dashed transparent;
-            transition: all 0.2s;
-        }
-
-            .ntf-content-text a:hover {
-                border-bottom-color: var(--ntf-primary);
-            }
-
-    /* Read vs Unread logic styling */
-    .ntf-row-unread .ntf-content-text {
-        font-weight: 700;
-        color: #000;
-    }
-
-    .ntf-row-unread {
-        background-color: #fff;
-    }
-
-        .ntf-row-unread td:first-child {
-            position: relative;
-        }
-
-            .ntf-row-unread td:first-child::before {
-                content: "";
-                position: absolute;
-                left: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                height: 60%;
-                width: 4px;
-                background-color: var(--ntf-primary);
-                border-radius: 0 4px 4px 0;
-            }
 
     /* Badges */
     .ntf-badge {
@@ -350,29 +310,6 @@
             border-top: 1px solid #f1f4f8;
             padding-top: 10px !important;
         }
-        /* Nút Tạo mới */
-        .ntf-btn-create {
-            background: var(--ntf-primary);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.25);
-            text-decoration: none;
-        }
-
-            .ntf-btn-create:hover {
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(78, 115, 223, 0.35);
-                filter: brightness(1.1);
-            }
     }
 </style>
 
@@ -382,7 +319,7 @@
             <partial name="_PageHeader" model="pageHeader" />
         </div>
         <a asp-action="Create" class="btn btn-primary shadow-sm w-md-auto d-none d-md-block">
-            <i class="fa fa-plus me-2"></i>Tạo mới
+            <i class="fa fa-plus me-2"></i>Tạo thông báo
         </a>
     </div>
     <div class="row align-items-center mb-2">
@@ -391,15 +328,14 @@
                 <div class="ntf-control-group">
                     <span class="ps-3 d-flex align-items-center text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" name="search" class="ntf-search-input"
-                           placeholder="Tìm kiếm..."
+                           placeholder="Tìm kiếm theo tiêu đề..."
                            value="@Context.Request.Query["search"]" autocomplete="off">
 
                     <div class="d-none d-lg-block border-start mx-2"></div>
                     <select name="type" class="ntf-select d-none d-lg-block" onchange="this.form.submit()">
                         <option value="">Tất cả loại</option>
-                        <option value="System" selected="@(Context.Request.Query["type"] == "System")">Hệ thống</option>
-                        <option value="Warning" selected="@(Context.Request.Query["type"] == "Warning")">Cảnh báo</option>
-                        <option value="Feedback" selected="@(Context.Request.Query["type"] == "Feedback")">Phản hồi</option>
+                        <option value="1" selected="@(Context.Request.Query["type"] == "1")">Hệ thống</option>
+                        <option value="2" selected="@(Context.Request.Query["type"] == "2")">Nhắc nhở</option>
                     </select>
 
                     <button type="submit" class="ntf-btn-filter shadow-sm">
@@ -410,9 +346,8 @@
                 <div class="mt-2 d-lg-none">
                     <select name="type" class="form-select rounded-pill shadow-sm" style="border: 1px solid #edf2f9;" onchange="this.form.submit()">
                         <option value="">-- Lọc theo loại --</option>
-                        <option value="System" selected="@(Context.Request.Query["type"] == "System")">Hệ thống</option>
-                        <option value="Warning" selected="@(Context.Request.Query["type"] == "Warning")">Cảnh báo</option>
-                        <option value="Feedback" selected="@(Context.Request.Query["type"] == "Feedback")">Phản hồi</option>
+                        <option value="1" selected="@(Context.Request.Query["type"] == "1")">Hệ thống</option>
+                        <option value="2" selected="@(Context.Request.Query["type"] == "2")">Nhắc nhở</option>
                     </select>
                 </div>
             </form>
@@ -425,40 +360,38 @@
                 <thead>
                     <tr>
                         <th class="ps-4 text-center" style="width: 100px;">Loại</th>
-                        <th>Nội dung thông báo</th>
-                        <th style="width: 180px;">Thời gian</th>
-                        <th style="width: 120px;">Trạng thái</th>
-                        <th class="text-end pe-4" style="width: 120px;"></th>
+                        <th>Thông tin thông báo</th>
+                        <th style="width: 180px;">Thời gian tạo</th>
+                        <th class="text-center" style="width: 120px;">Đã gửi</th>
+                        <th class="text-end pe-4" style="width: 120px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in notificationList)
                     {
-                        // Logic Màu sắc & Icon
+                        // Logic chọn Icon và Màu sắc dựa trên trường Type (int)
                         string iconClass = "bi-info-circle";
                         string bgStyle = "background-color: #e7f1ff; color: #0d6efd;";
+                        string typeName = "Khác";
 
+                        // Giả sử: 1 = SYSTEM, 2 = PROMOTION (Bạn có thể sửa lại theo logic thực tế)
                         switch (item.Type)
                         {
-                            case NotificationType.System:
+                            case 1: // System
                                 iconClass = "bi-shield-check";
                                 bgStyle = "background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); color: #fff;";
+                                typeName = "Hệ thống";
                                 break;
-                            case NotificationType.Feedback:
-                                iconClass = "bi-chat-heart-fill";
-                                bgStyle = "background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #00b86a;";
-                                break;
-                            case NotificationType.Warning:
-                                iconClass = "bi-exclamation-diamond-fill";
+                            case 2: // Promotion
+                                iconClass = "bi-star-fill";
                                 bgStyle = "background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #fff;";
+                                typeName = "Khuyến mãi";
                                 break;
                         }
 
-                        string rowClass = item.IsRead ? "ntf-row-read" : "ntf-row-unread";
-
-                        <tr class="@rowClass">
+                        <tr>
                             <td class="ps-4 text-center ntf-cell-icon">
-                                <div class="ntf-icon-box shadow-sm" style="@bgStyle">
+                                <div class="ntf-icon-box shadow-sm" style="@bgStyle" title="@typeName">
                                     <i class="bi @iconClass"></i>
                                 </div>
                             </td>
@@ -466,25 +399,16 @@
                             <td>
                                 <div class="ntf-mobile-header d-md-none">
                                     <span class="badge rounded-pill bg-light text-dark border">
-                                        <i class="bi @iconClass me-1"></i> @item.Type
+                                        <i class="bi @iconClass me-1"></i> @typeName
                                     </span>
                                     <small class="text-muted">@item.CreatedAt.ToString("HH:mm dd/MM")</small>
                                 </div>
 
                                 <div class="ntf-sender-name">
-                                    <i class="bi bi-person-circle"></i> @item.SenderName
+                                    @item.Title
                                 </div>
                                 <div class="ntf-content-text">
-                                    @if (!string.IsNullOrEmpty(item.RedirectUrl))
-                                    {
-                                        <a href="@item.RedirectUrl" title="@item.Content">
-                                            @item.Content <i class="bi bi-arrow-up-right-square small ms-1" style="font-size: 0.8em;"></i>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <span>@item.Content</span>
-                                    }
+                                    <span>@item.Content</span>
                                 </div>
                             </td>
 
@@ -495,25 +419,20 @@
                                 </div>
                             </td>
 
-                            <td class="ntf-cell-status">
-                                @if (item.IsRead)
-                                {
-                                    <span class="ntf-badge ntf-badge-read">Đã xem</span>
-                                }
-                                else
-                                {
-                                    <span class="ntf-badge ntf-badge-new">Mới</span>
-                                }
+                            <td class="text-center">
+                                <span class="ntf-badge ntf-badge-new">
+                                    @(item.UserNotifications?.Count ?? 0) User
+                                </span>
                             </td>
 
                             <td class="text-end pe-4 ntf-cell-actions">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="ntf-action-btn" title="Chi tiết">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="ntf-action-btn" title="Xem thông báo">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="ntf-action-btn ntf-action-del" title="Xóa"
-                                   onclick="return confirm('Bạn muốn xóa thông báo này?');">
+                                <button type="button" class="ntf-action-btn ntf-action-del p-0" title="Xóa thông báo"
+                                        data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="@item.Id">
                                     <i class="bi bi-trash"></i>
-                                </a>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -527,10 +446,56 @@
                         <i class="bi bi-inbox"></i>
                     </div>
                     <h5 class="text-muted fw-bold">Chưa có thông báo nào</h5>
-                    <p class="text-muted small">Hệ thống sẽ gửi thông báo khi có cập nhật mới.</p>
+                    <p class="text-muted small">Hãy tạo thông báo đầu tiên để gửi cho người dùng.</p>
                     <a href="@Url.Action("Index")" class="btn btn-light btn-sm text-primary fw-bold mt-2">Làm mới trang</a>
                 </div>
             }
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body text-center pb-4">
+                <i class="bi bi-exclamation-circle text-danger mb-3" style="font-size: 3.5rem;"></i>
+                <h6 class="fw-bold">Bạn có chắc chắn muốn xóa thông báo này?</h6>
+                <p class="text-muted small mb-0">Mọi lịch sử gửi cũng sẽ bị xóa và không thể khôi phục.</p>
+            </div>
+            <div class="modal-footer border-top-0 justify-content-center bg-light rounded-bottom">
+                <button type="button" class="btn btn-secondary px-4 shadow-sm" data-bs-dismiss="modal">Hủy</button>
+
+                <form id="deleteForm" method="post" action="">
+                    <button type="submit" class="btn btn-danger px-4 shadow-sm">Xóa thông báo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteModal = document.getElementById('deleteConfirmModal');
+
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                // Nút đã kích hoạt modal
+                var button = event.relatedTarget;
+
+                // Lấy ID từ thuộc tính data-id
+                var itemId = button.getAttribute('data-id');
+
+                // Cập nhật action của Form
+                var form = document.getElementById('deleteForm');
+
+                // Tạo URL gọi action Delete trong Controller.
+                // Giả định Route mặc định của bạn là: /ControllerName/Delete/{id}
+                form.action = '@Url.Action("Delete")' + '/' + itemId;
+            });
+        });
+    </script>
+}

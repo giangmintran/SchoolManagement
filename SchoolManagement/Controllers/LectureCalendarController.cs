@@ -264,7 +264,6 @@ namespace SchoolManagement.Controllers
             return _context.LectureCalendars.Any(e => e.Id == id);
         }
 
-        [Authorize(Roles = "User")]
         [HttpPost]
         public async Task<IActionResult> UpdateQuick(LectureCalendarReadVM model)
         {

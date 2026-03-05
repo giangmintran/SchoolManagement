@@ -1,0 +1,282 @@
+﻿@using SchoolManagement.Models.ViewModels
+@model SchoolManagement.Data.Entities.NotificationType
+
+@{
+    ViewData["Title"] = "Chi tiết thông báo";
+    // Tùy chỉnh lại class cho badge trạng thái thông báo chính
+    var statusBadge = Model.Status == SchoolManagement.Data.Entities.NotificationStatus.Sent ? "badge-soft-success" : "badge-soft-secondary";
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Quản lý thông báo",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") },
+            new BreadcrumbItem { Title = "Chi tiết", IsActive = true }
+        }
+    };
+}
+
+<div class="container-fluid animate-fade-in">
+    <div>
+        <partial name="_PageHeader" model="pageHeader" />
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card custom-card h-100">
+                <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
+                    <div class="d-flex align-items-center">
+                        <h5 class="fw-bold text-dark mb-0">Thông tin chung</h5>
+                    </div>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="info-group mb-4">
+                        <label class="info-label">Tiêu đề</label>
+                        <div class="fw-bold text-dark fs-6">@Model.Title</div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="info-label">Loại</label>
+                            <div>
+                                @{
+                                    var typeLabel = Model.Type == 1 ? "Hệ thống" : "Nhắc nhở";
+                                }
+                                <span class="badge badge-soft-info px-3 py-2 rounded-pill">@typeLabel</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="info-label">Trạng thái</label>
+                            <div>
+                                <span class="badge @statusBadge px-3 py-2 rounded-pill">@Model.Status</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-group mb-4">
+                        <label class="info-label">Thời gian tạo</label>
+                        <div class="text-dark fw-medium">
+                            <i class="bi bi-clock-history text-muted me-1"></i>
+                            @Model.CreatedAt.ToString("HH:mm dd/MM/yyyy")
+                        </div>
+                    </div>
+
+                    <hr class="border-light-subtle my-4" />
+
+                    <div class="info-group mb-0">
+                        <label class="info-label">Nội dung</label>
+                        <div class="content-box pre-wrap text-dark mt-2">@Model.Content</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card custom-card h-100">
+                <div class="card-header bg-transparent border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark m-0">
+                        Danh sách người nhận
+                        <span class="badge bg-primary rounded-pill ms-2">@Model.UserNotifications.Count</span>
+                    </h5>
+                </div>
+
+                <div class="table-container">
+                    <table class="table custom-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Người dùng</th>
+                                <th class="text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.UserNotifications.Any())
+                            {
+                                foreach (var un in Model.UserNotifications)
+                                {
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-wrapper me-3">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">@un.UserId</div>
+                                                    @if (un.User != null)
+                                                    {
+                                                        <div class="small text-muted mt-1">
+                                                            <i class="bi bi-envelope me-1"></i>@un.User.Email
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center py-3">
+                                            @if (un.IsRead)
+                                            {
+                                                <span class="badge badge-soft-success rounded-pill px-3 py-2">
+                                                    <i class="bi bi-check2-all me-1"></i> Đã đọc
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-soft-secondary rounded-pill px-3 py-2">
+                                                    <i class="bi bi-eye-slash me-1"></i> Chưa xem
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon mb-3">
+                                                <i class="bi bi-inbox text-muted"></i>
+                                            </div>
+                                            <h6 class="text-muted fw-medium">Chưa có dữ liệu</h6>
+                                            <p class="text-muted small mb-0">Chưa có người dùng nào nhận được thông báo này.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 2. Style chung cho Card */
+    .custom-card {
+        border-radius: 16px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    /* 3. Typography & Labels */
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #8da0b1;
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .icon-shape {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .content-box {
+        background-color: #f8f9fa;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid #0d6efd;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #495057;
+    }
+
+    .pre-wrap {
+        white-space: pre-wrap;
+    }
+
+    /* 4. Table & Scrollbar */
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+        /* Tùy chỉnh thanh cuộn cho đẹp */
+        .table-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+            .table-container::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        border-bottom: 1px solid #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .custom-table tbody tr {
+        transition: background-color 0.2s ease;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+        .custom-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    .custom-table tbody td {
+        border-bottom: none;
+    }
+
+    /* 5. Badges (Thẻ trạng thái) dạng Soft-color */
+    .badge-soft-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid rgba(15, 81, 50, 0.1);
+    }
+
+    .badge-soft-secondary {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+
+    .badge-soft-info {
+        background-color: #cff4fc;
+        color: #055160;
+        border: 1px solid rgba(5, 81, 96, 0.1);
+    }
+
+    /* 6. Avatar & Empty State */
+    .avatar-wrapper {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4a6fdc;
+        font-size: 1.25rem;
+    }
+
+    .empty-state-icon i {
+        font-size: 3rem;
+        opacity: 0.5;
+    }
+</style>
