@@ -54,7 +54,18 @@ if (builder.Environment.IsDevelopment())
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
-    await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        // Ensure DB migrated before seeding
+        db.Database.Migrate();
+        await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Error while migrating/seeding database");
+    }
 }
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

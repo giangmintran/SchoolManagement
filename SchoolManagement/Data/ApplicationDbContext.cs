@@ -53,7 +53,7 @@ namespace SchoolManagement.Data
             foreach (var entry in entries)
             {
                 var entity = (IAuditable)entry.Entity;
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
 
                 if (entry.State == EntityState.Added)
                 {

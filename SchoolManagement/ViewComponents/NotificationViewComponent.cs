@@ -31,7 +31,7 @@ namespace SchoolManagement.ViewComponents
                      UserId = userId,
                      NotificationType = e.NotificationType,
                      CreatedAt = e.NotificationType.CreatedAt,
-                     Content = e.NotificationType.Content,
+                     Title = e.NotificationType.Title,
                      IsRead = e.IsRead,
                      ReadAt = e.ReadAt,
                      RedirectUrl = e.NotificationType.RedirectUrl,

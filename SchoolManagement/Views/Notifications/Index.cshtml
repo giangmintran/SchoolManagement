@@ -1,15 +1,21 @@
-﻿@* @model IEnumerable<SchoolManagement.Data.Entities.NotificationUser>
+﻿@model IEnumerable<NotificationUserRM>
 @using SchoolManagement.Data.Entities
+@using SchoolManagement.Models.ReadModels
+@using SchoolManagement.Models.ViewModels
 
 @{
     ViewData["Title"] = "Danh sách Thông báo";
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Quản lý thông báo",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") },
+        }
+    };
 }
 
 <style>
-    /* * QUY TẮC ĐẶT TÊN: ntf-[tên-thành-phần]
-         * Giúp tránh xung đột với các trang khác
-         */
-
     /* Wrapper tổng */
     .ntf-wrapper {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -118,7 +124,8 @@
 
     /* Trạng thái dòng chưa đọc */
     .ntf-row-unread {
-        background-color: #f0f7ff; /* Xanh nhạt */
+        background-color: #f0f7ff;
+        /* Xanh nhạt */
         border-left: 4px solid #0d6efd;
     }
 
@@ -213,7 +220,8 @@
     /* --- RESPONSIVE MOBILE (< 768px) --- */
     @@media (max-width: 768px) {
         .ntf-table thead {
-            display: none; /* Ẩn header bảng */
+            display: none;
+            /* Ẩn header bảng */
         }
 
         .ntf-table, .ntf-table tbody, .ntf-table tr, .ntf-table td {
@@ -227,7 +235,8 @@
                 border-radius: 12px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.08);
                 border: 1px solid #eee;
-                position: relative; /* Để căn chỉnh ngày tháng */
+                position: relative;
+                /* Để căn chỉnh ngày tháng */
                 padding-bottom: 10px;
             }
 
@@ -280,38 +289,37 @@
     }
 </style>
 
-<div class="container-fluid p-4 ntf-wrapper">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-            <h2 class="ntf-header-title mb-0">
-                <i class="bi bi-bell-fill text-primary me-2"></i>Quản lý Thông báo
-            </h2>
-            <p class="text-muted mb-0 small mt-1">Danh sách cập nhật và cảnh báo hệ thống</p>
+            <partial name="_PageHeader" model="pageHeader" />
         </div>
     </div>
-
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body py-3">
-            <form method="get" class="row g-3 align-items-center">
+            <form id="filterForm" method="get" class="row g-3 align-items-center">
+
                 <div class="col-md-5">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control border-start-0 bg-light"
+                        <input type="text" id="searchInput" name="search" class="form-control border-start-0 bg-light"
                                placeholder="Tìm kiếm nội dung..." value="@Context.Request.Query["search"]">
                     </div>
                 </div>
 
                 <div class="col-md-3">
                     <select name="type" class="form-select bg-light" onchange="this.form.submit()">
-                        <option value="">-- Tất cả loại --</option>
-                        <option value="System" selected="@(Context.Request.Query["type"] == "System")">Hệ thống</option>
-                        <option value="Warning" selected="@(Context.Request.Query["type"] == "Warning")">Cảnh báo</option>
-                        <option value="Feedback" selected="@(Context.Request.Query["type"] == "Feedback")">Phản hồi</option>
+                        <option value="0">-- Tất cả loại --</option>
+                        <option value="1" selected="@(Context.Request.Query["type"] == "1")">Hệ thống</option>
+                        <option value="2" selected="@(Context.Request.Query["type"] == "2")">Nhắc nhở</option>
+                        <option value="3" selected="@(Context.Request.Query["type"] == "3")">Khác</option>
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
+                <div class="col-md-1">
+                    <a href="@Url.Action("Index")" class="btn btn-primary w-100" title="Đặt lại bộ lọc">
+                        <i class="bi bi-repeat"></i>
+                    </a>
                 </div>
             </form>
         </div>
@@ -332,7 +340,6 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        // --- Xử lý Logic C# (Giữ nguyên logic màu sắc của bạn) ---
                         string iconTypeClass = "bi-info-circle";
                         string badgeColorClass = "ntf-badge-sys";
                         string typeBgColor = "#0d6efd"; // Màu nền icon
@@ -340,17 +347,17 @@
 
                         switch (item.Type)
                         {
-                            case NotificationType.System:
+                            case (int)NotificationCategory.System:
                                 iconTypeClass = "bi-shield-lock";
                                 typeBgColor = "#0d6efd";
                                 typeSoftColor = "#cfe2ff"; // Xanh dương nhạt
                                 break;
-                            case NotificationType.Feedback:
+                            case (int)NotificationCategory.Other:
                                 iconTypeClass = "bi-chat-dots";
                                 typeBgColor = "#00b86a";
                                 typeSoftColor = "#d1e7dd"; // Xanh lá nhạt
                                 break;
-                            case NotificationType.Warning:
+                            case (int)NotificationCategory.Warning:
                                 iconTypeClass = "bi-exclamation-triangle";
                                 typeBgColor = "#ffc107";
                                 typeSoftColor = "#fff3cd"; // Vàng nhạt
@@ -371,19 +378,19 @@
 
                             <td class="ntf-cell-content">
                                 <div class="text-muted small mb-1">
-                                    <i class="bi bi-person me-1"></i> @item.SenderName
+                                    <i class="bi bi-person me-1"></i> @item.Sender
                                 </div>
 
                                 <div class="@textClass text-break">
                                     @if (!string.IsNullOrEmpty(item.RedirectUrl))
                                     {
-                                        <a href="@item.RedirectUrl" class="ntf-link fw-bold" title="@item.Content">
-                                            @item.Content <i class="bi bi-box-arrow-up-right small ms-1 text-muted"></i>
+                                        <a href="@item.RedirectUrl" class="ntf-link fw-bold" title="@item.Title">
+                                            @item.Title <i class="bi bi-box-arrow-up-right small ms-1 text-muted"></i>
                                         </a>
                                     }
                                     else
                                     {
-                                        <span class="fw-bold">@item.Content</span>
+                                        <span class="fw-bold">@item.Title</span>
                                     }
                                 </div>
                             </td>
@@ -411,7 +418,7 @@
                             </td>
 
                             <td class="text-end pe-4 ntf-cell-actions">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="ntf-btn-action ntf-btn-view me-1" title="Xem chi tiết">
+                                <a asp-action="Detail" asp-route-id="@item.Id" class="ntf-btn-action ntf-btn-view me-1" title="Xem chi tiết">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
                                 <a asp-action="Delete" asp-route-id="@item.Id" class="ntf-btn-action ntf-btn-del" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">
@@ -435,4 +442,38 @@
             }
         </div>
     </div>
-</div> *@
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let typingTimer;
+            const doneTypingInterval = 2000; // Thời gian chờ 2 giây
+            const searchInput = document.getElementById('searchInput');
+            const filterForm = document.getElementById('filterForm');
+
+            if (searchInput && filterForm) {
+                // Lắng nghe sự kiện khi người dùng gõ phím
+                searchInput.addEventListener('input', function () {
+                    // Xóa timer cũ nếu người dùng vẫn đang gõ
+                    clearTimeout(typingTimer);
+
+                    // Thiết lập timer mới
+                    typingTimer = setTimeout(function () {
+                        // Submit form sau 2 giây không gõ
+                        filterForm.submit();
+                    }, doneTypingInterval);
+                });
+
+                // Nếu người dùng nhấn Enter, submit luôn và hủy bỏ timer
+                searchInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Ngăn submit mặc định để tránh submit 2 lần
+                        clearTimeout(typingTimer);
+                        filterForm.submit();
+                    }
+                });
+            }
+        });
+    </script>
+}

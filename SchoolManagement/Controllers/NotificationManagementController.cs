@@ -54,51 +54,51 @@ namespace SchoolManagement.Controllers
             return View(new CreateNotificationViewModel());
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult Create(CreateNotificationViewModel model)
-        //{
-        //    if (ModelState.IsValid && model.SelectedUserIds != null && model.SelectedUserIds.Any())
-        //    {
-        //        try
-        //        {
-        //            var notificationsToInsert = new List<NotificationUser>();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateNotificationViewModel model)
+        {
+            if (ModelState.IsValid && model.SelectedUserIds != null && model.SelectedUserIds.Any())
+            {
+                try
+                {
+                    var notificationsToInsert = new List<NotificationUser>();
 
-        //            foreach (var userId in model.SelectedUserIds)
-        //            {
-        //                var notification = new NotificationUser
-        //                {
-        //                    UserId = userId,
-        //                    Type = model.Type,
-        //                    Content = model.Content,
-        //                    RedirectUrl = model.RedirectUrl,
-        //                    SenderName = "Admin",
-        //                    SenderAvatar = null,
-        //                    CreatedAt = DateTime.Now,
-        //                    IsRead = false
-        //                };
-        //                notificationsToInsert.Add(notification);
-        //            }
+                    foreach (var userId in model.SelectedUserIds)
+                    {
+                        var notification = new NotificationUser
+                        {
+                            UserId = userId,
+                            Type = model.Type,
+                            Content = model.Content,
+                            RedirectUrl = model.RedirectUrl,
+                            SenderName = "Admin",
+                            SenderAvatar = null,
+                            CreatedAt = DateTime.UtcNow,
+                            IsRead = false
+                        };
+                        notificationsToInsert.Add(notification);
+                    }
 
-        //            _context.NotificationUsers.AddRange(notificationsToInsert);
-        //            _context.SaveChanges();
+                    _context.NotificationUsers.AddRange(notificationsToInsert);
+                    await _context.SaveChangesAsync();
 
-        //            TempData["SuccessMessage"] = $"Đã gửi thông báo thành công tới {model.SelectedUserIds.Count} người dùng!";
-        //            return RedirectToAction(nameof(Index));
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            ModelState.AddModelError("", "Đã xảy ra lỗi khi lưu: " + ex.Message);
-        //        }
-        //    }
+                    TempData["SuccessMessage"] = $"Đã gửi thông báo thành công tới {model.SelectedUserIds.Count} người dùng!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Đã xảy ra lỗi khi lưu: " + ex.Message);
+                }
+            }
 
-        //    if (model.SelectedUserIds == null || model.SelectedUserIds.Count == 0)
-        //    {
-        //        ModelState.AddModelError("SelectedUserIds", "Vui lòng chọn ít nhất 1 người nhận.");
-        //    }
+            if (model.SelectedUserIds == null || model.SelectedUserIds.Count == 0)
+            {
+                ModelState.AddModelError("SelectedUserIds", "Vui lòng chọn ít nhất 1 người nhận.");
+            }
 
-        //    // Trả về View cùng model (View sẽ tự render lại danh sách ID đã chọn thông qua JS)
-        //    return View(model);
-        //}
+            // Trả về View cùng model (View sẽ tự render lại danh sách ID đã chọn thông qua JS)
+            return View(model);
+        }
     }
 }

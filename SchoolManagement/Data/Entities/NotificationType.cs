@@ -12,6 +12,7 @@ namespace SchoolManagement.Data.Entities
         [Display(Name = "Khác")]
         Other = 3
     }
+    
     public enum NotificationStatus
     {
         NotSend = 1,

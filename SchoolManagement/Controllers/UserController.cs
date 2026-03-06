@@ -82,6 +82,7 @@ namespace SchoolManagement.Controllers
 
         // 3. POST: Tạo người dùng
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (ModelState.IsValid)
@@ -230,6 +231,7 @@ namespace SchoolManagement.Controllers
 
         // 6. Xóa người dùng
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
             var user = await _userManager.FindByIdAsync(id);

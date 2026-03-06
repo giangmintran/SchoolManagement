@@ -11,7 +11,7 @@ namespace SchoolManagement.Models.ReadModels
         public Guid NotificationId { get; set; }
         public int Type { get; set; }
         public string? Sender { get; set; }
-        public string? Content { get; set; }
+        public string? Title { get; set; }
         public bool IsRead { get; set; } = false;
 
         public DateTime? ReadAt { get; set; }

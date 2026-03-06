@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolManagement.Data;
 using SchoolManagement.Data.Entities;
 using SchoolManagement.Models.ReadModels;
+using SchoolManagement.Models.ViewModels;
 using System.Security.Claims;
 
 namespace SchoolManagement.Controllers
@@ -17,6 +18,7 @@ namespace SchoolManagement.Controllers
         {
             _dbContext = dbContext;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetNotifications(string filter = "all")
         {
@@ -40,7 +42,7 @@ namespace SchoolManagement.Controllers
                     UserId = userId,
                     NotificationType = e.NotificationType,
                     CreatedAt = e.NotificationType.CreatedAt,
-                    Content = e.NotificationType.Content,
+                    Title = e.NotificationType.Title,
                     IsRead = e.IsRead,
                     ReadAt = e.ReadAt,
                     RedirectUrl = e.NotificationType.RedirectUrl,
@@ -70,31 +72,73 @@ namespace SchoolManagement.Controllers
         }
 
 
-        public async Task<IActionResult> Index(string search, NotificationType? type)
+        public async Task<IActionResult> Index(string search, int type = 0)
         {
             // Lấy UserId hiện tại
             var userId = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var query = _dbContext.NotificationUsers
+            var query = await _dbContext.NotificationUsers
                 .Include(e => e.NotificationType)
                 .OrderByDescending(e => e.NotificationType.CreatedAt)
-                .Where(e => e.UserId == userId)
-                 .Select(e => new NotificationUserRM
-                 {
-                     UserId = userId,
-                     NotificationType = e.NotificationType,
-                     CreatedAt = e.NotificationType.CreatedAt,
-                     Content = e.NotificationType.Content,
-                     IsRead = e.IsRead,
-                     ReadAt = e.ReadAt,
-                     RedirectUrl = e.NotificationType.RedirectUrl,
-                     Sender = e.User.UserName,
-                     Type = e.NotificationType.Type
-                 });
+                .Where(e => e.UserId == userId
+                    && (type == 0 || e.NotificationType.Type == type)
+                    && (search == null || e.NotificationType.Title.ToLower().Contains(search.ToLower()))
+                )
+                .Select(e => new NotificationUserRM
+                {
+                    Id = e.Id,
+                    UserId = userId,
+                    NotificationType = e.NotificationType,
+                    CreatedAt = e.NotificationType.CreatedAt,
+                    Title = e.NotificationType.Title,
+                    IsRead = e.IsRead,
+                    ReadAt = e.ReadAt,
+                    RedirectUrl = e.NotificationType.RedirectUrl,
+                    Sender = e.NotificationType.CreatedBy,
+                    Type = e.NotificationType.Type
+                })
+                .ToListAsync();
 
-            //if (!string.IsNullOrEmpty(search)) query = query.Where(x => x.Content.Contains(search));
-            //if (type.HasValue) query = query.Where(x => x.Type == type);
             return View(query);
+        }
+        public async Task<IActionResult> Detail(Guid id)
+        {
+            // Lấy NotificationUser kèm theo NotificationType thông qua Navigation Property
+            var notificationUser = await _dbContext.NotificationUsers
+                .Include(nu => nu.NotificationType)
+                .FirstOrDefaultAsync(nu => nu.Id == id);
+
+            if (notificationUser == null)
+            {
+                return NotFound();
+            }
+
+            // Đánh dấu đã đọc nếu chưa đọc (Tùy chọn: Thường xem detail thì sẽ tính là đã đọc)
+            if (!notificationUser.IsRead)
+            {
+                notificationUser.IsRead = true;
+                notificationUser.ReadAt = DateTime.Now;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            // Map sang ViewModel
+            var viewModel = new NotificationDetailViewModel
+            {
+                NotificationUserId = notificationUser.Id,
+                IsRead = notificationUser.IsRead,
+                ReadAt = notificationUser.ReadAt,
+                UserId = notificationUser.UserId,
+
+                Title = notificationUser.NotificationType.Title,
+                Content = notificationUser.NotificationType.Content,
+                CreatedAt = notificationUser.NotificationType.CreatedAt,
+                RedirectUrl = notificationUser.NotificationType.RedirectUrl,
+                CreatedBy = notificationUser.NotificationType.CreatedBy,
+                // Ép kiểu int sang Enum NotificationCategory
+                Category = (NotificationCategory) notificationUser.NotificationType.Type
+            };
+
+            return View(viewModel);
         }
     }
 }

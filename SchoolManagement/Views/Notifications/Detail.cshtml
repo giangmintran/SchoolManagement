@@ -1,0 +1,186 @@
+﻿@using SchoolManagement.Common
+@using SchoolManagement.Models.ViewModels
+@model NotificationDetailViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết thông báo";
+    var pageHeader = new PageHeaderViewModel
+    {
+        Title = "Chi tiết thông báo",
+        Breadcrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem { Title = "Danh sách", Url = Url.Action("Index") },
+            new BreadcrumbItem {Title = "Chi tiết", IsActive = true}
+        }
+    };
+}
+
+<style>
+    /* Custom CSS để làm mượt giao diện */
+    .notification-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .notification-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        padding: 1rem;
+        border-bottom: 0;
+    }
+
+    .category-badge {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 0.5em 1em;
+        border-radius: 50rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .content-box {
+        background-color: #f8f9fc;
+        border-left: 4px solid #0d6efd;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        min-height: 120px;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #2c3e50;
+    }
+
+    .redirect-section {
+        background-color: #f1f4f8;
+        border: 1px dashed #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+        .redirect-section:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+    .metadata-box {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+
+    .meta-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 0.3rem;
+        display: block;
+    }
+
+    .meta-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+</style>
+
+<div class="container-fluid animate-fade-in">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+        <div>
+            <partial name="_PageHeader" model="pageHeader" />
+        </div>
+    </div>
+    <div class="card notification-card">
+        <div class="card-header notification-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-white fw-bold">
+                <i class="fas fa-bell me-2"></i> @Model.Title
+            </h5>
+            <span class="badge bg-light text-primary category-badge">
+                @Model.GetNotificationCategory(Model.Category)
+            </span>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="mb-4">
+                <h6 class="text-secondary text-uppercase fw-bold mb-3">
+                    <i class="fas fa-align-left me-1"></i> Nội dung thông báo
+                </h6>
+                <div class="content-box shadow-sm">
+                    @Html.Raw(Model.Content)
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.RedirectUrl))
+            {
+                var baseUrl = "https://localhost:7137";
+                var isAbsoluteUrl = Model.RedirectUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                Model.RedirectUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+
+                var fullUrl = isAbsoluteUrl ? Model.RedirectUrl : baseUrl + (Model.RedirectUrl.StartsWith("/") ? Model.RedirectUrl : "/" + Model.RedirectUrl);
+
+                <div class="redirect-section mt-4 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="fw-bold text-dark d-block mb-1">Tài liệu / Liên kết đính kèm</span>
+                        <a href="@fullUrl" class="text-muted small text-decoration-none" target="_blank">@fullUrl</a>
+                    </div>
+                    <a href="@fullUrl" class="btn btn-primary px-4 rounded-pill shadow-sm" target="_blank">
+                        Truy cập <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            }
+
+            <hr class="my-4 text-muted" style="opacity: 0.15;" />
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="metadata-box d-flex align-items-center">
+                        <div class="bg-light p-3 rounded-circle me-3 text-primary">
+                            <i class="fas fa-calendar-alt fa-lg"></i>
+                        </div>
+                        <div>
+                            <span class="meta-label">Ngày gửi hệ thống</span>
+                            <span class="meta-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metadata-box d-flex align-items-center">
+                        <div class="bg-light p-3 rounded-circle me-3 @(Model.IsRead ? "text-success" : "text-warning")">
+                            <i class="fas @(Model.IsRead ? "fa-check-double" : "fa-envelope") fa-lg"></i>
+                        </div>
+                        <div>
+                            <span class="meta-label">Trạng thái</span>
+                            @if (Model.IsRead)
+                            {
+                                <span class="meta-value text-success">Đã xem (@Model.ReadAt?.ToString("HH:mm dd/MM/yy"))</span>
+                            }
+                            else
+                            {
+                                <span class="meta-value text-warning">Chưa đọc</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metadata-box d-flex align-items-center">
+                        <div class="bg-light p-3 rounded-circle me-3 text-primary">
+                            <i class="fas fa-user fa-lg"></i>
+                        </div>
+                        <div>
+                            <span class="meta-label">Người gửi</span>
+                            <span class="meta-value">@Model.CreatedBy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-footer bg-light p-3 border-top-0 text-end">
+            <a href="@Url.Action("Index", "Notifications")" class="btn btn-outline-secondary px-4 rounded-pill">
+                <i class="fas fa-arrow-left me-1"></i> Trở về danh sách
+            </a>
+        </div>
+    </div>
+</div>

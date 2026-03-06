@@ -59,6 +59,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 </head>
 <body>
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer" style="z-index: 1055;">
+        </div>
+    </div>
     <div id="sidebar-overlay"></div>
 
     <div id="wrapper">
@@ -123,7 +127,7 @@
                 }
                 else
                 {
-                    <a asp-controller="NotificationManagement" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("NotificationManagement", "Index")">
+                    <a asp-controller="Notifications" asp-action="Index" class="list-group-item list-group-item-action @GetActiveClass("Notifications", "Index")">
                         <i class="bi bi-envelope-at"></i><span>Thông báo</span>
                     </a>   
                 }
@@ -275,6 +279,86 @@
                 e.preventDefault();
                 $("#wrapper").removeClass("toggled"); // Chỉ đóng
             });
+        });
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // Lắng nghe sự kiện từ Server
+        connection.on("ReceiveNotification", function (data) {
+            // Tạo một ID duy nhất cho mỗi thông báo để dễ quản lý
+            const toastId = 'toast-' + Date.now();
+
+            // Thiết kế HTML cho Toast (Dùng class của Bootstrap 5)
+            // Nút tắt là <button class="btn-close">
+            const toastHtml = `
+                <div id="${toastId}" class="toast shadow-lg border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-primary text-white">
+                        <strong class="me-auto">
+                            <i class="bi bi-bell-fill me-1"></i> ${data.title}
+                        </strong>
+                        <small class="text-white-50">${data.createdAt}</small>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body bg-white text-dark">
+                        ${data.content}
+                    </div>
+                </div>
+            `;
+
+            // 1. Thêm HTML của toast mới vào trong Container
+            const toastContainer = document.getElementById('toastContainer');
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+            // 2. Khởi tạo và hiển thị Toast bằng Bootstrap API
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true, // Cho phép tự động ẩn
+                delay: 5000     // Ẩn sau 5 giây (5000ms)
+            });
+
+            toast.show();
+
+            // 3. Clean-up: Xóa phần tử HTML khỏi DOM sau khi toast đã ẩn xong để giải phóng bộ nhớ
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                toastElement.remove();
+            });
+        });
+        // ==========================================
+        // 2. CẬP NHẬT SỐ LƯỢNG THÔNG BÁO (BADGE) TRÊN CHUÔNG
+        // ==========================================
+        const badgeContainer = document.getElementById('badge-container');
+        if (badgeContainer) {
+            // Tìm thẻ span chứa số lượng hiện tại
+            let badgeSpan = badgeContainer.querySelector('.notif-badge-count');
+
+            if (badgeSpan) {
+                // Nếu đã có số, lấy giá trị hiện tại cộng thêm 1
+                let currentCount = parseInt(badgeSpan.innerText) || 0;
+                badgeSpan.innerText = currentCount + 1;
+            } else {
+                // Nếu đang không có thông báo nào (chưa có thẻ span), tạo thẻ mới gán giá trị 1
+                badgeContainer.innerHTML = '<span class="notif-badge-count">1</span>';
+            }
+        }
+
+        // ==========================================
+        // 3. (TÙY CHỌN) LÀM MỚI DANH SÁCH NẾU DROPDOWN ĐANG MỞ
+        // ==========================================
+        const dropdownMenu = document.querySelector('.notification-dropdown-menu');
+        if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+            // Nếu người dùng đang mở bảng thông báo ra xem, ta gọi hàm load lại dữ liệu luôn
+            if (typeof loadNotifications === "function") {
+                const currentFilter = document.getElementById('btn-filter-unread').classList.contains('active') ? 'unread' : 'all';
+                loadNotifications(currentFilter);
+            }
+        }
+        connection.start().then(function () {
+            console.log("SignalR Connected.");
+        }).catch(function (err) {
+            console.error("SignalR Connection Error: ", err.toString());
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

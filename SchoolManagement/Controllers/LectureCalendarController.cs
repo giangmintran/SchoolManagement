@@ -265,6 +265,7 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuick(LectureCalendarReadVM model)
         {
             if (model.Details == null || !model.Details.Any())
